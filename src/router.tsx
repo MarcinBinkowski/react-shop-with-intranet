@@ -3,7 +3,7 @@ import StoreLayout from "./layouts/store-layout";
 import IntranetLayout from "./layouts/intranet-layout";
 
 
-const AppRoutes() => {
+const AppRoutes: React.FC = () => {
 
     return (
         <Routes>
@@ -24,3 +24,4 @@ const AppRoutes() => {
 
     )
 }
+export default AppRoutes;

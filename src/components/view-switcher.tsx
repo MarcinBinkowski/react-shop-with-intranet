@@ -1,21 +1,23 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from './ui/button'
-import { useAdmin } from '@/contexts/admin-context'
 
 export function ViewSwitcher() {
-  const navigate = useNavigate()
-
-  return (
-    <Button
-      onClick={() => {
-        if (true) {
-          navigate('/')
-        } else {
-          navigate('/intranet')
-        }
-      }}
-    >
-      {true ? 'View Store' : 'View Admin Panel'}
-    </Button>
-  )
-}
+    const navigate = useNavigate()
+    const location = useLocation()
+  
+    const isInIntranet = location.pathname.startsWith('/intranet')
+  
+    const handleSwitch = () => {
+      if (isInIntranet) {
+        navigate('/')
+      } else {
+        navigate('/intranet')
+      }
+    }
+  
+    return (
+      <Button onClick={handleSwitch}>
+        {isInIntranet ? 'View Store' : 'View Intranet'}
+      </Button>
+    )
+} 
