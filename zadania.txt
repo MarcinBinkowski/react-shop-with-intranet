@@ -1,0 +1,24 @@
+1.
+W Visual Studio utworzyć solucję Firma, a w niej dwa projekty (ASP.NET):
+
+- Portal (dla Klienta)
+
+- Intranet (pracownika).
+
+W tych projektach utwórz:
+
+- layout Portalu (kliencki), 7 punktów
+
+- layout Intranetu (pracowniczy), 6 punktów
+
+Premiowane będą profesjonalne layouty.
+
+W każdym z projektów1) stwórz minimum 4 strony zgodny z tymi layout-ami.
+
+Szczegóły: wykład 1 i wykład 2
+
+2.
+6 punktów: Intranet: operacje dodawania, edycji, kasowania w oparciu o minimum 8 klas
+
+4 punkty: Intranet: profesjonalny wygląd widoków obsługujących operacje dodawania, edycji, kasowania (przyciski, ikony, poprawione tebelki, wygląd każdego widoku Create, Delete, Edit, Index)
+
