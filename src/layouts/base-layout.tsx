@@ -1,5 +1,4 @@
-import type React from "react"
-import type { LayoutProps } from "./types"
+import { type LayoutProps } from './types'
 import {
   Sidebar,
   SidebarProvider,
@@ -12,14 +11,14 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarInset,
-  SidebarRail,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { ViewSwitcher } from "@/components/view-switcher"
-import { ModeToggle } from "@/components/mode-toggle"
-import { Search, Settings } from "lucide-react"
+import { Search } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { AppHeader } from "@/components/app-header"
+import { useState } from "react"
+import { Outlet } from "react-router-dom"
 
 interface BaseLayoutProps extends LayoutProps {
   icon: React.ReactNode
@@ -35,6 +34,12 @@ interface BaseLayoutProps extends LayoutProps {
 }
 
 export function BaseLayout({ children, icon, title, navItems }: BaseLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+  
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
@@ -44,82 +49,72 @@ export function BaseLayout({ children, icon, title, navItems }: BaseLayoutProps)
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  className="flex items-center gap-2 rounded-lg bg-sidebar-primary p-2 text-sidebar-primary-foreground"
+                  className="flex items-center gap-2 rounded-lg bg-primary/10 p-2"
                 >
                   <a href="#" className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">{icon}</div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+                      {icon}
+                    </div>
                     <span className="text-base font-semibold">{title}</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-
+            
             <div className="mt-4 px-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input type="search" placeholder="Search..." className="w-full bg-background pl-8 text-sm" />
+                <Input
+                  type="search"
+                  placeholder="Search..."
+                  className="w-full bg-background pl-8 text-sm"
+                />
               </div>
             </div>
           </SidebarHeader>
-
+          
           <SidebarContent className="px-2">
-            {navItems &&
-              navItems.map((section, index) => (
-                <SidebarGroup key={index}>
-                  <SidebarGroupLabel className="px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {section.title}
-                  </SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {section.items.map((item, itemIndex) => (
-                        <SidebarMenuItem key={itemIndex}>
-                          <SidebarMenuButton asChild className="flex items-center gap-2 px-2 py-1.5">
-                            <a href={item.href} className="flex items-center gap-2">
-                              {item.icon}
-                              <span>{item.name}</span>
-                            </a>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              ))}
+            {navItems && navItems.map((section, index) => (
+              <SidebarGroup key={index}>
+                <SidebarGroupLabel className="px-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {section.title}
+                </SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {section.items.map((item, itemIndex) => (
+                      <SidebarMenuItem key={itemIndex}>
+                        <SidebarMenuButton asChild className="flex items-center gap-2 px-2 py-1.5">
+                          <a href={item.href} className="flex items-center gap-2">
+                            {item.icon}
+                            <span>{item.name}</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
           </SidebarContent>
-
+          
           <div className="mt-auto px-4 py-4">
             <Separator className="mb-4" />
             <div className="flex items-center justify-between">
               <ViewSwitcher />
-              <ModeToggle />
             </div>
           </div>
-          <SidebarRail />
         </Sidebar>
-
+        
         <SidebarInset className="flex-1">
-          <div className="flex h-16 items-center justify-between border-b px-6">
-            <SidebarTrigger className="lg:hidden" />
-            <h1 className="text-xl font-semibold">{title} Dashboard</h1>
-            <div className="flex items-center gap-4">
-              <button className="rounded-full bg-muted p-2">
-                <Settings className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
+          <AppHeader 
+            title={title} 
+            onMenuClick={toggleSidebar}
+          />
           <main className="p-6">
-            {children || (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <h3 className="mb-4 text-lg font-medium">Welcome to {title}</h3>
-                  <p className="text-muted-foreground">This is a placeholder content area. Add your content here.</p>
-                </div>
-              </div>
-            )}
+            {children || <Outlet />}
           </main>
         </SidebarInset>
       </div>
     </SidebarProvider>
   )
 }
-
