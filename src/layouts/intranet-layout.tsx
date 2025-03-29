@@ -1,4 +1,4 @@
-import { Building2, FileText, Users, Calendar } from "lucide-react"
+import { Building2, FileText, Users, Calendar, Briefcase, BarChart3 } from "lucide-react"
 import { BaseLayout } from "./base-layout"
 import type { LayoutProps } from "./types"
 
@@ -24,12 +24,22 @@ const intranetNavItems = [
     ],
   },
   {
-    title: "Resources",
+    title: "Management",
     items: [
       {
-        name: "Products",
-        href: "/intranet/products",
+        name: "Calendar",
+        href: "/intranet/calendar",
         icon: <Calendar className="h-4 w-4" />,
+      },
+      {
+        name: "Projects",
+        href: "/intranet/projects",
+        icon: <Briefcase className="h-4 w-4" />,
+      },
+      {
+        name: "Reports",
+        href: "/intranet/reports",
+        icon: <BarChart3 className="h-4 w-4" />,
       },
     ],
   },

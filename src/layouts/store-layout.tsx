@@ -1,4 +1,4 @@
-import { Store, Home, Package, Users, ShoppingCart } from "lucide-react"
+import { Store, Home, Package, Users, ShoppingCart, BarChart3 } from "lucide-react"
 import { BaseLayout } from "./base-layout"
 import type { LayoutProps } from "./types"
 
@@ -31,6 +31,11 @@ const storeNavItems = [
         href: "/orders",
         icon: <ShoppingCart className="h-4 w-4" />,
       },
+      {
+        name: "Analytics",
+        href: "/analytics",
+        icon: <BarChart3 className="h-4 w-4" />,
+      },
     ],
   },
 ]
@@ -44,3 +49,4 @@ const StoreLayout = ({ children }: LayoutProps) => {
 }
 
 export default StoreLayout
+
