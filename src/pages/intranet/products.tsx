@@ -259,7 +259,7 @@ const ProductsPage: React.FC = () => {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="relative w-full sm:w-64 md:w-80">
+            <div className="relative w-full sm:w-64 md:w-80 lg:w-96">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -322,8 +322,8 @@ const ProductsPage: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
-            <Table>
+          <div className="rounded-md border overflow-x-auto">
+            <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[40px]">
@@ -332,11 +332,11 @@ const ProductsPage: React.FC = () => {
                       onCheckedChange={toggleSelectAll}
                     />
                   </TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Stock</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="min-w-[250px]">Product</TableHead>
+                  <TableHead className="min-w-[120px]">Category</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Price</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Stock</TableHead>
+                  <TableHead className="min-w-[120px]">Status</TableHead>
                   <TableHead className="w-[80px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -434,7 +434,7 @@ const ProductsPage: React.FC = () => {
             <CardTitle className="text-sm font-medium">Stock Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-1">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
                 <span className="text-sm">In Stock: {products.filter((p) => p.status === "In Stock").length}</span>
