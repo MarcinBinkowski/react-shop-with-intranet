@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -42,6 +42,7 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react"
+import { useMediaQuery } from "@/hooks/use-media-query"
 
 // Sample product data
 const products = [
@@ -119,7 +120,8 @@ const products = [
   },
 ]
 
-const ProductsPage: React.FC = () => {
+const ProductsPage = () => {
+  const isMobile = useMediaQuery("(max-width: 768px)")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
@@ -195,228 +197,314 @@ const ProductsPage: React.FC = () => {
     }
   }
 
+  // Mobile table view component
+  const MobileProductCard = ({ product }: { product: typeof products[0] }) => (
+    <Card className="mb-4">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-base font-medium">{product.name}</CardTitle>
+            <p className="text-sm text-muted-foreground">{product.sku}</p>
+          </div>
+          <Checkbox
+            checked={selectedProducts.includes(product.id)}
+            onCheckedChange={() => toggleSelectProduct(product.id)}
+          />
+        </div>
+      </CardHeader>
+      <CardContent className="grid gap-2">
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground">Category:</span>
+          <span>{product.category}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground">Price:</span>
+          <span>${product.price.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground">Stock:</span>
+          <span>{product.stock}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted-foreground">Status:</span>
+          {getStatusBadge(product.status)}
+        </div>
+      </CardContent>
+      <CardFooter>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="w-full">
+              <MoreHorizontal className="mr-2 h-4 w-4" />
+              Actions
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuItem>
+              <Eye className="mr-2 h-4 w-4" />
+              View details
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit product
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Copy className="mr-2 h-4 w-4" />
+              Duplicate
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive">
+              <Trash className="mr-2 h-4 w-4" />
+              Delete product
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </CardFooter>
+    </Card>
+  )
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Products</h1>
           <p className="text-muted-foreground">Manage your product inventory</p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
-              <DialogDescription>Fill in the details to add a new product to your inventory.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Product Name</Label>
-                <Input id="name" placeholder="Enter product name" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="sku">SKU</Label>
-                  <Input id="sku" placeholder="Enter SKU" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select>
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="furniture">Furniture</SelectItem>
-                      <SelectItem value="electronics">Electronics</SelectItem>
-                      <SelectItem value="stationery">Stationery</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Input id="price" type="number" placeholder="0.00" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="stock">Stock</Label>
-                  <Input id="stock" type="number" placeholder="0" />
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Save Product</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="relative w-full sm:w-64 md:w-80">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search products..."
+              className="w-full pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("Furniture")}>Furniture</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("Electronics")}>Electronics</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("Stationery")}>Stationery</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setSelectedStatus(null)}>All Statuses</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedStatus("In Stock")}>In Stock</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedStatus("Low Stock")}>Low Stock</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedStatus("Out of Stock")}>Out of Stock</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                  Sort
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[160px]">
+                <DropdownMenuItem onClick={() => handleSort("name")}>
+                  Name {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort("price")}>
+                  Price {sortField === "price" && (sortDirection === "asc" ? "↑" : "↓")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort("stock")}>
+                  Stock {sortField === "stock" && (sortDirection === "asc" ? "↑" : "↓")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {selectedProducts.length > 0 && (
+              <Button variant="outline" size="sm" className="text-destructive">
+                <Trash className="mr-2 h-4 w-4" />
+                Delete ({selectedProducts.length})
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="relative w-full sm:w-64 md:w-80 lg:w-96">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search products..."
-                className="w-full pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filter
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[200px]">
-                  <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedCategory("Furniture")}>Furniture</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedCategory("Electronics")}>Electronics</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedCategory("Stationery")}>Stationery</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setSelectedStatus(null)}>All Statuses</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedStatus("In Stock")}>In Stock</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedStatus("Low Stock")}>Low Stock</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedStatus("Out of Stock")}>Out of Stock</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+      {isMobile ? (
+        // Mobile view
+        <div className="space-y-4">
+          {filteredProducts.map((product) => (
+            <MobileProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
+        // Desktop view
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="relative w-full sm:w-64 md:w-80">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search products..."
+                  className="w-full pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Filter className="mr-2 h-4 w-4" />
+                      Filter
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[200px]">
+                    <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedCategory("Furniture")}>Furniture</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedCategory("Electronics")}>Electronics</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedCategory("Stationery")}>Stationery</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setSelectedStatus(null)}>All Statuses</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("In Stock")}>In Stock</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Low Stock")}>Low Stock</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSelectedStatus("Out of Stock")}>Out of Stock</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <ArrowUpDown className="mr-2 h-4 w-4" />
-                    Sort
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[160px]">
-                  <DropdownMenuItem onClick={() => handleSort("name")}>
-                    Name {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort("price")}>
-                    Price {sortField === "price" && (sortDirection === "asc" ? "↑" : "↓")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSort("stock")}>
-                    Stock {sortField === "stock" && (sortDirection === "asc" ? "↑" : "↓")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <ArrowUpDown className="mr-2 h-4 w-4" />
+                      Sort
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[160px]">
+                    <DropdownMenuItem onClick={() => handleSort("name")}>
+                      Name {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSort("price")}>
+                      Price {sortField === "price" && (sortDirection === "asc" ? "↑" : "↓")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSort("stock")}>
+                      Stock {sortField === "stock" && (sortDirection === "asc" ? "↑" : "↓")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-              {selectedProducts.length > 0 && (
-                <Button variant="outline" size="sm" className="text-destructive">
-                  <Trash className="mr-2 h-4 w-4" />
-                  Delete ({selectedProducts.length})
-                </Button>
-              )}
+                {selectedProducts.length > 0 && (
+                  <Button variant="outline" size="sm" className="text-destructive">
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete ({selectedProducts.length})
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border overflow-x-auto">
-            <Table className="min-w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40px]">
-                    <Checkbox
-                      checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
-                      onCheckedChange={toggleSelectAll}
-                    />
-                  </TableHead>
-                  <TableHead className="min-w-[250px]">Product</TableHead>
-                  <TableHead className="min-w-[120px]">Category</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Price</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Stock</TableHead>
-                  <TableHead className="min-w-[120px]">Status</TableHead>
-                  <TableHead className="w-[80px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.length === 0 ? (
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      No products found.
-                    </TableCell>
+                    <TableHead className="w-[40px]">
+                      <Checkbox
+                        checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead className="text-right">Stock</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[80px]"></TableHead>
                   </TableRow>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedProducts.includes(product.id)}
-                          onCheckedChange={() => toggleSelectProduct(product.id)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-muted-foreground">{product.sku}</div>
-                      </TableCell>
-                      <TableCell>{product.category}</TableCell>
-                      <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
-                      <TableCell className="text-right">{product.stock}</TableCell>
-                      <TableCell>{getStatusBadge(product.status)}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit product
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Copy className="mr-2 h-4 w-4" />
-                              Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash className="mr-2 h-4 w-4" />
-                              Delete product
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        No products found.
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-        <CardFooter className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Showing {filteredProducts.length} of {products.length} products
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" disabled>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" disabled>
-              Next
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+                  ) : (
+                    filteredProducts.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedProducts.includes(product.id)}
+                            onCheckedChange={() => toggleSelectProduct(product.id)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-sm text-muted-foreground">{product.sku}</div>
+                        </TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{product.stock}</TableCell>
+                        <TableCell>{getStatusBadge(product.status)}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit product
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive">
+                                <Trash className="mr-2 h-4 w-4" />
+                                Delete product
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+          <CardFooter className="flex items-center justify-between">
+            <div className="text-sm text-muted-foreground">
+              Showing {filteredProducts.length} of {products.length} products
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" disabled>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" disabled>
+                Next
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Make stats cards stack on mobile */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
@@ -434,7 +522,7 @@ const ProductsPage: React.FC = () => {
             <CardTitle className="text-sm font-medium">Stock Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
                 <span className="text-sm">In Stock: {products.filter((p) => p.status === "In Stock").length}</span>
@@ -468,4 +556,3 @@ const ProductsPage: React.FC = () => {
 }
 
 export default ProductsPage
-
