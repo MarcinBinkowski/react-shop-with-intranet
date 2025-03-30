@@ -37,7 +37,7 @@ interface BaseLayoutProps extends LayoutProps {
 }
 
 // This wrapper component allows us to access the sidebar context
-const BaseLayoutContent = ({ children, icon, title, navItems }: BaseLayoutProps) => {
+const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -98,7 +98,7 @@ const BaseLayoutContent = ({ children, icon, title, navItems }: BaseLayoutProps)
 
       <SidebarInset className="flex-1">
         <AppHeader title={title} onMenuClick={toggleSidebar} />
-        <main className="p-6 max-w-7xl mx-auto w-full">{children || <Outlet />}</main>
+        <main className="p-6 max-w-7xl mx-auto w-full">{<Outlet />}</main>
       </SidebarInset>
     </div>
   )

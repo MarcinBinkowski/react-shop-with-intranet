@@ -1,21 +1,16 @@
 import { Store, Home, Package, Users, ShoppingCart, BarChart3 } from "lucide-react"
 import { BaseLayout } from "./base-layout"
-import type { LayoutProps } from "./types"
 
 const storeNavItems = [
   {
     title: "Main",
     items: [
-      {
-        name: "Products",
-        href: "/products",
-        icon: <Package className="h-4 w-4" />,
-      },
-      {
-        name: "Customers",
-        href: "/customers",
-        icon: <Users className="h-4 w-4" />,
-      },
+    //   {
+    //     name: "Products",
+    //     href: "/products",
+    //     icon: <Package className="h-4 w-4" />,
+    //   },
+
     ],
   },
   {
