@@ -1,6 +1,7 @@
 import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
 import React from 'react'
-import { NotificationItemProps } from './header/types'
+import { NotificationItemProps } from './types'
+
 
 export default function NotificationItem({key, title, desc, time}: NotificationItemProps) {
   return (

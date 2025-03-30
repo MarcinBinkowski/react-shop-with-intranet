@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useUser } from "@/context/user-context"
-import { useNavigate } from "react-router-dom"
+import { useNavigatef } from "react-router-dom"
 
 interface AppHeaderProps {
   title: string

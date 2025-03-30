@@ -1,4 +1,7 @@
+import { UserContextType } from '@/context/UserContext'
+
 export interface AppHeaderProps {
+    auth: UserContextType
     title: string
     // showSearch?: boolean
     onMenuClick: () => void

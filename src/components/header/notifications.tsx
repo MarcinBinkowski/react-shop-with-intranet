@@ -1,8 +1,15 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import React from 'react'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import { Bell } from 'lucide-react'
 import NotificationItem from './notifications-item'
+
+const data = [
+  { title: "New order", desc: "Order #1234 has been placed", time: "2m ago" },
+  { title: "Payment received", desc: "$1,234.56 payment received", time: "1h ago" },
+  { title: "New user", desc: "User John Doe has registered", time: "5h ago" },
+  { title: "Server update", desc: "Server maintenance completed", time: "1d ago" },
+]
 
 export default function Notifications() {
   return (
@@ -18,12 +25,7 @@ export default function Notifications() {
     <DropdownMenuContent align="end" className="w-80">
       <DropdownMenuLabel>Notifications</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      {[
-        { title: "New order", desc: "Order #1234 has been placed", time: "2m ago" },
-        { title: "Payment received", desc: "$1,234.56 payment received", time: "1h ago" },
-        { title: "New user", desc: "User John Doe has registered", time: "5h ago" },
-        { title: "Server update", desc: "Server maintenance completed", time: "1d ago" },
-      ].map((item, i) => (
+      {data.map((item, i) => (
         < NotificationItem {...item} key={i} />
       ))}
       <DropdownMenuSeparator />
