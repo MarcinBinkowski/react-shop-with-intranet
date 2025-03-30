@@ -2,11 +2,17 @@ import React from 'react'
 import Messages from './messages'
 import Notifications from './notifications'
 
-export default function AuthActions() {
+import { UserContextType } from '@context/user-context'
+
+export default function AuthActions(auth: UserContextType) {
   return (
-    <>
-    <Messages/>
-    <Notifications/>
-    </>
+    {auth.isAuthenticated ? (
+      <>
+        <Messages />
+        <Notifications />
+      </>
+    ) : (
+      <></>
+    )}
   )
 }

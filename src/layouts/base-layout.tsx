@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Outlet } from "react-router-dom"
 import { AppHeader } from "../components/header"
+import { useUser } from "../context/user-context"
 
 interface BaseLayoutProps {
   icon: React.ReactNode
@@ -36,6 +37,7 @@ interface BaseLayoutProps {
 // This wrapper component allows us to access the sidebar context
 const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
   const { toggleSidebar } = useSidebar()
+  const auth = useUser()
 
   return (
     <div className="flex min-h-screen">
@@ -94,7 +96,7 @@ const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
       </Sidebar>
 
       <SidebarInset className="flex-1">
-        <AppHeader title={title} onMenuClick={toggleSidebar} />
+        <AppHeader title={title} onMenuClick={toggleSidebar} auth={auth}/>
         <main className="p-6 max-w-7xl mx-auto w-full">{<Outlet />}</main>
       </SidebarInset>
     </div>
