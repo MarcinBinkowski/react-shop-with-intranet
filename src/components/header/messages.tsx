@@ -6,10 +6,10 @@ import { Avatar, AvatarFallback } from '@radix-ui/react-avatar'
 import MessageItem from './message-item'
 
 const data = [
-    { name: "John Doe", message: "New order placed #1234", time: "2m ago" },
-    { name: "Sarah Smith", message: "Your report is ready", time: "1h ago" },
-    { name: "Team Support", message: "Meeting scheduled for tomorroww", time: "5h ago" },
-  ]
+    { id: '1', name: "John Doe", message: "New order placed #1234", time: "2m ago" },
+    { id: '2', name: "Sarah Smith", message: "Your report is ready", time: "1h ago" },
+    { id: '3', name: "Team Support", message: "Meeting scheduled", time: "5h ago" },
+    ]
 
 export default function Messages() {
   return (
@@ -25,8 +25,8 @@ export default function Messages() {
     <DropdownMenuContent align="end" className="w-80">
       <DropdownMenuLabel>Messages</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      {data.map((item, i) => (
-        <MessageItem {...item} key={i} />
+      {data.map((item) => (
+        <MessageItem key={item.id} {...item}  />
       ))}
       <DropdownMenuSeparator />
       <DropdownMenuItem className="cursor-pointer justify-center">View all messages</DropdownMenuItem>

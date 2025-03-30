@@ -1,46 +1,38 @@
 // import { UserContextType } from '../../context/UserContext'
 import { useContext } from 'react';
 import { UserContextType } from '@/context/UserContext';
+import { NavigateFunction } from 'react-router-dom';
 
-export interface NavigationHandlers {
-    handleLogout: () => void
-    handleProfileClick: () => void
-    handleSettingsClick: () => void
-  }
   
 export interface AppHeaderProps {
     title: string
     onMenuClick: () => void
     auth: UserContextType
-    navigationHandlers: NavigationHandlers
+    navigate: NavigateFunction
   }
 export interface ShowMenuButtonProps {
     onMenuClick: () => void
   }
 
 export interface MessageItemProps {
-    key: number
+    id: string
     name: string
     message: string
     time: string
 }
 export interface NotificationItemProps {
-    key: number
+    id: string
     title: string
-    desc: string
+    description: string
     time: string
-}
+  }
 
 export  interface AuthActionsProps {
-    auth: UserContextType
-    navigationHandlers: NavigationHandlers
+    auth: UserContextType,
+    navigate: NavigateFunction
   }
 
 export interface SettingsProps {
     auth: UserContextType
-    navigationHandlers: {
-      handleLogout: () => void
-      handleProfileClick: () => void
-      handleSettingsClick: () => void
-    }
+    navigate: NavigateFunction
   }

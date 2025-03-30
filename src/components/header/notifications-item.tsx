@@ -1,15 +1,15 @@
 import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
-import React from 'react'
 import { NotificationItemProps } from './types'
 
 
-export default function NotificationItem({key, title, desc, time}: NotificationItemProps) {
+export default function NotificationItem({ title, description, time }: NotificationItemProps) {
   return (
-    <DropdownMenuItem key={key} className="cursor-pointer">
-    <div className="flex flex-col space-y-1">
-      <p className="text-sm font-medium leading-none">{title}</p>
-      <p className="text-sm text-muted-foreground">{desc}</p>
-      <p className="text-xs text-muted-foreground">{time}</p>
-    </div>
-  </DropdownMenuItem>  )
+    <DropdownMenuItem className="cursor-pointer p-0">
+      <div className="flex w-full flex-col gap-1 p-2">
+        <p className="text-sm font-medium leading-none">{title}</p>
+        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-xs text-muted-foreground">{time}</p>
+      </div>
+    </DropdownMenuItem>
+  )
 }

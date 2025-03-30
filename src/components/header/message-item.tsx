@@ -3,9 +3,9 @@ import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
 import React from 'react'
 import { MessageItemProps } from './types'
 
-export default function MessageItem({key, name, message, time}: MessageItemProps) {
+export default function MessageItem({name, message, time}: MessageItemProps) {
   return (
-    <DropdownMenuItem key={key} className="cursor-pointer p-0">
+    <DropdownMenuItem className="cursor-pointer p-0">
     <div className="flex w-full items-start gap-2 p-2">
       <Avatar className="h-9 w-9">
         <AvatarFallback>{name[0]}</AvatarFallback>

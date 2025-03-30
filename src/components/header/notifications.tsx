@@ -5,10 +5,10 @@ import { Bell } from 'lucide-react'
 import NotificationItem from './notifications-item'
 
 const data = [
-  { title: "New order", desc: "Order #1234 has been placed", time: "2m ago" },
-  { title: "Payment received", desc: "$1,234.56 payment received", time: "1h ago" },
-  { title: "New user", desc: "User John Doe has registered", time: "5h ago" },
-  { title: "Server update", desc: "Server maintenance completed", time: "1d ago" },
+  {id: "1", title: "New order", description: "Order #1234 has been placed", time: "2m ago" },
+  {id: "2", title: "Payment received", description: "$1,234.56 payment received", time: "1h ago" },
+  {id: "3", title: "New user", description: "User John Doe has registered", time: "5h ago" },
+  {id: "4", title: "Server update", description: "Server maintenance completed", time: "1d ago" },
 ]
 
 export default function Notifications() {
@@ -25,9 +25,12 @@ export default function Notifications() {
     <DropdownMenuContent align="end" className="w-80">
       <DropdownMenuLabel>Notifications</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      {data.map((item, i) => (
-        < NotificationItem {...item} key={i} />
-      ))}
+      {data.map((item) => (
+          <NotificationItem
+            key={item.id}
+            {...item}
+          />
+        ))}
       <DropdownMenuSeparator />
       <DropdownMenuItem className="cursor-pointer justify-center">View all notifications</DropdownMenuItem>
     </DropdownMenuContent>

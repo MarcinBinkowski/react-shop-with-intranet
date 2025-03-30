@@ -26,16 +26,8 @@ export function AppHeader({
   title, 
   onMenuClick, 
   auth,
-  navigationHandlers 
+  navigate 
 }: AppHeaderProps) {
-
-  // const handleLogin = () => {
-  //   navigate("/login")
-  // }
-
-  // const handleLogout = () => {
-  //   logout()
-  //   navigate("/")
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b">
@@ -48,7 +40,7 @@ export function AppHeader({
         {/* <ThemeToggle /> */}
         <AuthActions 
           auth={auth} 
-          navigationHandlers={navigationHandlers}
+          navigate={navigate}
         />
       </div>
     </header>

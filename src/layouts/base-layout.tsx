@@ -40,22 +40,7 @@ const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
   const { toggleSidebar } = useSidebar()
   const auth = useUser()
   const navigate = useNavigate()
-
-  const navigationHandlers = {
-    handleLogout: useCallback(() => {
-      auth.logout()
-      navigate('/')
-    }, [auth, navigate]),
-
-    handleProfileClick: useCallback(() => {
-      navigate('/profile')
-    }, [navigate]),
-
-    handleSettingsClick: useCallback(() => {
-      navigate('/settings')
-    }, [navigate])
-  }
-
+  
   return (
     <div className="flex min-h-screen">
       <Sidebar className="border-r" style={{ "--sidebar-width": "16rem" } as React.CSSProperties}>
@@ -117,7 +102,6 @@ const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
           title={title} 
           onMenuClick={toggleSidebar} 
           auth={auth}
-          navigationHandlers={navigationHandlers}
         />
         <main className="p-6 max-w-7xl mx-auto w-full">{<Outlet />}</main>
       </SidebarInset>
