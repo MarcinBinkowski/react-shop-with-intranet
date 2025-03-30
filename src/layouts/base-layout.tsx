@@ -17,8 +17,8 @@ import { ViewSwitcher } from "@/components/view-switcher"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { AppHeader } from "@/components/app-header"
 import { Outlet } from "react-router-dom"
+import { AppHeader } from "../components/header"
 
 interface BaseLayoutProps {
   icon: React.ReactNode
