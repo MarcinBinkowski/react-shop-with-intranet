@@ -1,0 +1,54 @@
+"use client"
+
+import React, { createContext, useContext, useState, useEffect } from "react"
+
+interface User {
+  username: string
+  isAdmin: boolean
+}
+
+interface UserContextType {
+  user: User | null
+  login: (username: string, isAdmin: boolean) => void
+  logout: () => void
+  isAuthenticated: boolean
+}
+
+const UserContext = createContext<UserContextType | undefined>(undefined)
+
+export function UserProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  
+  // Load user from localStorage on initial render
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+  }, [])
+
+  const login = (username: string, isAdmin: boolean) => {
+    const newUser = { username, isAdmin }
+    setUser(newUser)
+    localStorage.setItem("user", JSON.stringify(newUser))
+  }
+
+  const logout = () => {
+    setUser(null)
+    localStorage.removeItem("user")
+  }
+
+  return (
+    <UserContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+      {children}
+    </UserContext.Provider>
+  )
+}
+
+export function useUser() {
+  const context = useContext(UserContext)
+  if (context === undefined) {
+    throw new Error("useUser must be used within a UserProvider")
+  }
+  return context
+}
