@@ -3,12 +3,13 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useNavigate } from "react-router-dom";
+import { SettingProps } from "./types";
 
-export default function Settings() {
+export default function Settings({auth}: SettingProps) {
     const navigate = useNavigate()
 
     const handleLogout = () => {
-        logout()
+        auth.logout()
         navigate("/")
         }
   return (
@@ -18,15 +19,15 @@ export default function Settings() {
           <Avatar className="h-8 w-8">
             <AvatarImage src="/placeholder.svg" alt="User" />
             <AvatarFallback>
-              {user?.username.charAt(0).toUpperCase()}
+              {auth.username.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>
-          {user?.username}
-          {user?.isAdmin && (
+          {auth.username}
+          {auth.isAdmin && (
             <span className="ml-2 text-xs text-primary">(Admin)</span>
           )}
         </DropdownMenuLabel>
@@ -39,7 +40,3 @@ export default function Settings() {
     </DropdownMenu>
   );
 }
-function logout() {
-    throw new Error("Function not implemented.");
-}
-

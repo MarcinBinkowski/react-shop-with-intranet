@@ -29,4 +29,7 @@ export interface NotificationItemProps {
 export interface AuthActionsProps {
     auth: UserContextType
   }
-  
+
+export interface SettingProps{
+    auth: UserContextType
+}

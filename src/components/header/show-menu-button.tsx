@@ -4,7 +4,7 @@ import { Menu } from 'lucide-react'
 import { ShowMenuButtonProps } from './types'
 
 
-function ShowMenuButton({ onMenuClick }: ShowMenuButtonProps) {
+export function ShowMenuButton({ onMenuClick }: ShowMenuButtonProps) {
   return (
          <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={onMenuClick} className="lg:hidden">
@@ -14,4 +14,4 @@ function ShowMenuButton({ onMenuClick }: ShowMenuButtonProps) {
   )
 }
 
-export default ShowMenuButton
+//  default ShowMenuButton

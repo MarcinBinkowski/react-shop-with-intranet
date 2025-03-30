@@ -17,7 +17,7 @@ import { ViewSwitcher } from "@/components/view-switcher"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Outlet } from "react-router-dom"
+import { Outlet, useNavigate } from "react-router-dom"
 import { AppHeader } from "../components/header"
 import { useUser } from "../context/user-context"
 
@@ -38,6 +38,8 @@ interface BaseLayoutProps {
 const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
   const { toggleSidebar } = useSidebar()
   const auth = useUser()
+  const navigate = useNavigate()
+
 
   return (
     <div className="flex min-h-screen">

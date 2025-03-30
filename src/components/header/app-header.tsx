@@ -15,14 +15,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useUser } from "@/context/user-context"
 import { useNavigate } from "react-router-dom"
-import ShowMenuButton from "./show-menu-button"
+import {ShowMenuButton} from "./show-menu-button"
 import { AppHeaderProps } from "./types"
-import AuthActions from "./auth-actions"
+import {AuthActions} from "./auth-actions"
 
 
 
 export function AppHeader({auth, onMenuClick, title}:AppHeaderProps) {
-  const navigate = useNavigate()
 
   // const handleLogin = () => {
   //   navigate("/login")
@@ -38,7 +37,7 @@ export function AppHeader({auth, onMenuClick, title}:AppHeaderProps) {
       <ShowMenuButton  onMenuClick={onMenuClick}/>
       <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       <div className="flex items-center gap-2 md:gap-4">
-        {auth.isAuthenticated ? <AuthActions />: <></>}
+        <AuthActions auth={auth} />
       </div>
     </div>
     </header>
