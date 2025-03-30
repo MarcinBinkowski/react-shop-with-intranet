@@ -45,11 +45,9 @@ const intranetNavItems = [
   },
 ]
 
-const IntranetLayout = ({ children }: LayoutProps) => {
+const IntranetLayout = () => {
   return (
-    <BaseLayout icon={<Building2 className="h-5 w-5" />} title="Intranet" navItems={intranetNavItems}>
-      {children}
-    </BaseLayout>
+    <BaseLayout icon={<Building2 className="h-5 w-5" />} title="Intranet" navItems={intranetNavItems}/>
   )
 }
 

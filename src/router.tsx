@@ -53,7 +53,6 @@ const AppRoutes: React.FC = () => {
       </Route>
 
       <Route path="/" element={<StoreLayout />}>
-        <Route index element={<Dashboard />} />
         <Route path="products" element={<ProductsPage />} />
         <Route
           path="customers"

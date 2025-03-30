@@ -7,11 +7,6 @@ const storeNavItems = [
     title: "Main",
     items: [
       {
-        name: "Dashboard",
-        href: "/",
-        icon: <Home className="h-4 w-4" />,
-      },
-      {
         name: "Products",
         href: "/products",
         icon: <Package className="h-4 w-4" />,
@@ -40,11 +35,9 @@ const storeNavItems = [
   },
 ]
 
-const StoreLayout = ({ children }: LayoutProps) => {
+const StoreLayout = () => {
   return (
-    <BaseLayout icon={<Store className="h-5 w-5" />} title="Shop" navItems={storeNavItems}>
-      {children}
-    </BaseLayout>
+    <BaseLayout icon={<Store className="h-5 w-5" />} title="Shop" navItems={storeNavItems}/>
   )
 }
 
