@@ -8,10 +8,15 @@ export interface ShowMenuButtonProps {
     onMenuClick: () => void
   }
 
-  export interface MessageItemProps {
+export interface MessageItemProps {
     key: number
     name: string
     message: string
     time: string
 }
-    
+export interface NotificationItemProps {
+    key: number
+    title: string
+    desc: string
+    time: string
+}
