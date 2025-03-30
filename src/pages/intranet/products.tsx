@@ -118,6 +118,7 @@ const products = [
     stock: 18,
     status: "In Stock",
   },
+  
 ]
 
 const ProductsPage = () => {

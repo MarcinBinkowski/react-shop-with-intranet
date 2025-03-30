@@ -5,11 +5,11 @@ const intranetNavItems = [
   {
     title: "Company",
     items: [
-      {
-        name: "Dashboard",
-        href: "/intranet",
-        icon: <Building2 className="h-4 w-4" />,
-      },
+    //   {
+    //     name: "Dashboard",
+    //     href: "/intranet",
+    //     icon: <Building2 className="h-4 w-4" />,
+    //   },
       {
         name: "Products",
         href: "/intranet/products",

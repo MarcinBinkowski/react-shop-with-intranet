@@ -22,8 +22,8 @@ import AuthActions from "./auth-actions"
 
 
 export function AppHeader({onMenuClick, title}:AppHeaderProps) {
-  // const { user, logout, isAuthenticated } = useUser()
-  // const navigate = useNavigate()
+  const { user, logout, isAuthenticated } = useUser()
+  const navigate = useNavigate()
 
   // const handleLogin = () => {
   //   navigate("/login")
@@ -39,7 +39,7 @@ export function AppHeader({onMenuClick, title}:AppHeaderProps) {
       <ShowMenuButton  onMenuClick={onMenuClick}/>
       <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       <div className="flex items-center gap-2 md:gap-4">
-      <AuthActions />
+        {isAuthenticated ? <AuthActions />: <></>}
       </div>
     </div>
     </header>
