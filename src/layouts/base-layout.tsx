@@ -1,4 +1,5 @@
 import type React from "react"
+import { useCallback } from "react"
 import {
   Sidebar,
   SidebarProvider,
@@ -18,8 +19,8 @@ import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Outlet, useNavigate } from "react-router-dom"
-import { AppHeader } from "../components/header"
-import { useUser } from "../context/user-context"
+import { AppHeader } from "@/components/header"
+import { useUser } from "@/context/user-context"
 
 interface BaseLayoutProps {
   icon: React.ReactNode
@@ -40,6 +41,20 @@ const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
   const auth = useUser()
   const navigate = useNavigate()
 
+  const navigationHandlers = {
+    handleLogout: useCallback(() => {
+      auth.logout()
+      navigate('/')
+    }, [auth, navigate]),
+
+    handleProfileClick: useCallback(() => {
+      navigate('/profile')
+    }, [navigate]),
+
+    handleSettingsClick: useCallback(() => {
+      navigate('/settings')
+    }, [navigate])
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -98,14 +113,18 @@ const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
       </Sidebar>
 
       <SidebarInset className="flex-1">
-        <AppHeader title={title} onMenuClick={toggleSidebar} auth={auth}/>
+        <AppHeader 
+          title={title} 
+          onMenuClick={toggleSidebar} 
+          auth={auth}
+          navigationHandlers={navigationHandlers}
+        />
         <main className="p-6 max-w-7xl mx-auto w-full">{<Outlet />}</main>
       </SidebarInset>
     </div>
   )
 }
 
-// Main component that provides the sidebar context
 export function BaseLayout(props: BaseLayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>

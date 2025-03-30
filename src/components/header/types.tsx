@@ -1,14 +1,19 @@
 // import { UserContextType } from '../../context/UserContext'
 import { useContext } from 'react';
-import { UserContextType } from '../../context/UserContext';
+import { UserContextType } from '@/context/UserContext';
 
-export interface AppHeaderProps {
-    auth: UserContextType
-    title: string
-    // showSearch?: boolean
-    onMenuClick: () => void
+export interface NavigationHandlers {
+    handleLogout: () => void
+    handleProfileClick: () => void
+    handleSettingsClick: () => void
   }
-
+  
+export interface AppHeaderProps {
+    title: string
+    onMenuClick: () => void
+    auth: UserContextType
+    navigationHandlers: NavigationHandlers
+  }
 export interface ShowMenuButtonProps {
     onMenuClick: () => void
   }
@@ -26,8 +31,9 @@ export interface NotificationItemProps {
     time: string
 }
 
-export interface AuthActionsProps {
+export  interface AuthActionsProps {
     auth: UserContextType
+    navigationHandlers: NavigationHandlers
   }
 
 export interface SettingProps{

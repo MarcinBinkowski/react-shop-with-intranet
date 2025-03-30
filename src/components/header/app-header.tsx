@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ModeToggle } from "@/components/mode-toggle"
+// import { ThemeToggle } from "@/components/theme-toggle"
 import { useUser } from "@/context/user-context"
 import { useNavigate } from "react-router-dom"
 import {ShowMenuButton} from "./show-menu-button"
@@ -21,7 +22,12 @@ import {AuthActions} from "./auth-actions"
 
 
 
-export function AppHeader({auth, onMenuClick, title}:AppHeaderProps) {
+export function AppHeader({ 
+  title, 
+  onMenuClick, 
+  auth,
+  navigationHandlers 
+}: AppHeaderProps) {
 
   // const handleLogin = () => {
   //   navigate("/login")
@@ -32,14 +38,19 @@ export function AppHeader({auth, onMenuClick, title}:AppHeaderProps) {
   //   navigate("/")
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b">
       <div className="flex items-center gap-4">
-      <ShowMenuButton  onMenuClick={onMenuClick}/>
-      <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-      <div className="flex items-center gap-2 md:gap-4">
-        <AuthActions auth={auth} />
+        <ShowMenuButton onMenuClick={onMenuClick} />
+        <h1 className="text-xl font-semibold">{title}</h1>
       </div>
-    </div>
+      
+      <div className="flex items-center gap-2">
+        {/* <ThemeToggle /> */}
+        <AuthActions 
+          auth={auth} 
+          navigationHandlers={navigationHandlers}
+        />
+      </div>
     </header>
   )
 }
