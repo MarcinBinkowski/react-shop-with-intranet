@@ -1,10 +1,17 @@
 export interface AppHeaderProps {
-    // title: string
+    title: string
     // showSearch?: boolean
-    onMenuClick?: () => void
+    onMenuClick: () => void
   }
 
 export interface ShowMenuButtonProps {
     onMenuClick: () => void
-    title: string
   }
+
+  export interface MessageItemProps {
+    key: number
+    name: string
+    message: string
+    time: string
+}
+    

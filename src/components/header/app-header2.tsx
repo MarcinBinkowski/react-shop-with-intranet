@@ -22,7 +22,7 @@ interface AppHeaderProps {
   onMenuClick?: () => void
 }
 
-export function AppHeader({ title, showSearch = true, onMenuClick }: AppHeaderProps) {
+export function AppHeader({ title, showSearch = false, onMenuClick }: AppHeaderProps) {
   const { user, logout, isAuthenticated } = useUser()
   const navigate = useNavigate()
 
@@ -40,7 +40,6 @@ export function AppHeader({ title, showSearch = true, onMenuClick }: AppHeaderPr
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={onMenuClick} className="lg:hidden">
           <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle menu</span>
         </Button>
 
         <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
@@ -71,7 +70,6 @@ export function AppHeader({ title, showSearch = true, onMenuClick }: AppHeaderPr
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     3
                   </span>
-                  <span className="sr-only">Messages</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
@@ -107,7 +105,6 @@ export function AppHeader({ title, showSearch = true, onMenuClick }: AppHeaderPr
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     5
                   </span>
-                  <span className="sr-only">Notifications</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
