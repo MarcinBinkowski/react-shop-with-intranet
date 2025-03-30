@@ -1,4 +1,6 @@
-import { UserContextType } from '@/context/UserContext'
+// import { UserContextType } from '../../context/UserContext'
+import { useContext } from 'react';
+import { UserContextType } from '../../context/UserContext';
 
 export interface AppHeaderProps {
     auth: UserContextType

@@ -7,7 +7,7 @@ interface User {
   isAdmin: boolean
 }
 
-interface UserContextType {
+export interface UserContextType {
   user: User | null
   login: (username: string, isAdmin: boolean) => void
   logout: () => void
