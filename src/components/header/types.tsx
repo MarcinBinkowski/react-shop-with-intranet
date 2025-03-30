@@ -36,6 +36,11 @@ export  interface AuthActionsProps {
     navigationHandlers: NavigationHandlers
   }
 
-export interface SettingProps{
+export interface SettingsProps {
     auth: UserContextType
-}
+    navigationHandlers: {
+      handleLogout: () => void
+      handleProfileClick: () => void
+      handleSettingsClick: () => void
+    }
+  }
