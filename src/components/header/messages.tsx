@@ -16,7 +16,7 @@ export default function Messages() {
     <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" size="icon" className="relative">
-        <MessageSquare className="h-5 w-5" />
+        <MessageSquare/>
         <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
         {data.length}
         </span>
