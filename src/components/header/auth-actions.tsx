@@ -1,18 +1,16 @@
-import React from 'react'
 import Messages from './messages'
 import Notifications from './notifications'
+import { AuthActionsProps } from './types'
 
-import { UserContextType } from '@context/user-context'
-
-export default function AuthActions(auth: UserContextType) {
-  return (
-    {auth.isAuthenticated ? (
-      <>
+export function AuthActions({ auth }: AuthActionsProps) {
+    if (!auth.isAuthenticated) {
+      return null
+    }
+  
+    return (
+      <div className="flex items-center gap-2">
         <Messages />
         <Notifications />
-      </>
-    ) : (
-      <></>
-    )}
-  )
-}
+      </div>
+    )
+  }

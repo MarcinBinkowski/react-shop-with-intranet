@@ -23,3 +23,8 @@ export interface NotificationItemProps {
     desc: string
     time: string
 }
+
+export interface AuthActionsProps {
+    auth: UserContextType
+  }
+  
