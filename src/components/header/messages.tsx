@@ -1,9 +1,7 @@
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
-import React from 'react'
 import { Button } from '../ui/button'
 import { MessageSquare } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@radix-ui/react-avatar'
 import MessageItem from './message-item'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
 
 const data = [
     { id: '1', name: "John Doe", message: "New order placed #1234", time: "2m ago" },

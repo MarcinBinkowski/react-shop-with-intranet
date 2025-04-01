@@ -1,8 +1,8 @@
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import React from 'react'
 import { Button } from '../ui/button'
 import { Bell } from 'lucide-react'
 import NotificationItem from './notifications-item'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
 
 const data = [
   {id: "1", title: "New order", description: "Order #1234 has been placed", time: "2m ago" },

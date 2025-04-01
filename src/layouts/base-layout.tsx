@@ -19,7 +19,7 @@ import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Outlet, useNavigate } from "react-router-dom"
-import { AppHeader } from "@/components/header"
+import { AppHeader } from "@/components/header/app-header"
 import { useUser } from "@/context/user-context"
 
 interface BaseLayoutProps {

@@ -1,3 +1,4 @@
+
 import type React from "react"
 import {
   Sidebar,
@@ -17,7 +18,7 @@ import { ViewSwitcher } from "@/components/view-switcher"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { AppHeader } from "@/components/app-header"
+import { AppHeader } from "@/components/header/app-header2"
 import { Outlet } from "react-router-dom"
 
 interface BaseLayoutProps {

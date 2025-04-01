@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback } from '@radix-ui/react-avatar'
-import { DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
 import React from 'react'
 import { MessageItemProps } from './types'
+import { DropdownMenuItem } from '../ui/dropdown-menu'
+import { Avatar, AvatarFallback } from '../ui/avatar'
 
 export default function MessageItem({name, message, time}: MessageItemProps) {
   return (
