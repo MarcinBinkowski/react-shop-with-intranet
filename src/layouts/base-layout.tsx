@@ -102,6 +102,7 @@ const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
           title={title} 
           onMenuClick={toggleSidebar} 
           auth={auth}
+          navigate={navigate}
         />
         <main className="p-6 max-w-7xl mx-auto w-full">{<Outlet />}</main>
       </SidebarInset>
