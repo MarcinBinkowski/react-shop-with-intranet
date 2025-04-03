@@ -28,7 +28,7 @@ const products = [
     id: 1,
     name: "Premium Ergonomic Chair",
     sku: "CHAIR-001",
-    category: "Furniture",
+    category: "Category1",
     price: 299.99,
     stock: 24,
     status: "In Stock",
@@ -39,7 +39,7 @@ const products = [
   },
 ]
 
-const categories = ["Furniture", "Electronics", "Stationery"]
+const categories = ["Category1", "Category2", "Category3"]
 
 const statuses = ["In Stock", "Low Stock", "Out of Stock"]
 
