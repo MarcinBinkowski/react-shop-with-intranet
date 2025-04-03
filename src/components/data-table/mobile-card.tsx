@@ -58,7 +58,7 @@ export function MobileCard<T>({ row, config, isSelected, onToggleSelect }: Mobil
                 <DropdownMenuItem
                   key={index}
                   onClick={() => action.onClick(row)}
-                  className={action.variant === "destructive" ? "text-destructive" : ""}
+                  className={action.variant}
                 >
                   {action.icon}
                   {action.label}

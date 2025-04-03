@@ -91,7 +91,7 @@ export function DataTableHeader<T>({
                   <DropdownMenuItem
                     key={index}
                     onClick={() => onBulkAction(action)}
-                    className={action.variant === "destructive" ? "text-destructive" : ""}
+                    className={action.variant}
                   >
                     {action.icon && <span className="mr-2">{action.icon}</span>}
                     {action.label}

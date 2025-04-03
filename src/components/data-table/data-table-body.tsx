@@ -92,7 +92,7 @@ export function DataTableBody<T>({
                               <DropdownMenuItem
                                 key={index}
                                 onClick={() => onRowAction(action, row)}
-                                className={action.variant === "destructive" ? "text-destructive" : ""}
+                                className={action.variant}
                               >
                                 {action.icon && <span className="mr-2">{action.icon}</span>}
                                 {action.label}
