@@ -1,19 +1,16 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
+import { DataListPage } from '@/components/common/DataListPage'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { UserCard } from '@/components/users/UserCard'
-import { CreateUserDialog } from '@/components/users/CreateUserDialog'
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 
 interface User {
   id: string
@@ -24,7 +21,7 @@ interface User {
   joinedDate: string
 }
 
-// Mock data - replace with actual API call
+// Mock data
 const mockUsers: User[] = [
   {
     id: '1',
@@ -50,61 +47,121 @@ const mockUsers: User[] = [
     department: 'Engineering',
     joinedDate: '2023-03-10'
   },
-  // Add more mock users as needed
 ]
+
+function UserCard({ user, onDelete, onUpdate }: { 
+  user: User
+  onDelete: (id: string) => void
+  onUpdate: (user: User) => void 
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedUser, setEditedUser] = useState(user)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onUpdate(editedUser)
+    setIsEditing(false)
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-bold">{user.name}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold">Email:</span> {user.email}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold">Role:</span> {user.role}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold">Department:</span> {user.department}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold">Joined:</span>{' '}
+            {new Date(user.joinedDate).toLocaleDateString()}
+          </p>
+          <div className="flex gap-2 pt-4">
+            <Dialog open={isEditing} onOpenChange={setIsEditing}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1">
+                  Edit
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit User</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={editedUser.name}
+                      onChange={(e) => setEditedUser({ ...editedUser, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={editedUser.email}
+                      onChange={(e) => setEditedUser({ ...editedUser, email: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Role</Label>
+                    <Input
+                      id="role"
+                      value={editedUser.role}
+                      onChange={(e) => setEditedUser({ ...editedUser, role: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="department">Department</Label>
+                    <Input
+                      id="department"
+                      value={editedUser.department}
+                      onChange={(e) => setEditedUser({ ...editedUser, department: e.target.value })}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Save Changes
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => onDelete(user.id)}
+              className="flex-1"
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>(mockUsers)
-  const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState<keyof User>('name')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [roleFilter, setRoleFilter] = useState<string>('all')
-  const [departmentFilter, setDepartmentFilter] = useState<string>('all')
-
-  // Get unique roles and departments for filter options
-  const uniqueRoles = useMemo(() => 
-    Array.from(new Set(users.map(user => user.role))).sort(),
-    [users]
-  )
-
-  const uniqueDepartments = useMemo(() => 
-    Array.from(new Set(users.map(user => user.department))).sort(),
-    [users]
-  )
-
-  const filteredAndSortedUsers = useMemo(() => {
-    return users
-      .filter(user => {
-        const matchesSearch = 
-          user.name.toLowerCase().includes(search.toLowerCase()) ||
-          user.email.toLowerCase().includes(search.toLowerCase()) ||
-          user.department.toLowerCase().includes(search.toLowerCase())
-        
-        const matchesRole = roleFilter === 'all' || user.role === roleFilter
-        const matchesDepartment = departmentFilter === 'all' || user.department === departmentFilter
-
-        return matchesSearch && matchesRole && matchesDepartment
-      })
-      .sort((a, b) => {
-        if (sortOrder === 'asc') {
-          return a[sortBy] > b[sortBy] ? 1 : -1
-        }
-        return a[sortBy] < b[sortBy] ? 1 : -1
-      })
-  }, [users, search, sortBy, sortOrder, roleFilter, departmentFilter])
+  const [newUser, setNewUser] = useState<Omit<User, 'id'>>({
+    name: '',
+    email: '',
+    role: '',
+    department: '',
+    joinedDate: new Date().toISOString().split('T')[0]
+  })
 
   const handleDeleteUser = (userId: string) => {
     setUsers(users.filter(user => user.id !== userId))
-  }
-
-  const handleCreateUser = (newUser: Omit<User, 'id'>) => {
-    const user = {
-      ...newUser,
-      id: Math.random().toString(36).substr(2, 9)
-    }
-    setUsers([...users, user])
-    setIsCreateDialogOpen(false)
   }
 
   const handleUpdateUser = (updatedUser: User) => {
@@ -113,115 +170,119 @@ export default function UsersPage() {
     ))
   }
 
+  const handleCreateUser = (e: React.FormEvent) => {
+    e.preventDefault()
+    const user = {
+      ...newUser,
+      id: Math.random().toString(36).substr(2, 9)
+    }
+    setUsers([...users, user])
+    setIsCreateDialogOpen(false)
+    setNewUser({
+      name: '',
+      email: '',
+      role: '',
+      department: '',
+      joinedDate: new Date().toISOString().split('T')[0]
+    })
+  }
+
+  const filterFields = [
+    {
+      name: 'role',
+      label: 'Role',
+      options: [
+        { label: 'Developer', value: 'Developer' },
+        { label: 'Designer', value: 'Designer' },
+        { label: 'Manager', value: 'Manager' },
+      ]
+    },
+    {
+      name: 'department',
+      label: 'Department',
+      options: [
+        { label: 'Engineering', value: 'Engineering' },
+        { label: 'Design', value: 'Design' },
+      ]
+    }
+  ]
+
+  const sortFields = [
+    { label: 'Name', value: 'name' },
+    { label: 'Email', value: 'email' },
+    { label: 'Department', value: 'department' },
+    { label: 'Join Date', value: 'joinedDate' },
+  ]
+
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Users</h1>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          Add New User
-        </Button>
-      </div>
-
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Search</label>
-              <Input
-                placeholder="Search users..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Role</label>
-              <Select
-                value={roleFilter}
-                onValueChange={setRoleFilter}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  {uniqueRoles.map(role => (
-                    <SelectItem key={role} value={role}>{role}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Department</label>
-              <Select
-                value={departmentFilter}
-                onValueChange={setDepartmentFilter}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  {uniqueDepartments.map(dept => (
-                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Sort By</label>
-              <div className="flex gap-2">
-                <Select
-                  value={sortBy}
-                  onValueChange={(value) => setSortBy(value as keyof User)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name">Name</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="department">Department</SelectItem>
-                    <SelectItem value="joinedDate">Join Date</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={sortOrder}
-                  onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sort order" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="asc">Ascending</SelectItem>
-                    <SelectItem value="desc">Descending</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAndSortedUsers.map(user => (
-          <UserCard
-            key={user.id}
-            user={user}
+    <>
+      <DataListPage<User>
+        title="Users"
+        items={users}
+        renderItem={(user) => (
+          <UserCard 
+            key={user.id} 
+            user={user} 
             onDelete={handleDeleteUser}
             onUpdate={handleUpdateUser}
           />
-        ))}
-      </div>
-
-      <CreateUserDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onSubmit={handleCreateUser}
+        )}
+        filterFields={filterFields}
+        sortFields={sortFields}
+        searchPlaceholder="Search users..."
+        onCreateClick={() => setIsCreateDialogOpen(true)}
+        searchFields={['name', 'email', 'department']}
       />
-    </div>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New User</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateUser} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="create-name">Name</Label>
+              <Input
+                id="create-name"
+                value={newUser.name}
+                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-email">Email</Label>
+              <Input
+                id="create-email"
+                type="email"
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-role">Role</Label>
+              <Input
+                id="create-role"
+                value={newUser.role}
+                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-department">Department</Label>
+              <Input
+                id="create-department"
+                value={newUser.department}
+                onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Create User
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 } 

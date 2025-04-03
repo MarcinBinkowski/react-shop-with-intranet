@@ -7,6 +7,7 @@ import { UserProvider } from "./context/user-context"
 // import Dashboard from "./pages/intranet/dashboard"
 import Index from "./pages/store"
 import UsersPage from "./pages/users"
+import ProductsPage from "./pages/products"
 // import DocumentsPage from "./pages/intranet/documents"
 
 
@@ -19,6 +20,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/intranet" element={<IntranetLayout />}>
         {/* <Route index element={<Dashboard />} /> */}
           <Route path="users" element={<UsersPage />} />
+          <Route path="products" element={<ProductsPage />} />
 
 
 
@@ -42,14 +44,7 @@ const AppRoutes: React.FC = () => {
 
         <Route path="/" element={<StoreLayout />}>
           <Route index element={<Index />} />
-          <Route
-            path="products"
-            element={
-              <div className="p-6">
-                <h1 className="text-2xl font-bold">Store Products</h1>
-              </div>
-            }
-          />
+          <Route path="products" element={<ProductsPage />} />
           <Route
             path="orders"
             element={
