@@ -13,21 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
-interface OrderItem {
-  productId: string
-  productName: string
-  quantity: number
-  price: number
-}
-
 interface Order {
   id: string
   orderNumber: string
   customerName: string
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   orderDate: string
-  items: OrderItem[]
-  totalAmount: number
+  deliveryDate: string
+  amount: number
   shippingAddress: string
   notes?: string
 }
@@ -39,13 +32,10 @@ const mockOrders: Order[] = [
     customerName: 'John Smith',
     status: 'delivered',
     orderDate: '2024-03-15',
-    items: [
-      { productId: '1', productName: 'Laptop Pro', quantity: 1, price: 1299.99 },
-      { productId: '2', productName: 'Wireless Mouse', quantity: 2, price: 29.99 }
-    ],
-    totalAmount: 1359.97,
-    shippingAddress: '123 Main St, City, Country',
-    notes: 'Please handle with care'
+    deliveryDate: '2024-03-20',
+    amount: 299.99,
+    shippingAddress: '123 Main St, New York, NY 10001',
+    notes: 'Please leave at the front door'
   },
   {
     id: '2',
@@ -53,11 +43,9 @@ const mockOrders: Order[] = [
     customerName: 'Jane Doe',
     status: 'processing',
     orderDate: '2024-04-01',
-    items: [
-      { productId: '3', productName: 'Gaming Monitor', quantity: 1, price: 499.99 }
-    ],
-    totalAmount: 499.99,
-    shippingAddress: '456 Oak Ave, Town, Country'
+    deliveryDate: '2024-04-05',
+    amount: 149.50,
+    shippingAddress: '456 Oak Ave, Los Angeles, CA 90001'
   },
 ]
 
@@ -104,19 +92,13 @@ function OrderCard({ order, onDelete, onUpdate }: {
           {new Date(order.orderDate).toLocaleDateString()}
         </p>
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Total Amount:</span> ${order.totalAmount.toFixed(2)}
+          <span className="font-semibold">Delivery Date:</span>{' '}
+          {new Date(order.deliveryDate).toLocaleDateString()}
         </p>
-        <div className="text-sm text-muted-foreground mt-2">
-          <p className="font-semibold">Items:</p>
-          <ul className="list-disc list-inside pl-2">
-            {order.items.map((item, index) => (
-              <li key={index}>
-                {item.quantity}x {item.productName} (${item.price.toFixed(2)} each)
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Amount:</span> ${order.amount.toFixed(2)}
+        </p>
+        <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Shipping Address:</span><br />
           {order.shippingAddress}
         </p>
@@ -171,9 +153,41 @@ function OrderCard({ order, onDelete, onUpdate }: {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-shipping">Shipping Address</Label>
+              <Label htmlFor="edit-order-date">Order Date</Label>
+              <Input
+                id="edit-order-date"
+                type="date"
+                value={editedOrder.orderDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedOrder({ ...editedOrder, orderDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-delivery-date">Delivery Date</Label>
+              <Input
+                id="edit-delivery-date"
+                type="date"
+                value={editedOrder.deliveryDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedOrder({ ...editedOrder, deliveryDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-amount">Amount</Label>
+              <Input
+                id="edit-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={editedOrder.amount}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedOrder({ ...editedOrder, amount: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-shipping-address">Shipping Address</Label>
               <Textarea
-                id="edit-shipping"
+                id="edit-shipping-address"
                 value={editedOrder.shippingAddress}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditedOrder({ ...editedOrder, shippingAddress: e.target.value })}
                 required
@@ -206,8 +220,8 @@ export default function OrdersPage() {
     customerName: '',
     status: 'pending',
     orderDate: new Date().toISOString().split('T')[0],
-    items: [],
-    totalAmount: 0,
+    deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    amount: 0,
     shippingAddress: ''
   })
 
@@ -224,8 +238,8 @@ export default function OrdersPage() {
       customerName: '',
       status: 'pending',
       orderDate: new Date().toISOString().split('T')[0],
-      items: [],
-      totalAmount: 0,
+      deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      amount: 0,
       shippingAddress: ''
     })
   }
@@ -258,7 +272,8 @@ export default function OrdersPage() {
     { label: 'Order Number', value: 'orderNumber' },
     { label: 'Customer Name', value: 'customerName' },
     { label: 'Order Date', value: 'orderDate' },
-    { label: 'Total Amount', value: 'totalAmount' },
+    { label: 'Delivery Date', value: 'deliveryDate' },
+    { label: 'Amount', value: 'amount' },
   ]
 
   return (
@@ -324,9 +339,41 @@ export default function OrdersPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-shipping">Shipping Address</Label>
+              <Label htmlFor="create-order-date">Order Date</Label>
+              <Input
+                id="create-order-date"
+                type="date"
+                value={newOrder.orderDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewOrder({ ...newOrder, orderDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-delivery-date">Delivery Date</Label>
+              <Input
+                id="create-delivery-date"
+                type="date"
+                value={newOrder.deliveryDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewOrder({ ...newOrder, deliveryDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-amount">Amount</Label>
+              <Input
+                id="create-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={newOrder.amount}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewOrder({ ...newOrder, amount: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-shipping-address">Shipping Address</Label>
               <Textarea
-                id="create-shipping"
+                id="create-shipping-address"
                 value={newOrder.shippingAddress}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewOrder({ ...newOrder, shippingAddress: e.target.value })}
                 required

@@ -20,15 +20,7 @@ interface Invoice {
   status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
   issueDate: string
   dueDate: string
-  items: {
-    description: string
-    quantity: number
-    unitPrice: number
-    total: number
-  }[]
-  subtotal: number
-  tax: number
-  total: number
+  amount: number
   notes?: string
 }
 
@@ -40,13 +32,7 @@ const mockInvoices: Invoice[] = [
     status: 'paid',
     issueDate: '2024-03-15',
     dueDate: '2024-04-14',
-    items: [
-      { description: 'Web Development Services', quantity: 1, unitPrice: 1500, total: 1500 },
-      { description: 'Hosting (Monthly)', quantity: 12, unitPrice: 29.99, total: 359.88 }
-    ],
-    subtotal: 1859.88,
-    tax: 371.98,
-    total: 2231.86,
+    amount: 2231.86,
     notes: 'Thank you for your business!'
   },
   {
@@ -56,12 +42,7 @@ const mockInvoices: Invoice[] = [
     status: 'sent',
     issueDate: '2024-04-01',
     dueDate: '2024-05-01',
-    items: [
-      { description: 'UI/UX Design', quantity: 1, unitPrice: 800, total: 800 }
-    ],
-    subtotal: 800,
-    tax: 160,
-    total: 960
+    amount: 960.00
   },
 ]
 
@@ -111,21 +92,9 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
           <span className="font-semibold">Due Date:</span>{' '}
           {new Date(invoice.dueDate).toLocaleDateString()}
         </p>
-        <div className="text-sm text-muted-foreground mt-2">
-          <p className="font-semibold">Items:</p>
-          <ul className="list-disc list-inside pl-2">
-            {invoice.items.map((item, index) => (
-              <li key={index}>
-                {item.description} - {item.quantity}x ${item.unitPrice.toFixed(2)} = ${item.total.toFixed(2)}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="text-sm text-muted-foreground mt-2">
-          <p><span className="font-semibold">Subtotal:</span> ${invoice.subtotal.toFixed(2)}</p>
-          <p><span className="font-semibold">Tax:</span> ${invoice.tax.toFixed(2)}</p>
-          <p className="font-semibold">Total: ${invoice.total.toFixed(2)}</p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Amount:</span> ${invoice.amount.toFixed(2)}
+        </p>
         {invoice.notes && (
           <p className="text-sm text-muted-foreground mt-2">
             <span className="font-semibold">Notes:</span><br />
@@ -197,6 +166,18 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="edit-amount">Amount</Label>
+              <Input
+                id="edit-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={editedInvoice.amount}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, amount: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="edit-notes">Notes</Label>
               <Textarea
                 id="edit-notes"
@@ -224,10 +205,7 @@ export default function InvoicesPage() {
     status: 'draft',
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    items: [],
-    subtotal: 0,
-    tax: 0,
-    total: 0
+    amount: 0
   })
 
   const handleCreateInvoice = (e: React.FormEvent<HTMLFormElement>) => {
@@ -244,10 +222,7 @@ export default function InvoicesPage() {
       status: 'draft',
       issueDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      items: [],
-      subtotal: 0,
-      tax: 0,
-      total: 0
+      amount: 0
     })
   }
 
@@ -280,7 +255,7 @@ export default function InvoicesPage() {
     { label: 'Customer Name', value: 'customerName' },
     { label: 'Issue Date', value: 'issueDate' },
     { label: 'Due Date', value: 'dueDate' },
-    { label: 'Total', value: 'total' },
+    { label: 'Amount', value: 'amount' },
   ]
 
   return (
@@ -362,6 +337,18 @@ export default function InvoicesPage() {
                 type="date"
                 value={newInvoice.dueDate}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, dueDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-amount">Amount</Label>
+              <Input
+                id="create-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={newInvoice.amount}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, amount: parseFloat(e.target.value) || 0 })}
                 required
               />
             </div>
