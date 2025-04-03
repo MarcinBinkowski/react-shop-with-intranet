@@ -247,6 +247,7 @@ const CustomersPage = () => {
         <Avatar className="h-10 w-10 mr-3">
           <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
         </Avatar>
+        {customer.name}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
