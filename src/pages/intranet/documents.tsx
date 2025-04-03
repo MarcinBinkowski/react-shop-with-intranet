@@ -40,6 +40,7 @@ import {
   Edit,
 } from "lucide-react"
 import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
+import { DataTableCardConfig } from "@/components/data-table/types"
 // Document data type
 interface Document {
   id: number
@@ -281,68 +282,56 @@ const DocumentsPage = () => {
     }
   ]
 
-  // Render mobile card view
-  const renderMobileCard = (document: Document, isSelected: boolean, toggleSelect: () => void) => (
-    <Card key={document.id} className="overflow-hidden">
-      <div className="flex items-center p-4 border-b">
-        <Checkbox checked={isSelected} onCheckedChange={toggleSelect} className="mr-3" />
-        <div className="mr-3">{getDocumentIcon(document.type)}</div>
-        <div className="flex-1">
-          <h3 className="font-medium">{document.name}</h3>
-          <p className="text-sm text-muted-foreground">{document.category}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => console.log("View", document)}>
-              <Eye className="mr-2 h-4 w-4" />
-              View document
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Download", document)}>
-              <Download className="mr-2 h-4 w-4" />
-              Download
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Share", document)}>
-              <Share2 className="mr-2 h-4 w-4" />
-              Share
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log("Delete", document)} className="text-destructive">
-              <Trash className="mr-2 h-4 w-4" />
-              Delete document
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="grid grid-cols-2 p-4 gap-y-2 text-sm">
-        <div>
-          <span className="text-muted-foreground">Size:</span>
-        </div>
-        <div>{document.size}</div>
+  const mobileCard: DataTableCardConfig<Document> = {
+    primary: {
+      title: (document) => document.name,
+      subtitle: (document) => document.category,
+      avatar: (document) => getDocumentIcon(document.type)
+    },
+    fields: [
+      {
+        label: "Size",
+        value: (document) => document.size
+      },
+      {
+        label: "Uploaded by",
+        value: (document) => document.uploadedBy
+      },
+      {
+        label: "Date",
+        value: (document) => new Date(document.uploadDate).toLocaleDateString()
+      },
+      {
+        label: "Status",
+        value: (document) => getStatusBadge(document.status)
+      }
+    ],
+    actions: [
+      {
+        label: "View document",
+        icon: <Eye className="mr-2 h-4 w-4" />,
+        onClick: (document) => console.log("View", document)
+      },
+      {
+        label: "Download",
+        icon: <Download className="mr-2 h-4 w-4" />,
+        onClick: (document) => console.log("Download", document)
+      },
+      {
+        label: "Share",
+        icon: <Share2 className="mr-2 h-4 w-4" />,
+        onClick: (document) => console.log("Share", document)
+      },
+      {
+        label: "Delete document",
+        icon: <Trash className="mr-2 h-4 w-4" />,
+        onClick: (document) => console.log("Delete", document),
+        variant: "destructive"
+      }
+    ]
+  }
 
-        <div>
-          <span className="text-muted-foreground">Uploaded by:</span>
-        </div>
-        <div>{document.uploadedBy}</div>
-
-        <div>
-          <span className="text-muted-foreground">Date:</span>
-        </div>
-        <div>{new Date(document.uploadDate).toLocaleDateString()}</div>
-
-        <div>
-          <span className="text-muted-foreground">Status:</span>
-        </div>
-        <div>{getStatusBadge(document.status)}</div>
-      </div>
-    </Card>
-  )
+  
 
   return (
     <div className="space-y-6">
@@ -422,7 +411,7 @@ const DocumentsPage = () => {
         bulkActions={bulkActions}
         searchPlaceholder="Search documents..."
         getRowId={(document) => document.id}
-        renderMobileCard={renderMobileCard}
+        mobileCard={mobileCard}
       />
     </div>
   )

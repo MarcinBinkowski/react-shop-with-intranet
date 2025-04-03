@@ -328,17 +328,7 @@ const CustomersPage = () => {
       }
     ],
     actions: [
-      {
-        label: "View details",
-        icon: <Eye className="mr-2 h-4 w-4" />,
-        onClick: (customer) => console.log("View", customer)
-      },
-      {
-        label: "Edit customer",
-        icon: <Edit className="mr-2 h-4 w-4" />,
-        onClick: (customer) => console.log("Edit", customer)
-      },
-      {
+  {
         label: "Send email",
         icon: <Mail className="mr-2 h-4 w-4" />,
         onClick: (customer) => console.log("Email", customer)

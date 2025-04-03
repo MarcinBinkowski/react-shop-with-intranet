@@ -41,7 +41,8 @@ import {
   BarChart,
   Users,
 } from "lucide-react"
-import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
+import { DataTable} from "@/components/data-table/data-table"
+import { DataTableCardConfig, DataTableFilter } from "@/components/data-table/types"
 
 // Team Member data type
 interface TeamMember {
@@ -326,79 +327,54 @@ const TeamPage = () => {
     },
   ]
 
-  // Render mobile card view
-  const renderMobileCard = (member: TeamMember, isSelected: boolean, toggleSelect: () => void) => (
-    <Card key={member.id} className="overflow-hidden">
-      <div className="flex items-center p-4 border-b">
-        <Checkbox checked={isSelected} onCheckedChange={toggleSelect} className="mr-3" />
-        <Avatar className="h-10 w-10 mr-3">
-          {member.avatar ? (
-            <AvatarImage src={member.avatar} alt={member.name} />
-          ) : (
-            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-          )}
+  const mobileCard: DataTableCardConfig<TeamMember> = {
+    primary: {
+      title: (member) => member.name,
+      subtitle: (member) => member.role,
+      avatar: (member) => (
+        <Avatar>
+          <AvatarImage src={member.avatar} alt={member.name} />
+          <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="flex-1">
-          <div className="flex items-center">
-            <h3 className="font-medium">{member.name}</h3>
-            {member.isAdmin && <Shield className="ml-2 h-4 w-4 text-blue-500" />}
-          </div>
-          <p className="text-sm text-muted-foreground">{member.email}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => console.log("View profile", member)}>
-              <User className="mr-2 h-4 w-4" />
-              View Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Send message to", member)}>
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Send Message
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Edit", member)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Member
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log("Delete", member)} className="text-destructive">
-              <Trash className="mr-2 h-4 w-4" />
-              Remove Member
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="grid grid-cols-2 p-4 gap-y-2 text-sm">
-        <div className="flex items-center gap-2">
-          <Briefcase className="h-4 w-4 text-muted-foreground" />
-          <span>{member.role}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Award className="h-4 w-4 text-muted-foreground" />
-          <span>{member.department}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Phone className="h-4 w-4 text-muted-foreground" />
-          <span>{member.phone}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-muted-foreground" />
-          <span>{member.location}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span>{new Date(member.joinDate).toLocaleDateString()}</span>
-        </div>
-        <div>{getStatusBadge(member.status)}</div>
-      </div>
-    </Card>
-  )
+      )
+    },
+    fields: [
+      {
+        label: "Department",
+        value: (member) => member.department
+      },
+      {
+        label: "Email",
+        value: (member) => member.email,
+        className: "text-sm text-muted-foreground"
+      },
+      {
+        label: "Status",
+        value: (member) => getStatusBadge(member.status)
+      },
+      {
+        label: "Role",
+        value: (member) => (
+          <Badge variant="outline" className="font-normal">
+            {member.isAdmin ? "Admin" : "Member"}
+          </Badge>
+        )
+      }
+    ],
+    actions: [
+      {
+        label: "Edit member",
+        icon: <Edit className="mr-2 h-4 w-4" />,
+        onClick: (member) => console.log("Edit", member)
+      },
+      {
+        label: "Remove member",
+        icon: <Trash className="mr-2 h-4 w-4" />,
+        onClick: (member) => console.log("Remove", member),
+        variant: "destructive"
+      }
+    ]
+  }
 
   return (
     <div className="space-y-6">
@@ -473,6 +449,7 @@ const TeamPage = () => {
         </Dialog>
       </div>
 
+
       <DataTable
         data={teamMembers}
         columns={columns}
@@ -481,9 +458,8 @@ const TeamPage = () => {
         bulkActions={bulkActions}
         searchPlaceholder="Search team members..."
         getRowId={(member) => member.id}
-        renderMobileCard={renderMobileCard}
+        mobileCard={mobileCard}
       />
-
     </div>
   )
 }

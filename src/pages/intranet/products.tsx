@@ -26,6 +26,7 @@ import {
 import { Card } from "@/components/ui/card"
 import { Plus, Edit, Trash, Copy, Eye, CheckCircle2, XCircle, AlertCircle, MoreHorizontal } from "lucide-react"
 import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
+import { DataTableCardConfig } from "@/components/data-table/types"
 
 // Product data type
 interface Product {
@@ -238,67 +239,55 @@ const ProductsPage = () => {
     },
   ]
 
-  // Render mobile card view
-  const renderMobileCard = (product: Product, isSelected: boolean, toggleSelect: () => void) => (
-    <Card key={product.id} className="overflow-hidden">
-      <div className="flex items-center p-4 border-b">
-        <Checkbox checked={isSelected} onCheckedChange={toggleSelect} className="mr-3" />
-        <div className="flex-1">
-          <h3 className="font-medium">{product.name}</h3>
-          <p className="text-sm text-muted-foreground">{product.sku}</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => console.log("View", product)}>
-              <Eye className="mr-2 h-4 w-4" />
-              View details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Edit", product)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit product
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Duplicate", product)}>
-              <Copy className="mr-2 h-4 w-4" />
-              Duplicate
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log("Delete", product)} className="text-destructive">
-              <Trash className="mr-2 h-4 w-4" />
-              Delete product
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="grid grid-cols-2 p-4 gap-y-2 text-sm">
-        <div>
-          <span className="text-muted-foreground">Category:</span>
-        </div>
-        <div>{product.category}</div>
-
-        <div>
-          <span className="text-muted-foreground">Price:</span>
-        </div>
-        <div className="font-medium">${product.price.toFixed(2)}</div>
-
-        <div>
-          <span className="text-muted-foreground">Stock:</span>
-        </div>
-        <div>{product.stock}</div>
-
-        <div>
-          <span className="text-muted-foreground">Status:</span>
-        </div>
-        <div>{getStatusBadge(product.status)}</div>
-      </div>
-    </Card>
-  )
+  const mobileCard: DataTableCardConfig<Product> = {
+    primary: {
+      title: (product) => product.name,
+      subtitle: (product) => product.sku
+    },
+    fields: [
+      {
+        label: "Category",
+        value: (product) => product.category
+      },
+      {
+        label: "Price",
+        value: (product) => `$${product.price.toFixed(2)}`,
+        className: "font-medium"
+      },
+      {
+        label: "Stock",
+        value: (product) => product.stock.toString(),
+        className: "text-right"
+      },
+      {
+        label: "Status",
+        value: (product) => getStatusBadge(product.status)
+      }
+    ],
+    actions: [
+      {
+        label: "View details",
+        icon: <Eye className="mr-2 h-4 w-4" />,
+        onClick: (product) => console.log("View", product)
+      },
+      {
+        label: "Edit product",
+        icon: <Edit className="mr-2 h-4 w-4" />,
+        onClick: (product) => console.log("Edit", product)
+      },
+      {
+        label: "Duplicate",
+        icon: <Copy className="mr-2 h-4 w-4" />,
+        onClick: (product) => console.log("Duplicate", product)
+      },
+      {
+        label: "Delete product",
+        icon: <Trash className="mr-2 h-4 w-4" />,
+        onClick: (product) => console.log("Delete", product),
+        variant: "destructive"
+      }
+    ]
+  }
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -368,7 +357,7 @@ const ProductsPage = () => {
         bulkActions={bulkActions}
         searchPlaceholder="Search products..."
         getRowId={(product) => product.id}
-        renderMobileCard={renderMobileCard}
+        mobileCard={mobileCard}
       />
 
     </div>

@@ -211,7 +211,6 @@ export function DataTable<T>({
         </div>
       </CardHeader>
       <CardContent>
-        console.log(filteredData)
         {isMobile && mobileCard ? (
           <div className="space-y-4">
             {filteredData.length === 0 ? (
