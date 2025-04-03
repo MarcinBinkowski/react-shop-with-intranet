@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -35,7 +35,11 @@ export function DataTable<T>({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
   const [selectedRows, setSelectedRows] = useState<(string | number)[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-
+  useEffect(() => {
+    console.log('Is Mobile:', isMobile)
+    console.log('Has Mobile Config:', Boolean(mobileCard))
+  }, [isMobile, mobileCard])
+  
   // Filter and sort data
   const filteredData = data
     .filter((row) => {
