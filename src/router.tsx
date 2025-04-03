@@ -5,8 +5,11 @@ import IntranetLayout from "./layouts/intranet-layout"
 import ProductsPage from "./pages/intranet/products"
 import LoginPage from "./pages/login"
 import { UserProvider } from "./context/user-context"
-import Dashboard from "./pages/intranet/dashboard"
+// import Dashboard from "./pages/intranet/dashboard"
 import Index from "./pages/store"
+// import DocumentsPage from "./pages/intranet/documents"
+import CustomersPage from "./pages/intranet/customers"
+import DocumentsPage from "./pages/intranet/documents"
 
 const AppRoutes: React.FC = () => {
   return (
@@ -18,15 +21,11 @@ const AppRoutes: React.FC = () => {
         {/* <Route index element={<Dashboard />} /> */}
 
           <Route path="products" element={<ProductsPage />} />
-          <Route
-            path="documents"
-            element={
-              <div className="p-6">
-                <h1 className="text-2xl font-bold">Documents</h1>
-              </div>
-            }
-          />
-        <Route
+          <Route path="documents" element={<DocumentsPage />} />
+          <Route path="customers" element={<CustomersPage />} />
+
+
+        {/* <Route
             path="customers"
             element={
               <div className="p-6">
@@ -41,7 +40,7 @@ const AppRoutes: React.FC = () => {
                 <h1 className="text-2xl font-bold">Team</h1>
               </div>
             }
-          />
+          /> */}
         </Route>
 
         <Route path="/" element={<StoreLayout />}>
