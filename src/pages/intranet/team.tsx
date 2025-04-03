@@ -42,7 +42,6 @@ import {
   Users,
 } from "lucide-react"
 import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
-import { DataMetrics } from "@/components/data-table/data-metrics"
 
 // Team Member data type
 interface TeamMember {
@@ -306,6 +305,11 @@ const TeamPage = () => {
   // Define row actions
   const rowActions = [
     {
+        label: "Edit Member",
+        icon: <Edit className="h-4 w-4" />,
+        onClick: (product: TeamMember) => console.log("Edit", product),
+    },
+    {
       label: "Remove Member",
       icon: <Trash className="h-4 w-4" />,
       onClick: (member: TeamMember) => console.log("Delete", member),
@@ -396,38 +400,6 @@ const TeamPage = () => {
     </Card>
   )
 
-  // Define metrics for the dashboard
-  const metrics = [
-    {
-      title: "Team Members",
-      value: teamMembers.length,
-      description: `${teamMembers.filter((m) => m.status === "Active").length} active members`,
-      icon: <Users className="h-5 w-5" />,
-    },
-    {
-      title: "Departments",
-      value: new Set(teamMembers.map((m) => m.department)).size,
-      description: `Most members: ${
-        Object.entries(
-          teamMembers.reduce(
-            (acc, member) => {
-              acc[member.department] = (acc[member.department] || 0) + 1
-              return acc
-            },
-            {} as Record<string, number>,
-          ),
-        ).sort((a, b) => b[1] - a[1])[0][0]
-      }`,
-      icon: <Briefcase className="h-5 w-5" />,
-    },
-    {
-      title: "Admin Users",
-      value: teamMembers.filter((m) => m.isAdmin).length,
-      description: `${((teamMembers.filter((m) => m.isAdmin).length / teamMembers.length) * 100).toFixed(1)}% of team`,
-      icon: <Shield className="h-5 w-5" />,
-    },
-  ]
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -512,7 +484,6 @@ const TeamPage = () => {
         renderMobileCard={renderMobileCard}
       />
 
-      <DataMetrics metrics={metrics} />
     </div>
   )
 }

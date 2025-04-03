@@ -349,7 +349,7 @@ export function DataTable<T>({
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex items-center justify-between">
+      {/* <CardFooter className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           Showing {filteredData.length} of {data.length} items
         </div>
@@ -361,7 +361,7 @@ export function DataTable<T>({
             Next
           </Button>
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   )
 }

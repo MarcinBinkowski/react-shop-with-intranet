@@ -40,8 +40,6 @@ import {
   Edit,
 } from "lucide-react"
 import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
-import { DataMetrics } from "@/components/data-table/data-metrics"
-
 // Document data type
 interface Document {
   id: number
@@ -346,40 +344,6 @@ const DocumentsPage = () => {
     </Card>
   )
 
-  // Define metrics for the dashboard
-  const metrics = [
-    {
-      title: "Document Categories",
-      value: new Set(documents.map((d) => d.category)).size,
-      description: `Most common: ${
-        Object.entries(
-          documents.reduce(
-            (acc, doc) => {
-              acc[doc.category] = (acc[doc.category] || 0) + 1
-              return acc
-            },
-            {} as Record<string, number>,
-          ),
-        ).sort((a, b) => b[1] - a[1])[0][0]
-      }`,
-    },
-    {
-      title: "Document Types",
-      value: new Set(documents.map((d) => d.type)).size,
-      description: `${documents.filter((d) => d.type === "PDF").length} PDFs, ${documents.filter((d) => d.type !== "PDF").length} other`,
-    },
-    {
-      title: "Total Storage",
-      value: `${(
-        documents.reduce((sum, doc) => {
-          const size = Number.parseFloat(doc.size.split(" ")[0])
-          return sum + size
-        }, 0)
-      ).toFixed(1)} MB`,
-      description: `Across ${documents.length} documents`,
-    },
-  ]
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -460,8 +424,6 @@ const DocumentsPage = () => {
         getRowId={(document) => document.id}
         renderMobileCard={renderMobileCard}
       />
-
-      <DataMetrics metrics={metrics} />
     </div>
   )
 }

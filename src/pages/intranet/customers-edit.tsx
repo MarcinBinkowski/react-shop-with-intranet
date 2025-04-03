@@ -118,10 +118,7 @@ const CustomerEditPage = () => {
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, this would be an API call to update the customer
     console.log("Updating customer:", { id, ...formData })
-
-    // Show success message and navigate back
     alert("Customer updated successfully!")
     navigate("/customers")
   }

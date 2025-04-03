@@ -26,7 +26,6 @@ import {
 import { Card } from "@/components/ui/card"
 import { Plus, Edit, Trash, Copy, Eye, CheckCircle2, XCircle, AlertCircle, MoreHorizontal } from "lucide-react"
 import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
-import { DataMetrics } from "@/components/data-table/data-metrics"
 
 // Product data type
 interface Product {
@@ -300,41 +299,6 @@ const ProductsPage = () => {
       </div>
     </Card>
   )
-
-  // Define metrics for the dashboard
-  const metrics = [
-    {
-      title: "Total Products",
-      value: products.length,
-      description: `Across ${new Set(products.map((p) => p.category)).size} categories`,
-    },
-    {
-      title: "Stock Status",
-      value: `${products.filter((p) => p.status === "In Stock").length} In Stock`,
-      description: (
-        <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs">
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3 text-green-500" />
-            <span>In Stock: {products.filter((p) => p.status === "In Stock").length}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <AlertCircle className="h-3 w-3 text-yellow-500" />
-            <span>Low: {products.filter((p) => p.status === "Low Stock").length}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <XCircle className="h-3 w-3 text-red-500" />
-            <span>Out: {products.filter((p) => p.status === "Out of Stock").length}</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Total Value",
-      value: `$${products.reduce((sum, product) => sum + product.price * product.stock, 0).toFixed(2)}`,
-      description: "Based on current inventory",
-    },
-  ]
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -407,7 +371,6 @@ const ProductsPage = () => {
         renderMobileCard={renderMobileCard}
       />
 
-      <DataMetrics metrics={metrics} />
     </div>
   )
 }
