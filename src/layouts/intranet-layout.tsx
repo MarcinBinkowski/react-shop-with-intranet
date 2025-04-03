@@ -20,6 +20,19 @@ const intranetNavItems = [
         href: "/intranet/users",
         icon: <User className="h-4 w-4" />,
       },
+      {
+        name: "Invoices",
+        href: "/intranet/invoices",
+        icon: <FileText className="h-4 w-4" />,
+      },
+      {
+        name: "Orders",
+        href: "/intranet/orders",
+        icon: <Package className="h-4 w-4" />,
+      },
+      
+      
+      
 
     ],
   }

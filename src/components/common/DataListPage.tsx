@@ -116,7 +116,7 @@ export function DataListPage<T extends { id: string }>({
                     <SelectValue placeholder={`Filter by ${field.label.toLowerCase()}`} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All {field.label}s</SelectItem>
+                    <SelectItem value="all">Show All</SelectItem>
                     {field.options.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}

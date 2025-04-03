@@ -8,6 +8,8 @@ import { UserProvider } from "./context/user-context"
 import Index from "./pages/store"
 import UsersPage from "./pages/intranet/users"
 import ProductsPage from "./pages/intranet/products"
+import InvoicesPage from "./pages/intranet/invoices"
+import OrdersPage from "./pages/intranet/orders"
 // import DocumentsPage from "./pages/intranet/documents"
 
 
@@ -21,6 +23,8 @@ const AppRoutes: React.FC = () => {
         {/* <Route index element={<Dashboard />} /> */}
           <Route path="users" element={<UsersPage />} />
           <Route path="products" element={<ProductsPage />} />
+          <Route path="invoices" element={<InvoicesPage />} />
+          <Route path="orders" element={<OrdersPage />} />
 
 
 
@@ -45,14 +49,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<StoreLayout />}>
           <Route index element={<Index />} />
           <Route path="products" element={<ProductsPage />} />
-          <Route
-            path="orders"
-            element={
-              <div className="p-6">
-                <h1 className="text-2xl font-bold">Orders</h1>
-              </div>
-            }
-          />
+          <Route path="orders" element={<OrdersPage />} />
         </Route>
         {/* 404 Route */}
         <Route path="*" element={<Navigate to="/" replace />} />

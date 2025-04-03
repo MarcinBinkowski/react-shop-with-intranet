@@ -16,10 +16,19 @@ import { Textarea } from "@/components/ui/textarea"
 interface Invoice {
   id: string
   invoiceNumber: string
-  clientName: string
-  amount: number
-  status: 'paid' | 'pending' | 'overdue'
+  customerName: string
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  issueDate: string
   dueDate: string
+  items: {
+    description: string
+    quantity: number
+    unitPrice: number
+    total: number
+  }[]
+  subtotal: number
+  tax: number
+  total: number
   notes?: string
 }
 
@@ -27,29 +36,32 @@ const mockInvoices: Invoice[] = [
   {
     id: '1',
     invoiceNumber: 'INV-2024-001',
-    clientName: 'Acme Corp',
-    amount: 1500.00,
+    customerName: 'John Smith',
     status: 'paid',
-    dueDate: '2024-04-15',
-    notes: 'Website development services'
+    issueDate: '2024-03-15',
+    dueDate: '2024-04-14',
+    items: [
+      { description: 'Web Development Services', quantity: 1, unitPrice: 1500, total: 1500 },
+      { description: 'Hosting (Monthly)', quantity: 12, unitPrice: 29.99, total: 359.88 }
+    ],
+    subtotal: 1859.88,
+    tax: 371.98,
+    total: 2231.86,
+    notes: 'Thank you for your business!'
   },
   {
     id: '2',
     invoiceNumber: 'INV-2024-002',
-    clientName: 'TechStart Inc',
-    amount: 2800.50,
-    status: 'pending',
-    dueDate: '2024-04-30',
-    notes: 'Monthly maintenance'
-  },
-  {
-    id: '3',
-    invoiceNumber: 'INV-2024-003',
-    clientName: 'Global Solutions',
-    amount: 950.00,
-    status: 'overdue',
-    dueDate: '2024-03-25',
-    notes: 'Consulting services'
+    customerName: 'Jane Doe',
+    status: 'sent',
+    issueDate: '2024-04-01',
+    dueDate: '2024-05-01',
+    items: [
+      { description: 'UI/UX Design', quantity: 1, unitPrice: 800, total: 800 }
+    ],
+    subtotal: 800,
+    tax: 160,
+    total: 960
   },
 ]
 
@@ -61,16 +73,18 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
   const [isEditing, setIsEditing] = useState(false)
   const [editedInvoice, setEditedInvoice] = useState(invoice)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     onUpdate(editedInvoice)
     setIsEditing(false)
   }
 
   const statusColors = {
+    draft: 'text-slate-600',
+    sent: 'text-blue-600',
     paid: 'text-green-600',
-    pending: 'text-yellow-600',
-    overdue: 'text-red-600'
+    overdue: 'text-red-600',
+    cancelled: 'text-red-600'
   }
 
   return (
@@ -81,14 +95,7 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
         onDelete={() => onDelete(invoice.id)}
       >
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Client:</span> {invoice.clientName}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Amount:</span> ${invoice.amount.toFixed(2)}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Due Date:</span>{' '}
-          {new Date(invoice.dueDate).toLocaleDateString()}
+          <span className="font-semibold">Customer:</span> {invoice.customerName}
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Status:</span>{' '}
@@ -96,9 +103,33 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
             {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
           </span>
         </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Issue Date:</span>{' '}
+          {new Date(invoice.issueDate).toLocaleDateString()}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Due Date:</span>{' '}
+          {new Date(invoice.dueDate).toLocaleDateString()}
+        </p>
+        <div className="text-sm text-muted-foreground mt-2">
+          <p className="font-semibold">Items:</p>
+          <ul className="list-disc list-inside pl-2">
+            {invoice.items.map((item, index) => (
+              <li key={index}>
+                {item.description} - {item.quantity}x ${item.unitPrice.toFixed(2)} = ${item.total.toFixed(2)}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="text-sm text-muted-foreground mt-2">
+          <p><span className="font-semibold">Subtotal:</span> ${invoice.subtotal.toFixed(2)}</p>
+          <p><span className="font-semibold">Tax:</span> ${invoice.tax.toFixed(2)}</p>
+          <p className="font-semibold">Total: ${invoice.total.toFixed(2)}</p>
+        </div>
         {invoice.notes && (
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Notes:</span> {invoice.notes}
+          <p className="text-sm text-muted-foreground mt-2">
+            <span className="font-semibold">Notes:</span><br />
+            {invoice.notes}
           </p>
         )}
       </DataCard>
@@ -114,38 +145,16 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
               <Input
                 id="edit-invoice-number"
                 value={editedInvoice.invoiceNumber}
-                onChange={(e) => setEditedInvoice({ ...editedInvoice, invoiceNumber: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, invoiceNumber: e.target.value })}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-client">Client Name</Label>
+              <Label htmlFor="edit-customer">Customer Name</Label>
               <Input
-                id="edit-client"
-                value={editedInvoice.clientName}
-                onChange={(e) => setEditedInvoice({ ...editedInvoice, clientName: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-amount">Amount</Label>
-              <Input
-                id="edit-amount"
-                type="number"
-                min="0"
-                step="0.01"
-                value={editedInvoice.amount}
-                onChange={(e) => setEditedInvoice({ ...editedInvoice, amount: parseFloat(e.target.value) || 0 })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-due-date">Due Date</Label>
-              <Input
-                id="edit-due-date"
-                type="date"
-                value={editedInvoice.dueDate}
-                onChange={(e) => setEditedInvoice({ ...editedInvoice, dueDate: e.target.value })}
+                id="edit-customer"
+                value={editedInvoice.customerName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, customerName: e.target.value })}
                 required
               />
             </div>
@@ -159,18 +168,40 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="overdue">Overdue</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-issue-date">Issue Date</Label>
+              <Input
+                id="edit-issue-date"
+                type="date"
+                value={editedInvoice.issueDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, issueDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-due-date">Due Date</Label>
+              <Input
+                id="edit-due-date"
+                type="date"
+                value={editedInvoice.dueDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, dueDate: e.target.value })}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-notes">Notes</Label>
               <Textarea
                 id="edit-notes"
                 value={editedInvoice.notes || ''}
-                onChange={(e) => setEditedInvoice({ ...editedInvoice, notes: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditedInvoice({ ...editedInvoice, notes: e.target.value })}
                 placeholder="Add notes here..."
               />
             </div>
@@ -188,14 +219,18 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newInvoice, setNewInvoice] = useState<Omit<Invoice, 'id'>>({
-    invoiceNumber: \`INV-\${new Date().getFullYear()}-\${String(mockInvoices.length + 1).padStart(3, '0')}\`,
-    clientName: '',
-    amount: 0,
-    status: 'pending',
-    dueDate: new Date().toISOString().split('T')[0],
+    invoiceNumber: `INV-${new Date().getFullYear()}-${String(mockInvoices.length + 1).padStart(3, '0')}`,
+    customerName: '',
+    status: 'draft',
+    issueDate: new Date().toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    items: [],
+    subtotal: 0,
+    tax: 0,
+    total: 0
   })
 
-  const handleCreateInvoice = (e: React.FormEvent) => {
+  const handleCreateInvoice = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const invoice = {
       ...newInvoice,
@@ -204,11 +239,15 @@ export default function InvoicesPage() {
     setInvoices([...invoices, invoice])
     setIsCreateDialogOpen(false)
     setNewInvoice({
-      invoiceNumber: \`INV-\${new Date().getFullYear()}-\${String(invoices.length + 2).padStart(3, '0')}\`,
-      clientName: '',
-      amount: 0,
-      status: 'pending',
-      dueDate: new Date().toISOString().split('T')[0],
+      invoiceNumber: `INV-${new Date().getFullYear()}-${String(invoices.length + 2).padStart(3, '0')}`,
+      customerName: '',
+      status: 'draft',
+      issueDate: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      items: [],
+      subtotal: 0,
+      tax: 0,
+      total: 0
     })
   }
 
@@ -227,18 +266,21 @@ export default function InvoicesPage() {
       name: 'status',
       label: 'Status',
       options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Sent', value: 'sent' },
         { label: 'Paid', value: 'paid' },
-        { label: 'Pending', value: 'pending' },
         { label: 'Overdue', value: 'overdue' },
+        { label: 'Cancelled', value: 'cancelled' },
       ]
     }
   ]
 
   const sortFields = [
     { label: 'Invoice Number', value: 'invoiceNumber' },
-    { label: 'Client Name', value: 'clientName' },
-    { label: 'Amount', value: 'amount' },
+    { label: 'Customer Name', value: 'customerName' },
+    { label: 'Issue Date', value: 'issueDate' },
     { label: 'Due Date', value: 'dueDate' },
+    { label: 'Total', value: 'total' },
   ]
 
   return (
@@ -258,7 +300,7 @@ export default function InvoicesPage() {
         sortFields={sortFields}
         searchPlaceholder="Search invoices..."
         onCreateClick={() => setIsCreateDialogOpen(true)}
-        searchFields={['invoiceNumber', 'clientName']}
+        searchFields={['invoiceNumber', 'customerName']}
       />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -272,38 +314,16 @@ export default function InvoicesPage() {
               <Input
                 id="create-invoice-number"
                 value={newInvoice.invoiceNumber}
-                onChange={(e) => setNewInvoice({ ...newInvoice, invoiceNumber: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, invoiceNumber: e.target.value })}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-client">Client Name</Label>
+              <Label htmlFor="create-customer">Customer Name</Label>
               <Input
-                id="create-client"
-                value={newInvoice.clientName}
-                onChange={(e) => setNewInvoice({ ...newInvoice, clientName: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-amount">Amount</Label>
-              <Input
-                id="create-amount"
-                type="number"
-                min="0"
-                step="0.01"
-                value={newInvoice.amount}
-                onChange={(e) => setNewInvoice({ ...newInvoice, amount: parseFloat(e.target.value) || 0 })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-due-date">Due Date</Label>
-              <Input
-                id="create-due-date"
-                type="date"
-                value={newInvoice.dueDate}
-                onChange={(e) => setNewInvoice({ ...newInvoice, dueDate: e.target.value })}
+                id="create-customer"
+                value={newInvoice.customerName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, customerName: e.target.value })}
                 required
               />
             </div>
@@ -317,18 +337,40 @@ export default function InvoicesPage() {
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="sent">Sent</SelectItem>
                   <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="overdue">Overdue</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-issue-date">Issue Date</Label>
+              <Input
+                id="create-issue-date"
+                type="date"
+                value={newInvoice.issueDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, issueDate: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-due-date">Due Date</Label>
+              <Input
+                id="create-due-date"
+                type="date"
+                value={newInvoice.dueDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, dueDate: e.target.value })}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-notes">Notes</Label>
               <Textarea
                 id="create-notes"
                 value={newInvoice.notes || ''}
-                onChange={(e) => setNewInvoice({ ...newInvoice, notes: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewInvoice({ ...newInvoice, notes: e.target.value })}
                 placeholder="Add notes here..."
               />
             </div>
@@ -340,4 +382,4 @@ export default function InvoicesPage() {
       </Dialog>
     </>
   )
-} 
+}
