@@ -173,9 +173,9 @@ const TeamPage = () => {
       sortable: true,
       cell: (member: TeamMember) => (
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className="h-8 w-8 flex items-center justify-center rounded-full bg-muted">
+            <User className="h-4 w-4 text-muted-foreground" />
+          </div>
           <div>
             <div className="font-medium">{member.name}</div>
             <div className="text-sm text-muted-foreground">{member.email}</div>

@@ -34,6 +34,7 @@ import {
   MoreHorizontal,
   Building2,
   Plus,
+  User,
 } from "lucide-react";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTableColumn, DataTableAction, DataTableFilter } from "@/components/data-table/types";
@@ -174,9 +175,9 @@ const CustomersPage = () => {
       sortable: true,
       cell: (customer: Customer) => (
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className="h-8 w-8 flex items-center justify-center rounded-full bg-muted">
+            <User className="h-4 w-4 text-muted-foreground" />
+          </div>
           <div>
             <div className="font-medium">{customer.name}</div>
             <div className="text-sm text-muted-foreground">{customer.email}</div>

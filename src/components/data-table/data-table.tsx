@@ -115,7 +115,7 @@ export function DataTable<T extends Record<string, any>>({
                         key={option.value}
                         checked={(activeFilters[filter.id] || []).includes(option.value)}
                         onCheckedChange={() => toggleFilter(filter.id, option.value)}
-                        className="px-2 py-1.5"
+                        className="flex items-center gap-2"
                       >
                         {option.label}
                       </DropdownMenuCheckboxItem>

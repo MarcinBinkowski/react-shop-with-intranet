@@ -28,7 +28,9 @@ export function DataTableBody<T>({
         <TableRow key={getRowId(row)}>
           {columns.map((column) => (
             <TableCell key={column.id}>
-              {column.cell ? column.cell(row) : String(row[column.id as keyof T] ?? '')}
+              <div className="[&>div>svg]:hidden [&>div>svg]:sm:inline-block [&>div>.Avatar]:hidden [&>div>.Avatar]:sm:inline-flex [&>div>div[role=img]]:hidden [&>div>div[role=img]]:sm:inline-flex">
+                {column.cell ? column.cell(row) : String(row[column.id as keyof T] ?? '')}
+              </div>
             </TableCell>
           ))}
           {rowActions && rowActions.length > 0 && (
