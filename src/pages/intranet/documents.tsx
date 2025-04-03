@@ -39,8 +39,8 @@ import {
   MoreHorizontal,
   Edit,
 } from "lucide-react"
-import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
-import { DataTableCardConfig } from "@/components/data-table/types"
+import { DataTable } from "@/components/data-table/data-table"
+import { DataTableCardConfig, DataTableColumn, DataTableFilter } from "@/components/data-table/types"
 // Document data type
 interface Document {
   id: number

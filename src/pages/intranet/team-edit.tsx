@@ -22,7 +22,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-// Sample team member data (same as in team.tsx)
 const teamMembers = [
   {
     id: 1,
@@ -36,13 +35,10 @@ const teamMembers = [
     status: "Active",
     isAdmin: true,
   },
-  // ... other team members
 ]
 
-// Available departments
 const departments = ["Product", "Engineering", "Design", "Marketing", "Sales", "Finance", "HR"]
 
-// Available statuses
 const statuses = ["Active", "Inactive", "On Leave"]
 
 const TeamEditPage = () => {

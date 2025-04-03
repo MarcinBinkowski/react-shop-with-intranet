@@ -39,10 +39,8 @@ import {
 } from "lucide-react";
 import {
   DataTable,
-  type DataTableColumn,
-  type DataTableFilter,
 } from "@/components/data-table/data-table";
-import { DataTableCardConfig } from "@/components/data-table/types";
+import { DataTableCardConfig, DataTableColumn, DataTableFilter } from "@/components/data-table/types";
 
 // Customer data type
 interface Customer {

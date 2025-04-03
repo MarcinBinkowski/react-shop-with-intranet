@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Card } from "@/components/ui/card"
 import { Plus, Edit, Trash, Copy, Eye, CheckCircle2, XCircle, AlertCircle, MoreHorizontal } from "lucide-react"
-import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
-import { DataTableCardConfig } from "@/components/data-table/types"
+import { DataTable,  } from "@/components/data-table/data-table"
+import { DataTableCardConfig, DataTableColumn, DataTableFilter } from "@/components/data-table/types"
 
 // Product data type
 interface Product {
