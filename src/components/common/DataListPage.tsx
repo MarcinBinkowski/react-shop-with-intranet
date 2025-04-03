@@ -87,7 +87,7 @@ export function DataListPage<T extends { id: string }>({
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{title}</h1>
         <Button onClick={onCreateClick}>
-          Add New {title.slice(0, -1)} {/* Removes 's' from title */}
+          Add New {title.slice(0, -1)} 
         </Button>
       </div>
 

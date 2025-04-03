@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { DataCard } from '@/components/common/DataCard'
 import {
   Dialog,
   DialogContent,
@@ -11,6 +10,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 
 interface Product {
   id: string
@@ -49,44 +49,124 @@ const mockProducts: Product[] = [
   },
 ]
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, onDelete, onUpdate }: { 
+  product: Product
+  onDelete: (id: string) => void
+  onUpdate: (product: Product) => void 
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedProduct, setEditedProduct] = useState(product)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onUpdate(editedProduct)
+    setIsEditing(false)
+  }
+
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-bold">{product.name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Category:</span> {product.category}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Price:</span> ${product.price.toFixed(2)}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Stock:</span> {product.stock}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Status:</span>{' '}
-            <span className={
-              product.status === 'in-stock' ? 'text-green-600' :
-              product.status === 'low-stock' ? 'text-yellow-600' :
-              'text-red-600'
-            }>
-              {product.status.replace('-', ' ')}
-            </span>
-          </p>
-          <div className="flex gap-2 pt-4">
-            <Button variant="outline" size="sm" className="flex-1">
-              Edit
+    <>
+      <DataCard
+        title={product.name}
+        onEdit={() => setIsEditing(true)}
+        onDelete={() => onDelete(product.id)}
+      >
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Category:</span> {product.category}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Price:</span> ${product.price.toFixed(2)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Stock:</span> {product.stock}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Status:</span>{' '}
+          <span className={
+            product.status === 'in-stock' ? 'text-green-600' :
+            product.status === 'low-stock' ? 'text-yellow-600' :
+            'text-red-600'
+          }>
+            {product.status.replace('-', ' ')}
+          </span>
+        </p>
+      </DataCard>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                value={editedProduct.name}
+                onChange={(e) => setEditedProduct({ ...editedProduct, name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-category">Category</Label>
+              <Select
+                value={editedProduct.category}
+                onValueChange={(value) => setEditedProduct({ ...editedProduct, category: value })}
+              >
+                <SelectTrigger id="edit-category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Electronics">Electronics</SelectItem>
+                  <SelectItem value="Accessories">Accessories</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-price">Price</Label>
+              <Input
+                id="edit-price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={editedProduct.price}
+                onChange={(e) => setEditedProduct({ ...editedProduct, price: parseFloat(e.target.value) || 0 })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-stock">Stock</Label>
+              <Input
+                id="edit-stock"
+                type="number"
+                min="0"
+                value={editedProduct.stock}
+                onChange={(e) => setEditedProduct({ ...editedProduct, stock: parseInt(e.target.value) || 0 })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-status">Status</Label>
+              <Select
+                value={editedProduct.status}
+                onValueChange={(value: Product['status']) => setEditedProduct({ ...editedProduct, status: value })}
+              >
+                <SelectTrigger id="edit-status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="in-stock">In Stock</SelectItem>
+                  <SelectItem value="low-stock">Low Stock</SelectItem>
+                  <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" className="w-full">
+              Save Changes
             </Button>
-            <Button variant="destructive" size="sm" className="flex-1">
-              Delete
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
@@ -116,6 +196,16 @@ export default function ProductsPage() {
       stock: 0,
       status: 'in-stock'
     })
+  }
+
+  const handleDeleteProduct = (productId: string) => {
+    setProducts(products.filter(product => product.id !== productId))
+  }
+
+  const handleUpdateProduct = (updatedProduct: Product) => {
+    setProducts(products.map(product => 
+      product.id === updatedProduct.id ? updatedProduct : product
+    ))
   }
 
   const filterFields = [
@@ -149,7 +239,14 @@ export default function ProductsPage() {
       <DataListPage<Product>
         title="Products"
         items={products}
-        renderItem={(product) => <ProductCard key={product.id} product={product} />}
+        renderItem={(product) => (
+          <ProductCard 
+            key={product.id} 
+            product={product}
+            onDelete={handleDeleteProduct}
+            onUpdate={handleUpdateProduct}
+          />
+        )}
         filterFields={filterFields}
         sortFields={sortFields}
         searchPlaceholder="Search products..."

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { DataCard } from '@/components/common/DataCard'
 import {
   Dialog,
   DialogContent,
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 
 interface User {
   id: string
@@ -64,88 +64,73 @@ function UserCard({ user, onDelete, onUpdate }: {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-bold">{user.name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Email:</span> {user.email}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Role:</span> {user.role}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Department:</span> {user.department}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Joined:</span>{' '}
-            {new Date(user.joinedDate).toLocaleDateString()}
-          </p>
-          <div className="flex gap-2 pt-4">
-            <Dialog open={isEditing} onOpenChange={setIsEditing}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1">
-                  Edit
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit User</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={editedUser.name}
-                      onChange={(e) => setEditedUser({ ...editedUser, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={editedUser.email}
-                      onChange={(e) => setEditedUser({ ...editedUser, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
-                    <Input
-                      id="role"
-                      value={editedUser.role}
-                      onChange={(e) => setEditedUser({ ...editedUser, role: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="department">Department</Label>
-                    <Input
-                      id="department"
-                      value={editedUser.department}
-                      onChange={(e) => setEditedUser({ ...editedUser, department: e.target.value })}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full">
-                    Save Changes
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => onDelete(user.id)}
-              className="flex-1"
-            >
-              Delete
+    <>
+      <DataCard
+        title={user.name}
+        onEdit={() => setIsEditing(true)}
+        onDelete={() => onDelete(user.id)}
+      >
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Email:</span> {user.email}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Role:</span> {user.role}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Department:</span> {user.department}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Joined:</span>{' '}
+          {new Date(user.joinedDate).toLocaleDateString()}
+        </p>
+      </DataCard>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={editedUser.name}
+                onChange={(e) => setEditedUser({ ...editedUser, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={editedUser.email}
+                onChange={(e) => setEditedUser({ ...editedUser, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Input
+                id="role"
+                value={editedUser.role}
+                onChange={(e) => setEditedUser({ ...editedUser, role: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Input
+                id="department"
+                value={editedUser.department}
+                onChange={(e) => setEditedUser({ ...editedUser, department: e.target.value })}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Save Changes
             </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

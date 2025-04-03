@@ -6,8 +6,8 @@ import LoginPage from "./pages/login"
 import { UserProvider } from "./context/user-context"
 // import Dashboard from "./pages/intranet/dashboard"
 import Index from "./pages/store"
-import UsersPage from "./pages/users"
-import ProductsPage from "./pages/products"
+import UsersPage from "./pages/intranet/users"
+import ProductsPage from "./pages/intranet/products"
 // import DocumentsPage from "./pages/intranet/documents"
 
 
