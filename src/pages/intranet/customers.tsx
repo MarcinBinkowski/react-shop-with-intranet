@@ -88,7 +88,6 @@ const customers: Customer[] = [
     email: "emily.d@example.com",
     phone: "+1 (555) 456-7890",
     location: "Houston, TX",
-    totalOrders: 15,
     totalSpent: 1876.3,
     status: "Active",
   },

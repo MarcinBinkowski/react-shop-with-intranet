@@ -11,4 +11,5 @@ export interface DataTableCardConfig<T> {
     className?: string
   }[]
   actions?: DataTableAction<T>[]
+  render: (row: T, isSelected: boolean, toggleSelect: () => void) => React.ReactNode
 }

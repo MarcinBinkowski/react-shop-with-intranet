@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Filter, ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { DataTableCardConfig } from "./types"
 
 export interface DataTableColumn<T> {
   id: string
@@ -45,12 +46,12 @@ export interface DataTableAction<T> {
 export interface DataTableProps<T> {
   data: T[]
   columns: DataTableColumn<T>[]
+  mobileCard?: DataTableCardConfig<T>
   filters?: DataTableFilter<T>[]
   rowActions?: DataTableAction<T>[]
   bulkActions?: DataTableAction<T[]>[]
   searchPlaceholder?: string
   getRowId: (row: T) => string | number
-  renderMobileCard?: (row: T, isSelected: boolean, toggleSelect: () => void) => React.ReactNode
   renderRowMenu?: (row: T) => React.ReactNode
 }
 
@@ -62,7 +63,7 @@ export function DataTable<T>({
   bulkActions = [],
   searchPlaceholder = "Search...",
   getRowId,
-  renderMobileCard,
+  mobileCard,
   renderRowMenu,
 }: DataTableProps<T>) {
   const isMobile = useIsMobile()
@@ -248,7 +249,7 @@ export function DataTable<T>({
         </div>
       </CardHeader>
       <CardContent>
-        {isMobile && renderMobileCard ? (
+        {isMobile && mobileCard ? (
           <div className="space-y-4">
             {filteredData.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No items found.</div>
@@ -256,7 +257,7 @@ export function DataTable<T>({
               filteredData.map((row) => {
                 const rowId = getRowId(row)
                 const isSelected = selectedRows.includes(rowId)
-                return renderMobileCard(row, isSelected, () => toggleSelectRow(rowId))
+                return mobileCard.render(row, isSelected, () => toggleSelectRow(rowId))
               })
             )}
           </div>
