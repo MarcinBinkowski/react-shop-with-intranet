@@ -270,68 +270,7 @@ const ProductsPage = () => {
           <h1 className="text-2xl font-bold tracking-tight">Products</h1>
           <p className="text-muted-foreground">Manage your product inventory</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="relative w-full sm:w-64 md:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="w-full pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filter
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("Furniture")}>Furniture</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("Electronics")}>Electronics</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("Stationery")}>Stationery</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setSelectedStatus(null)}>All Statuses</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedStatus("In Stock")}>In Stock</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedStatus("Low Stock")}>Low Stock</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedStatus("Out of Stock")}>Out of Stock</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <ArrowUpDown className="mr-2 h-4 w-4" />
-                  Sort
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[160px]">
-                <DropdownMenuItem onClick={() => handleSort("name")}>
-                  Name {sortField === "name" && (sortDirection === "asc" ? "↑" : "↓")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort("price")}>
-                  Price {sortField === "price" && (sortDirection === "asc" ? "↑" : "↓")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort("stock")}>
-                  Stock {sortField === "stock" && (sortDirection === "asc" ? "↑" : "↓")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {selectedProducts.length > 0 && (
-              <Button variant="outline" size="sm" className="text-destructive">
-                <Trash className="mr-2 h-4 w-4" />
-                Delete ({selectedProducts.length})
-              </Button>
-            )}
-          </div>
-        </div>
       </div>
 
       {isMobile ? (
