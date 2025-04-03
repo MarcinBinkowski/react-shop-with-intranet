@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { DataTableBody } from "./data-table-body"
 import { Button } from "@/components/ui/button"
-import { Filter, ArrowUpDown } from "lucide-react"
+import { Filter, ArrowUpDown, Search } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,49 +86,55 @@ export function DataTable<T extends Record<string, any>>({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder={searchPlaceholder}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
+    <div className="space-y-4 w-full">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={searchPlaceholder}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8 w-full"
+          />
+        </div>
         {filters && filters.length > 0 && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="ml-auto">
-                <Filter className="mr-2 h-4 w-4" />
-                Filters
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              {filters.map((filter) => (
-                <div key={filter.id} className="px-2 py-1.5">
-                  <div className="text-sm font-medium">{filter.label}</div>
-                  {filter.options.map((option) => (
-                    <DropdownMenuCheckboxItem
-                      key={option.value}
-                      checked={(activeFilters[filter.id] || []).includes(option.value)}
-                      onCheckedChange={() => toggleFilter(filter.id, option.value)}
-                    >
-                      {option.label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </div>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex w-full sm:w-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filters
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                {filters.map((filter) => (
+                  <div key={filter.id} className="border-b last:border-0">
+                    <div className="px-2 py-1.5 text-sm font-medium">{filter.label}</div>
+                    {filter.options.map((option) => (
+                      <DropdownMenuCheckboxItem
+                        key={option.value}
+                        checked={(activeFilters[filter.id] || []).includes(option.value)}
+                        onCheckedChange={() => toggleFilter(filter.id, option.value)}
+                        className="px-2 py-1.5"
+                      >
+                        {option.label}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </div>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
       </div>
-      <div className="rounded-md border">
-        <Table>
+      <div className="w-full rounded-md border overflow-x-auto">
+        <Table className="w-full min-w-full table-fixed">
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
                 <TableHead
                   key={column.id}
-                  className={column.sortable ? "cursor-pointer select-none" : ""}
+                  className={column.sortable ? "cursor-pointer select-none whitespace-nowrap" : "whitespace-nowrap"}
                   onClick={() => column.sortable && handleSort(column.id)}
                 >
                   <div className="flex items-center gap-2">
@@ -137,7 +143,7 @@ export function DataTable<T extends Record<string, any>>({
                       <ArrowUpDown className="h-4 w-4" />
                     )}
                     {sortColumn === column.id && (
-                      <span className="text-xs">
+                      <span className="text-xs text-muted-foreground">
                         {sortDirection === "asc" ? "↑" : "↓"}
                       </span>
                     )}
