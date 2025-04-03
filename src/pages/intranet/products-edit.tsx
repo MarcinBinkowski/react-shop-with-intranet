@@ -23,7 +23,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-// Sample product data (same as in products.tsx)
 const products = [
   {
     id: 1,
@@ -38,13 +37,10 @@ const products = [
     dimensions: { width: "26 inches", depth: "26 inches", height: "48 inches" },
     weight: "35 lbs",
   },
-  // ... other products
 ]
 
-// Available categories
 const categories = ["Furniture", "Electronics", "Stationery"]
 
-// Available statuses
 const statuses = ["In Stock", "Low Stock", "Out of Stock"]
 
 const ProductEditPage = () => {

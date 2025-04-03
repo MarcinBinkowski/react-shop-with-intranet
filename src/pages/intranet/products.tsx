@@ -217,19 +217,9 @@ const ProductsPage = () => {
   // Define row actions
   const rowActions = [
     {
-      label: "View details",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: (product: Product) => console.log("View", product),
-    },
-    {
       label: "Edit product",
       icon: <Edit className="h-4 w-4" />,
       onClick: (product: Product) => console.log("Edit", product),
-    },
-    {
-      label: "Duplicate",
-      icon: <Copy className="h-4 w-4" />,
-      onClick: (product: Product) => console.log("Duplicate", product),
     },
     {
       label: "Delete product",
