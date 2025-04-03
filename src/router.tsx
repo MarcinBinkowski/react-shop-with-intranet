@@ -11,6 +11,10 @@ import Index from "./pages/store"
 import CustomersPage from "./pages/intranet/customers"
 import DocumentsPage from "./pages/intranet/documents"
 import TeamPage from "./pages/intranet/team"
+import ProductEditPage from "./pages/intranet/products-edit"
+import DocumentEditPage from "./pages/intranet/documents-edit"
+import TeamEditPage from "./pages/intranet/team-edit"
+import CustomerEditPage from "./pages/intranet/customers-edit"
 
 const AppRoutes: React.FC = () => {
   return (
@@ -21,11 +25,14 @@ const AppRoutes: React.FC = () => {
         <Route path="/intranet" element={<IntranetLayout />}>
         {/* <Route index element={<Dashboard />} /> */}
 
-          <Route path="products" element={<ProductsPage />} />
+        <Route path="products" element={<ProductsPage />} />
+          <Route path="products/edit/:id" element={<ProductEditPage />} />
           <Route path="documents" element={<DocumentsPage />} />
-          <Route path="customers" element={<CustomersPage />} />
+          <Route path="documents/edit/:id" element={<DocumentEditPage />} />
           <Route path="team" element={<TeamPage />} />
-
+          <Route path="team/edit/:id" element={<TeamEditPage />} />
+          <Route path="customers" element={<CustomersPage />} />
+          <Route path="customers/edit/:id" element={<CustomerEditPage />} />
 
         {/* <Route
             path="customers"
