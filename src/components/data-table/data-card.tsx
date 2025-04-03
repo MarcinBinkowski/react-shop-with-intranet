@@ -1,14 +1,8 @@
 import type React from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { DataCardProps } from "./types"
 
-interface DataCardProps {
-  title: string
-  value: string | number
-  description?: string
-  icon?: React.ReactNode
-  className?: string
-}
 
 export function DataCard({ title, value, description, icon, className }: DataCardProps) {
   return (

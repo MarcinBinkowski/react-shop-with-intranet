@@ -42,6 +42,7 @@ import {
   type DataTableColumn,
   type DataTableFilter,
 } from "@/components/data-table/data-table";
+import { DataTableCardConfig } from "@/components/data-table/types";
 
 // Customer data type
 interface Customer {
@@ -292,6 +293,64 @@ const CustomersPage = () => {
       </div>
     </Card>
   );
+  const mobileCard: DataTableCardConfig<Customer> = {
+    primary: {
+      title: (customer) => customer.name,
+      subtitle: (customer) => customer.email,
+      avatar: (customer) => (
+        <Avatar className="h-10 w-10">
+          <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+      )
+    },
+    fields: [
+      {
+        label: "Phone",
+        value: (customer) => (
+          <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <span>{customer.phone}</span>
+          </div>
+        )
+      },
+      {
+        label: "Location",
+        value: (customer) => (
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span>{customer.location}</span>
+          </div>
+        )
+      },
+      {
+        label: "Status",
+        value: (customer) => getStatusBadge(customer.status)
+      }
+    ],
+    actions: [
+      {
+        label: "View details",
+        icon: <Eye className="mr-2 h-4 w-4" />,
+        onClick: (customer) => console.log("View", customer)
+      },
+      {
+        label: "Edit customer",
+        icon: <Edit className="mr-2 h-4 w-4" />,
+        onClick: (customer) => console.log("Edit", customer)
+      },
+      {
+        label: "Send email",
+        icon: <Mail className="mr-2 h-4 w-4" />,
+        onClick: (customer) => console.log("Email", customer)
+      },
+      {
+        label: "Delete customer",
+        icon: <Trash className="mr-2 h-4 w-4" />,
+        onClick: (customer) => console.log("Delete", customer),
+      }
+    ]
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -354,7 +413,7 @@ const CustomersPage = () => {
         bulkActions={bulkActions}
         searchPlaceholder="Search customers..."
         getRowId={(customer) => customer.id}
-        renderMobileCard={renderMobileCard}
+        mobileCard={mobileCard}
       />
     </div>
   );

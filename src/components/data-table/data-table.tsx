@@ -13,47 +13,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Filter, ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { DataTableCardConfig } from "./types"
+import { DataTableCardConfig, DataTableProps } from "./types"
+import { MobileCard } from "./mobile-card"
 
-export interface DataTableColumn<T> {
-  id: string
-  header: string
-  accessorKey: keyof T | ((row: T) => any)
-  cell?: (row: T) => React.ReactNode
-  enableSorting?: boolean
-  meta?: {
-    className?: string
-  }
-}
-
-export interface DataTableFilter<T> {
-  id: string
-  label: string
-  options: {
-    label: string
-    value: string
-    filter: (row: T) => boolean
-  }[]
-}
-
-export interface DataTableAction<T> {
-  label: string
-  icon?: React.ReactNode
-  onClick: (row: T) => void
-  className?: string
-}
-
-export interface DataTableProps<T> {
-  data: T[]
-  columns: DataTableColumn<T>[]
-  mobileCard?: DataTableCardConfig<T>
-  filters?: DataTableFilter<T>[]
-  rowActions?: DataTableAction<T>[]
-  bulkActions?: DataTableAction<T[]>[]
-  searchPlaceholder?: string
-  getRowId: (row: T) => string | number
-  renderRowMenu?: (row: T) => React.ReactNode
-}
 
 export function DataTable<T>({
   data,
@@ -249,6 +211,7 @@ export function DataTable<T>({
         </div>
       </CardHeader>
       <CardContent>
+        console.log(filteredData)
         {isMobile && mobileCard ? (
           <div className="space-y-4">
             {filteredData.length === 0 ? (
@@ -257,7 +220,13 @@ export function DataTable<T>({
               filteredData.map((row) => {
                 const rowId = getRowId(row)
                 const isSelected = selectedRows.includes(rowId)
-                return mobileCard.render(row, isSelected, () => toggleSelectRow(rowId))
+                return ( <MobileCard
+                  key={rowId}
+                  row={row}
+                  config={mobileCard}
+                  isSelected={isSelected}
+                  onToggleSelect={() => toggleSelectRow(rowId)}
+                />)
               })
             )}
           </div>

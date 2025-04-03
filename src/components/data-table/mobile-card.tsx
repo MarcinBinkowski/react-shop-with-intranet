@@ -1,5 +1,13 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal } from "lucide-react"
 import type { DataTableCardConfig } from "./types"
 
 interface MobileCardProps<T> {
@@ -14,13 +22,16 @@ export function MobileCard<T>({ row, config, isSelected, onToggleSelect }: Mobil
     <Card>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <div>
-            <div className="font-medium">{config.primary.title(row)}</div>
-            {config.primary.subtitle && (
-              <div className="text-sm text-muted-foreground">
-                {config.primary.subtitle(row)}
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            {config.primary.avatar?.(row)}
+            <div>
+              <div className="font-medium">{config.primary.title(row)}</div>
+              {config.primary.subtitle && (
+                <div className="text-sm text-muted-foreground">
+                  {config.primary.subtitle(row)}
+                </div>
+              )}
+            </div>
           </div>
           <Checkbox checked={isSelected} onCheckedChange={onToggleSelect} />
         </div>
@@ -33,6 +44,30 @@ export function MobileCard<T>({ row, config, isSelected, onToggleSelect }: Mobil
           </div>
         ))}
       </CardContent>
+      {config.actions && config.actions.length > 0 && (
+        <CardFooter>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full">
+                <MoreHorizontal className="mr-2 h-4 w-4" />
+                Actions
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[160px]">
+              {config.actions.map((action, index) => (
+                <DropdownMenuItem
+                  key={index}
+                  onClick={() => action.onClick(row)}
+                  className={action.variant === "destructive" ? "text-destructive" : ""}
+                >
+                  {action.icon}
+                  {action.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </CardFooter>
+      )}
     </Card>
   )
 }
