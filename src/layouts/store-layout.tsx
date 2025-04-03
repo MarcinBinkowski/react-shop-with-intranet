@@ -12,22 +12,7 @@ const storeNavItems = [
     //   },
 
     ],
-  },
-  {
-    title: "Sales",
-    items: [
-      {
-        name: "Orders",
-        href: "/orders",
-        icon: <ShoppingCart className="h-4 w-4" />,
-      },
-      {
-        name: "Analytics",
-        href: "/analytics",
-        icon: <BarChart3 className="h-4 w-4" />,
-      },
-    ],
-  },
+  }
 ]
 
 const StoreLayout = () => {

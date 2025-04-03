@@ -1,4 +1,4 @@
-import { Building2, FileText, Users, Calendar, Briefcase, BarChart3, Package } from "lucide-react"
+import { Building2, FileText, Users, Calendar, Briefcase, BarChart3, Package, User } from "lucide-react"
 import { BaseLayout } from "@/layouts/base-layout"
 
 const intranetNavItems = [
@@ -16,20 +16,11 @@ const intranetNavItems = [
         icon: <Package className="h-4 w-4" />,
       },
       {
-        name: "Documents",
-        href: "/intranet/documents",
-        icon: <FileText className="h-4 w-4" />,
+        name: "Users",
+        href: "/intranet/users",
+        icon: <User className="h-4 w-4" />,
       },
-      {
-        name: "Team",
-        href: "/intranet/team",
-        icon: <Users className="h-4 w-4" />,
-      },
-      {
-        name: "Customers",
-        href: "/intranet/customers",
-        icon: <Users className="h-4 w-4" />,
-      },
+
     ],
   }
 ]

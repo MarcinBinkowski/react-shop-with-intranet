@@ -2,19 +2,13 @@ import type React from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 import StoreLayout from "./layouts/store-layout"
 import IntranetLayout from "./layouts/intranet-layout"
-import ProductsPage from "./pages/intranet/products"
 import LoginPage from "./pages/login"
 import { UserProvider } from "./context/user-context"
 // import Dashboard from "./pages/intranet/dashboard"
 import Index from "./pages/store"
+import UsersPage from "./pages/users"
 // import DocumentsPage from "./pages/intranet/documents"
-import CustomersPage from "./pages/intranet/customers"
-import DocumentsPage from "./pages/intranet/documents"
-import TeamPage from "./pages/intranet/team"
-import ProductEditPage from "./pages/intranet/products-edit"
-import DocumentEditPage from "./pages/intranet/documents-edit"
-import TeamEditPage from "./pages/intranet/team-edit"
-import CustomerEditPage from "./pages/intranet/customers-edit"
+
 
 const AppRoutes: React.FC = () => {
   return (
@@ -24,15 +18,9 @@ const AppRoutes: React.FC = () => {
 
         <Route path="/intranet" element={<IntranetLayout />}>
         {/* <Route index element={<Dashboard />} /> */}
+          <Route path="users" element={<UsersPage />} />
 
-        <Route path="products" element={<ProductsPage />} />
-          <Route path="products/edit/:id" element={<ProductEditPage />} />
-          <Route path="documents" element={<DocumentsPage />} />
-          <Route path="documents/edit/:id" element={<DocumentEditPage />} />
-          <Route path="team" element={<TeamPage />} />
-          <Route path="team/edit/:id" element={<TeamEditPage />} />
-          <Route path="customers" element={<CustomersPage />} />
-          <Route path="customers/edit/:id" element={<CustomerEditPage />} />
+
 
         {/* <Route
             path="customers"
