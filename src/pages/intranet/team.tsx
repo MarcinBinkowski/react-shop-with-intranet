@@ -306,21 +306,6 @@ const TeamPage = () => {
   // Define row actions
   const rowActions = [
     {
-      label: "View Profile",
-      icon: <User className="h-4 w-4" />,
-      onClick: (member: TeamMember) => console.log("View profile", member),
-    },
-    {
-      label: "Send Message",
-      icon: <MessageSquare className="h-4 w-4" />,
-      onClick: (member: TeamMember) => console.log("Send message to", member),
-    },
-    {
-      label: "Edit Member",
-      icon: <Edit className="h-4 w-4" />,
-      onClick: (member: TeamMember) => console.log("Edit", member),
-    },
-    {
       label: "Remove Member",
       icon: <Trash className="h-4 w-4" />,
       onClick: (member: TeamMember) => console.log("Delete", member),
@@ -328,18 +313,7 @@ const TeamPage = () => {
     },
   ]
 
-  // Define bulk actions
   const bulkActions = [
-    {
-      label: "Send Message",
-      icon: <MessageSquare className="h-4 w-4" />,
-      onClick: (members: TeamMember[]) => console.log("Message to", members),
-    },
-    {
-      label: "Export Selection",
-      icon: <BarChart className="h-4 w-4" />,
-      onClick: (members: TeamMember[]) => console.log("Export", members),
-    },
     {
       label: "Remove Selected",
       icon: <Trash className="h-4 w-4" />,

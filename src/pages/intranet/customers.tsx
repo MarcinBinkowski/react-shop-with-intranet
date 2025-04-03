@@ -255,21 +255,6 @@ const CustomersPage = () => {
   // Define row actions
   const rowActions = [
     {
-      label: "View details",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: (customer: Customer) => console.log("View", customer),
-    },
-    {
-      label: "Edit customer",
-      icon: <Edit className="h-4 w-4" />,
-      onClick: (customer: Customer) => console.log("Edit", customer),
-    },
-    {
-      label: "Send email",
-      icon: <Mail className="h-4 w-4" />,
-      onClick: (customer: Customer) => console.log("Email", customer),
-    },
-    {
       label: "Delete customer",
       icon: <Trash className="h-4 w-4" />,
       onClick: (customer: Customer) => console.log("Delete", customer),

@@ -37,6 +37,7 @@ import {
   FileSpreadsheet,
   FileCode,
   MoreHorizontal,
+  Edit,
 } from "lucide-react"
 import { DataTable, type DataTableColumn, type DataTableFilter } from "@/components/data-table/data-table"
 import { DataMetrics } from "@/components/data-table/data-metrics"
@@ -260,19 +261,9 @@ const DocumentsPage = () => {
   // Define row actions
   const rowActions = [
     {
-      label: "View document",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: (document: Document) => console.log("View", document),
-    },
-    {
-      label: "Download",
-      icon: <Download className="h-4 w-4" />,
-      onClick: (document: Document) => console.log("Download", document),
-    },
-    {
-      label: "Share",
-      icon: <Share2 className="h-4 w-4" />,
-      onClick: (document: Document) => console.log("Share", document),
+      label: "Edit document",
+      icon: <Edit className="h-4 w-4" />,
+      onClick: (product: Document) => console.log("Edit", product),
     },
     {
       label: "Delete document",
@@ -285,21 +276,11 @@ const DocumentsPage = () => {
   // Define bulk actions
   const bulkActions = [
     {
-      label: "Download selected",
-      icon: <Download className="h-4 w-4" />,
-      onClick: (documents: Document[]) => console.log("Download", documents),
-    },
-    {
-      label: "Share selected",
-      icon: <Share2 className="h-4 w-4" />,
-      onClick: (documents: Document[]) => console.log("Share", documents),
-    },
-    {
       label: "Delete selected",
       icon: <Trash className="h-4 w-4" />,
       onClick: (documents: Document[]) => console.log("Delete", documents),
       className: "text-destructive",
-    },
+    }
   ]
 
   // Render mobile card view
