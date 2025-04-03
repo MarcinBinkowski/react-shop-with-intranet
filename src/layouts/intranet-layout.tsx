@@ -31,27 +31,7 @@ const intranetNavItems = [
         icon: <Users className="h-4 w-4" />,
       },
     ],
-  },
-  {
-    title: "Management",
-    items: [
-      {
-        name: "Calendar",
-        href: "/intranet/calendar",
-        icon: <Calendar className="h-4 w-4" />,
-      },
-      {
-        name: "Projects",
-        href: "/intranet/projects",
-        icon: <Briefcase className="h-4 w-4" />,
-      },
-      {
-        name: "Reports",
-        href: "/intranet/reports",
-        icon: <BarChart3 className="h-4 w-4" />,
-      },
-    ],
-  },
+  }
 ]
 
 const IntranetLayout = () => {

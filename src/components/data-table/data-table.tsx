@@ -34,31 +34,35 @@ export function DataTable<T extends Record<string, any>>({
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
 
   const filteredData = data.filter((row) => {
-    // Apply search term filter
     if (searchTerm) {
       const matchesSearch = columns.some((column) => {
-        const value = column.cell
-          ? String(column.cell(row))
-          : String(row[column.id] ?? "")
-        return value.toLowerCase().includes(searchTerm.toLowerCase())
+        let value: any = column.cell ? column.cell(row) : row[column.id]
+        
+        // Handle different data types
+        if (value === null || value === undefined) {
+          return false
+        }
+        
+        // Handle numbers
+        if (typeof value === 'number') {
+          value = value.toString()
+        }
+        
+        // Handle dates
+        if (value instanceof Date) {
+          value = value.toLocaleDateString()
+        }
+        
+        // Handle objects (including React elements)
+        if (typeof value === 'object') {
+          String(value).toLowerCase().includes(searchTerm.toLowerCase())
+          return false
+        }
+        console.log()
+        return String(value).toLowerCase().includes(searchTerm.toLowerCase())
       })
       if (!matchesSearch) return false
     }
-
-    // Apply column filters
-    if (filters) {
-      for (const filter of filters) {
-        const selectedValues = activeFilters[filter.id] || []
-        if (selectedValues.length > 0) {
-          const matchesFilter = selectedValues.some((value) => {
-            const option = filter.options.find((opt) => opt.value === value)
-            return option?.filter(row)
-          })
-          if (!matchesFilter) return false
-        }
-      }
-    }
-
     return true
   })
 

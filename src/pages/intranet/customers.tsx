@@ -312,7 +312,6 @@ const CustomersPage = () => {
         getRowId={(customer) => customer.id}
         searchPlaceholder="Search customers..."
         rowActions={rowActions}
-        filters={filters}
         onSort={handleSort}
         sortColumn={sortColumn}
         sortDirection={sortDirection}

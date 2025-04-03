@@ -281,7 +281,6 @@ const ProductsPage = () => {
         getRowId={(product) => product.id}
         searchPlaceholder="Search products..."
         rowActions={rowActions}
-        filters={filters}
         onSort={handleSort}
         sortColumn={sortColumn}
         sortDirection={sortDirection}

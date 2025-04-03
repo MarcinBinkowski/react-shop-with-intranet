@@ -308,7 +308,6 @@ const TeamPage = () => {
         getRowId={(member) => member.id}
         searchPlaceholder="Search team members..."
         rowActions={rowActions}
-        filters={filters}
         onSort={handleSort}
         sortColumn={sortColumn}
         sortDirection={sortDirection}

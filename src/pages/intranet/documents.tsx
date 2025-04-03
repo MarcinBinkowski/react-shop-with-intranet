@@ -212,7 +212,6 @@ const DocumentsPage = () => {
       description="Manage document links and references"
       data={documents}
       columns={columns}
-      filters={filters}
       rowActions={rowActions}
       getRowId={(document) => document.id}
       searchPlaceholder="Search documents..."

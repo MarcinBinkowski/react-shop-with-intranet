@@ -126,7 +126,6 @@ export function ListPage<T extends Record<string, any>>({
         getRowId={getRowId}
         searchPlaceholder={searchPlaceholder}
         rowActions={rowActions}
-        filters={filters}
         onSort={handleSort}
         sortColumn={sortColumn}
         sortDirection={sortDirection}

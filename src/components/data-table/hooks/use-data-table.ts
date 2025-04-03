@@ -28,7 +28,6 @@ export function useDataTable<T>({
   const filteredData = useMemo(() => {
     return data
       .filter((row) => {
-        // Search filter - only search by name
         const searchMatches =
           searchTerm === "" ||
           String(getCellValue(columns.find(col => col.id === "name")!, row))

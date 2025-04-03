@@ -44,7 +44,6 @@ export interface DataTableProps<T> {
   getRowId: (row: T) => string | number
   searchPlaceholder?: string
   rowActions?: DataTableAction<T>[]
-  filters?: DataTableFilter<T>[]
   onSort?: (columnId: string, direction: "asc" | "desc") => void
   sortColumn?: string
   sortDirection?: "asc" | "desc"
