@@ -1,20 +1,9 @@
-export interface DataCardProps {
-    title: string
-    value: string | number
-    description?: string
-    icon?: React.ReactNode
-    className?: string
-  }
-  
 export interface DataTableColumn<T> {
-  id: string
+  id: keyof T | 'actions'
   header: string
-  accessorKey: keyof T | ((row: T) => any)
-  cell?: (row: T) => React.ReactNode
-  enableSorting?: boolean
-  meta?: {
-    className?: string
-  }
+  cell: (item: T) => React.ReactNode
+  sortable?: boolean
+  className?: string
 }
 
 export interface DataTableFilter<T> {
@@ -23,44 +12,38 @@ export interface DataTableFilter<T> {
   options: {
     label: string
     value: string
-    filter: (row: T) => boolean
+    filter: (item: T) => boolean
   }[]
 }
 
 export interface DataTableAction<T> {
   label: string
   icon?: React.ReactNode
-  onClick: (row: T) => void
-  className?: string
+  onClick: (item: T) => void
+  variant?: 'default' | 'destructive'
+}
+
+export interface DataTableCardConfig<T> {
+  primary: {
+    title: (item: T) => React.ReactNode
+    subtitle?: (item: T) => React.ReactNode
+    avatar?: (item: T) => React.ReactNode
+  }
+  fields: {
+    label: string
+    value: (item: T) => React.ReactNode
+    className?: string
+  }[]
+  actions?: DataTableAction<T>[]
 }
 
 export interface DataTableProps<T> {
   data: T[]
   columns: DataTableColumn<T>[]
-  mobileCard?: DataTableCardConfig<T>
   filters?: DataTableFilter<T>[]
   rowActions?: DataTableAction<T>[]
   bulkActions?: DataTableAction<T[]>[]
   searchPlaceholder?: string
   getRowId: (row: T) => string | number
-  renderRowMenu?: (row: T) => React.ReactNode
+  mobileCard?: DataTableCardConfig<T>
 }
-
-export interface DataTableCardConfig<T> {
-    primary: {
-      title: (row: T) => React.ReactNode
-      subtitle?: (row: T) => React.ReactNode
-      avatar?: (row: T) => React.ReactNode
-    }
-    fields: {
-      label: string
-      value: (row: T) => React.ReactNode
-      className?: string
-    }[]
-    actions?: {
-      label: string
-      icon?: React.ReactNode
-      onClick: (row: T) => void
-      variant?: 'default' | 'destructive'
-    }[]
-  }
