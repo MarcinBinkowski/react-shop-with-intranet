@@ -1,20 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import {
   FileText,
   Link,
@@ -22,11 +8,9 @@ import {
   Trash,
   Eye,
   Share2,
-  ExternalLink,
 } from "lucide-react"
-import { DataTable } from "@/components/data-table/data-table"
 import { DataTableColumn, DataTableAction, DataTableFilter } from "@/components/data-table/types"
-import { PageHeader } from "@/components/page-header/page-header"
+import { ListPage } from "@/components/list-page/list-page"
 
 // Document data type
 interface Document {
@@ -89,12 +73,6 @@ const documents: Document[] = [
 ]
 
 const DocumentsPage = () => {
-  const [sortColumn, setSortColumn] = useState<string>()
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-  const [sortedData, setSortedData] = useState(documents)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [activeFilters, setActiveFilters] = useState({})
-
   // Helper function to render status badges
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -216,184 +194,76 @@ const DocumentsPage = () => {
   // Define row actions
   const rowActions: DataTableAction<Document>[] = [
     {
-      label: "View Document",
-      icon: <Eye className="h-4 w-4" />,
-      onClick: (document) => window.open(document.url, "_blank"),
-    },
-    {
-      label: "Share Link",
-      icon: <Share2 className="h-4 w-4" />,
-      onClick: (document) => console.log("Share", document.url),
-    },
-    {
-      label: "Edit Details",
+      label: "Edit Document",
       icon: <Edit className="h-4 w-4" />,
       onClick: (document) => console.log("Edit", document),
     },
     {
-      label: "Remove Link",
+      label: "Remove Document",
       icon: <Trash className="h-4 w-4" />,
       onClick: (document) => console.log("Delete", document),
       className: "text-destructive",
     },
   ]
 
-  const handleSort = (columnId: string, direction: "asc" | "desc") => {
-    setSortColumn(columnId)
-    setSortDirection(direction)
-
-    const sorted = [...documents].sort((a, b) => {
-      // Get raw values for sorting
-      const aValue = a[columnId as keyof Document]
-      const bValue = b[columnId as keyof Document]
-
-      if (typeof aValue === "string") {
-        return direction === "asc"
-          ? aValue.localeCompare(String(bValue))
-          : String(bValue).localeCompare(aValue)
-      }
-
-      if (typeof aValue === "number") {
-        return direction === "asc"
-          ? Number(aValue) - Number(bValue)
-          : Number(bValue) - Number(aValue)
-      }
-
-      return 0
-    })
-
-    setSortedData(sorted)
-  }
-
-  const getCellValue = (column: DataTableColumn<Document>, document: Document): React.ReactNode => {
-    if (column.cell) {
-      return column.cell(document)
-    }
-    return ''
-  }
-
-  const filteredData = useMemo(() => {
-    return documents
-      .filter((document) => {
-        // Search filter - only search by name
-        const searchMatches =
-          searchTerm === "" ||
-          document.name.toLowerCase().includes(searchTerm.toLowerCase())
-
-        // Custom filters
-        const filterMatches = Object.entries(activeFilters).every(([filterId, filterValue]) => {
-          if (!filterValue) return true
-          const filter = filters.find((f) => f.id === filterId)
-          if (!filter) return true
-          const option = filter.options.find((o) => o.value === filterValue)
-          return option ? option.filter(document) : true
-        })
-
-        return searchMatches && filterMatches
-      })
-      .sort((a, b) => {
-        if (!sortColumn) return 0
-
-        const column = columns.find((col) => col.id === sortColumn)
-        if (!column) return 0
-
-        const valueA = getCellValue(column, a)
-        const valueB = getCellValue(column, b)
-
-        if (typeof valueA === "string" && typeof valueB === "string") {
-          return sortDirection === "asc" ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA)
-        }
-
-        if (typeof valueA === "number" && typeof valueB === "number") {
-          return sortDirection === "asc" ? valueA - valueB : valueB - valueA
-        }
-
-        return 0
-      })
-  }, [documents, columns, filters, searchTerm, activeFilters, sortColumn, sortDirection])
-
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Documents"
-        description="Manage document links and references"
-        action={{
-          label: "Add Document Link",
-          icon: Link,
-          children: (
-            <Dialog>
-              <DialogTrigger asChild>
-                <span />
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New Document Link</DialogTitle>
-                  <DialogDescription>
-                    Add a new document link to your repository.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Document Name</Label>
-                    <Input id="name" placeholder="Enter document name" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="url">Document URL</Label>
-                    <Input id="url" placeholder="https://docs.company.com/..." />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select>
-                        <SelectTrigger id="category">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Finance">Finance</SelectItem>
-                          <SelectItem value="HR">HR</SelectItem>
-                          <SelectItem value="Product">Product</SelectItem>
-                          <SelectItem value="Marketing">Marketing</SelectItem>
-                          <SelectItem value="Design">Design</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select>
-                        <SelectTrigger id="status">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Approved">Approved</SelectItem>
-                          <SelectItem value="Review">Review</SelectItem>
-                          <SelectItem value="Draft">Draft</SelectItem>
-                          <SelectItem value="Confidential">Confidential</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Add Link</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          ),
-        }}
-      />
-
-      <DataTable
-        data={filteredData}
-        columns={columns}
-        getRowId={(document) => document.id}
-        searchPlaceholder="Search documents..."
-        rowActions={rowActions}
-        filters={filters}
-        onSort={handleSort}
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
-      />
-    </div>
+    <ListPage<Document>
+      title="Documents"
+      description="Manage document links and references"
+      data={documents}
+      columns={columns}
+      filters={filters}
+      rowActions={rowActions}
+      getRowId={(document) => document.id}
+      searchPlaceholder="Search documents..."
+      action={{
+        label: "Add Document Link",
+        icon: Link,
+        dialog: {
+          title: "Add New Document Link",
+          description: "Add a new document link to your repository.",
+          submitLabel: "Add Link",
+          layout: "double",
+          fields: [
+            {
+              id: "name",
+              label: "Document Name",
+              type: "text",
+              placeholder: "Enter document name",
+            },
+            {
+              id: "url",
+              label: "Document URL",
+              type: "text",
+              placeholder: "https://docs.company.com/...",
+            },
+            {
+              id: "category",
+              label: "Category",
+              type: "select",
+              options: [
+                { label: "Finance", value: "Finance" },
+                { label: "HR", value: "HR" },
+                { label: "Product", value: "Product" },
+                { label: "Marketing", value: "Marketing" },
+                { label: "Design", value: "Design" },
+              ],
+            },
+            {
+              id: "status",
+              label: "Status",
+              type: "select",
+              options: [
+                { label: "Approved", value: "Approved" },
+                { label: "Review", value: "Review" },
+                { label: "Draft", value: "Draft" },
+                { label: "Confidential", value: "Confidential" },
+              ],
+            },
+          ],
+        },
+      }}
+    />
   )
 }
 
