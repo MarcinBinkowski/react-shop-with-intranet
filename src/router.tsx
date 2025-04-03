@@ -10,6 +10,7 @@ import Index from "./pages/store"
 // import DocumentsPage from "./pages/intranet/documents"
 import CustomersPage from "./pages/intranet/customers"
 import DocumentsPage from "./pages/intranet/documents"
+import TeamPage from "./pages/intranet/team"
 
 const AppRoutes: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ const AppRoutes: React.FC = () => {
           <Route path="products" element={<ProductsPage />} />
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="customers" element={<CustomersPage />} />
+          <Route path="team" element={<TeamPage />} />
 
 
         {/* <Route
