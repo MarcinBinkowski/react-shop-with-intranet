@@ -1,21 +1,13 @@
 "use client"
 
-import type React from "react"
-
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Search, Filter, ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { useState } from "react"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { DataTableCardConfig, DataTableProps } from "./types"
+import { DataTableProps } from "./types"
+import { useDataTable } from "./hooks/use-data-table"
+import { DataTableHeader } from "./data-table-header"
+import { DataTableBody } from "./data-table-body"
 import { MobileCard } from "./mobile-card"
-
 
 export function DataTable<T>({
   data,
@@ -29,190 +21,57 @@ export function DataTable<T>({
   renderRowMenu,
 }: DataTableProps<T>) {
   const isMobile = useIsMobile()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
-  const [sortField, setSortField] = useState<string | null>(null)
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-  const [selectedRows, setSelectedRows] = useState<(string | number)[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  useEffect(() => {
-    console.log('Is Mobile:', isMobile)
-    console.log('Has Mobile Config:', Boolean(mobileCard))
-  }, [isMobile, mobileCard])
-  
-  // Filter and sort data
-  const filteredData = data
-    .filter((row) => {
-      // Search filter
-      const searchMatches =
-        searchTerm === "" ||
-        columns.some((column) => {
-          const value =
-            typeof column.accessorKey === "function" ? column.accessorKey(row) : row[column.accessorKey as keyof T]
-          return String(value).toLowerCase().includes(searchTerm.toLowerCase())
-        })
 
-      // Custom filters
-      const filterMatches = Object.entries(activeFilters).every(([filterId, filterValue]) => {
-        if (!filterValue) return true
-        const filter = filters.find((f) => f.id === filterId)
-        if (!filter) return true
-        const option = filter.options.find((o) => o.value === filterValue)
-        return option ? option.filter(row) : true
-      })
+  const {
+    searchTerm,
+    setSearchTerm,
+    activeFilters,
+    sortField,
+    sortDirection,
+    selectedRows,
+    filteredData,
+    handleSort,
+    toggleSelectAll,
+    toggleSelectRow,
+    handleFilterChange,
+    getSelectedRows,
+    getCellValue,
+  } = useDataTable({
+    data,
+    columns,
+    filters,
+    getRowId,
+  })
 
-      return searchMatches && filterMatches
-    })
-    .sort((a, b) => {
-      if (!sortField) return 0
-
-      const column = columns.find((col) => col.id === sortField)
-      if (!column) return 0
-
-      const valueA = typeof column.accessorKey === "function" ? column.accessorKey(a) : a[column.accessorKey as keyof T]
-      const valueB = typeof column.accessorKey === "function" ? column.accessorKey(b) : b[column.accessorKey as keyof T]
-
-      if (typeof valueA === "string" && typeof valueB === "string") {
-        return sortDirection === "asc" ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA)
-      }
-
-      if (typeof valueA === "number" && typeof valueB === "number") {
-        return sortDirection === "asc" ? valueA - valueB : valueB - valueA
-      }
-
-      return 0
-    })
-
-  const handleSort = (columnId: string) => {
-    if (sortField === columnId) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(columnId)
-      setSortDirection("asc")
-    }
+  const handleBulkAction = (action: typeof bulkActions[number]) => {
+    action.onClick(getSelectedRows())
   }
 
-  const toggleSelectAll = () => {
-    if (selectedRows.length === filteredData.length) {
-      setSelectedRows([])
-    } else {
-      setSelectedRows(filteredData.map((row) => getRowId(row)))
-    }
-  }
-
-  const toggleSelectRow = (id: string | number) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter((rowId) => rowId !== id))
-    } else {
-      setSelectedRows([...selectedRows, id])
-    }
-  }
-
-  const toggleFilters = () => {
-    setIsFilterOpen(!isFilterOpen)
-  }
-
-  const handleFilterChange = (filterId: string, value: string) => {
-    setActiveFilters((prev) => ({
-      ...prev,
-      [filterId]: value === "all" ? "" : value,
-    }))
-  }
-
-  const getSelectedRows = () => {
-    return data.filter((row) => selectedRows.includes(getRowId(row)))
+  const handleRowAction = (action: typeof rowActions[number], row: T) => {
+    action.onClick(row)
   }
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex flex-col gap-4">
-          <div className="relative w-full">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder={searchPlaceholder}
-              className="w-full pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Button variant="outline" size="sm" onClick={toggleFilters}>
-              <Filter className="mr-2 h-4 w-4" />
-              Filters {Object.values(activeFilters).some(Boolean) && "(Active)"}
-            </Button>
-
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <ArrowUpDown className="mr-2 h-4 w-4" />
-                    Sort
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[160px]">
-                  {columns
-                    .filter((column) => column.enableSorting !== false)
-                    .map((column) => (
-                      <DropdownMenuItem key={column.id} onClick={() => handleSort(column.id)}>
-                        {column.header} {sortField === column.id && (sortDirection === "asc" ? "↑" : "↓")}
-                      </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {selectedRows.length > 0 && bulkActions.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      Actions ({selectedRows.length})
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {bulkActions.map((action, index) => (
-                      <DropdownMenuItem
-                        key={index}
-                        onClick={() => action.onClick(getSelectedRows())}
-                        className={action.className}
-                      >
-                        {action.icon && <span className="mr-2">{action.icon}</span>}
-                        {action.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </div>
-
-          {isFilterOpen && filters.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              {filters.map((filter) => (
-                <div key={filter.id}>
-                  <Label htmlFor={`filter-${filter.id}`}>{filter.label}</Label>
-                  <Select
-                    value={activeFilters[filter.id] || "all"}
-                    onValueChange={(value) => handleFilterChange(filter.id, value)}
-                  >
-                    <SelectTrigger id={`filter-${filter.id}`}>
-                      <SelectValue placeholder={`All ${filter.label}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{`All ${filter.label}`}</SelectItem>
-                      {filter.options.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <DataTableHeader
+          columns={columns}
+          filters={filters}
+          bulkActions={bulkActions}
+          searchPlaceholder={searchPlaceholder}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          activeFilters={activeFilters}
+          onFilterChange={handleFilterChange}
+          onSort={handleSort}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          selectedRowsCount={selectedRows.length}
+          onBulkAction={handleBulkAction}
+          isFilterOpen={isFilterOpen}
+          onToggleFilters={() => setIsFilterOpen(!isFilterOpen)}
+        />
       </CardHeader>
       <CardContent>
         {isMobile && mobileCard ? (
@@ -223,118 +82,33 @@ export function DataTable<T>({
               filteredData.map((row) => {
                 const rowId = getRowId(row)
                 const isSelected = selectedRows.includes(rowId)
-                return ( <MobileCard
-                  key={rowId}
-                  row={row}
-                  config={mobileCard}
-                  isSelected={isSelected}
-                  onToggleSelect={() => toggleSelectRow(rowId)}
-                />)
+                return (
+                  <MobileCard
+                    key={rowId}
+                    row={row}
+                    config={mobileCard}
+                    isSelected={isSelected}
+                    onToggleSelect={() => toggleSelectRow(rowId)}
+                  />
+                )
               })
             )}
           </div>
         ) : (
-          <div className="rounded-md border overflow-x-auto">
-            <Table className="min-w-[800px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40px]">
-                    <Checkbox
-                      checked={selectedRows.length === filteredData.length && filteredData.length > 0}
-                      onCheckedChange={toggleSelectAll}
-                    />
-                  </TableHead>
-                  {columns.map((column) => (
-                    <TableHead
-                      key={column.id}
-                      className={column.meta?.className}
-                      onClick={() => column.enableSorting !== false && handleSort(column.id)}
-                      style={{ cursor: column.enableSorting !== false ? "pointer" : "default" }}
-                    >
-                      {column.header}
-                      {sortField === column.id && <span className="ml-2">{sortDirection === "asc" ? "↑" : "↓"}</span>}
-                    </TableHead>
-                  ))}
-                  {(rowActions.length > 0 || renderRowMenu) && <TableHead className="w-[80px]"></TableHead>}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length + 2} className="h-24 text-center">
-                      No items found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredData.map((row) => {
-                    const rowId = getRowId(row)
-                    return (
-                      <TableRow key={rowId}>
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedRows.includes(rowId)}
-                            onCheckedChange={() => toggleSelectRow(rowId)}
-                          />
-                        </TableCell>
-                        {columns.map((column) => (
-                          <TableCell key={column.id} className={column.meta?.className}>
-                            {column.cell
-                              ? column.cell(row)
-                              : typeof column.accessorKey === "function"
-                                ? column.accessorKey(row)
-                                : String(row[column.accessorKey as keyof T] || "")}
-                          </TableCell>
-                        ))}
-                        {(rowActions.length > 0 || renderRowMenu) && (
-                          <TableCell>
-                            {renderRowMenu ? (
-                              renderRowMenu(row)
-                            ) : (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">Open menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  {rowActions.map((action, index) => (
-                                    <DropdownMenuItem
-                                      key={index}
-                                      onClick={() => action.onClick(row)}
-                                      className={action.className}
-                                    >
-                                      {action.icon && <span className="mr-2">{action.icon}</span>}
-                                      {action.label}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTableBody
+            data={filteredData}
+            columns={columns}
+            rowActions={rowActions}
+            selectedRows={selectedRows}
+            onToggleSelectAll={toggleSelectAll}
+            onToggleSelectRow={toggleSelectRow}
+            onRowAction={handleRowAction}
+            getRowId={getRowId}
+            renderRowMenu={renderRowMenu}
+            getCellValue={getCellValue}
+          />
         )}
       </CardContent>
-      {/* <CardFooter className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Showing {filteredData.length} of {data.length} items
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" disabled>
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" disabled>
-            Next
-          </Button>
-        </div>
-      </CardFooter> */}
     </Card>
   )
 }

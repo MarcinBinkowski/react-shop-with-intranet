@@ -1,7 +1,8 @@
 export interface DataTableColumn<T> {
   id: keyof T | 'actions'
   header: string
-  cell: (item: T) => React.ReactNode
+  cell?: (item: T) => React.ReactNode
+  accessorKey?: keyof T
   sortable?: boolean
   className?: string
 }
@@ -46,4 +47,5 @@ export interface DataTableProps<T> {
   searchPlaceholder?: string
   getRowId: (row: T) => string | number
   mobileCard?: DataTableCardConfig<T>
+  renderRowMenu?: (row: T) => React.ReactNode
 }
