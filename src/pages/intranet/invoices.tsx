@@ -46,17 +46,123 @@ const mockInvoices: Invoice[] = [
   },
 ]
 
+interface InvoiceFormProps {
+  invoice: Partial<Invoice>
+  onSubmit: (invoice: Omit<Invoice, 'id'>) => void
+  submitLabel: string
+}
+
+function InvoiceForm({ invoice, onSubmit, submitLabel }: InvoiceFormProps) {
+  const [formData, setFormData] = useState<Omit<Invoice, 'id'>>({
+    invoiceNumber: invoice.invoiceNumber || '',
+    customerName: invoice.customerName || '',
+    status: invoice.status || 'draft',
+    issueDate: invoice.issueDate || new Date().toISOString().split('T')[0],
+    dueDate: invoice.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    amount: invoice.amount || 0,
+    notes: invoice.notes
+  })
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    onSubmit(formData)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="invoice-number">Invoice Number</Label>
+        <Input
+          id="invoice-number"
+          value={formData.invoiceNumber}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, invoiceNumber: e.target.value })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="customer">Customer Name</Label>
+        <Input
+          id="customer"
+          value={formData.customerName}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, customerName: e.target.value })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="status">Status</Label>
+        <Select
+          value={formData.status}
+          onValueChange={(value: Invoice['status']) => setFormData({ ...formData, status: value })}
+        >
+          <SelectTrigger id="status">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="sent">Sent</SelectItem>
+            <SelectItem value="paid">Paid</SelectItem>
+            <SelectItem value="overdue">Overdue</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="issue-date">Issue Date</Label>
+        <Input
+          id="issue-date"
+          type="date"
+          value={formData.issueDate}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, issueDate: e.target.value })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="due-date">Due Date</Label>
+        <Input
+          id="due-date"
+          type="date"
+          value={formData.dueDate}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, dueDate: e.target.value })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="amount">Amount</Label>
+        <Input
+          id="amount"
+          type="number"
+          min="0"
+          step="0.01"
+          value={formData.amount}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea
+          id="notes"
+          value={formData.notes || ''}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, notes: e.target.value })}
+          placeholder="Add notes here..."
+        />
+      </div>
+      <Button type="submit" className="w-full">
+        {submitLabel}
+      </Button>
+    </form>
+  )
+}
+
 function InvoiceCard({ invoice, onDelete, onUpdate }: { 
   invoice: Invoice
   onDelete: (id: string) => void
   onUpdate: (invoice: Invoice) => void 
 }) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editedInvoice, setEditedInvoice] = useState(invoice)
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    onUpdate(editedInvoice)
+  const handleUpdate = (updatedInvoice: Omit<Invoice, 'id'>) => {
+    onUpdate({ ...updatedInvoice, id: invoice.id })
     setIsEditing(false)
   }
 
@@ -108,88 +214,11 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
           <DialogHeader>
             <DialogTitle>Edit Invoice</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-invoice-number">Invoice Number</Label>
-              <Input
-                id="edit-invoice-number"
-                value={editedInvoice.invoiceNumber}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, invoiceNumber: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-customer">Customer Name</Label>
-              <Input
-                id="edit-customer"
-                value={editedInvoice.customerName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, customerName: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-status">Status</Label>
-              <Select
-                value={editedInvoice.status}
-                onValueChange={(value: Invoice['status']) => setEditedInvoice({ ...editedInvoice, status: value })}
-              >
-                <SelectTrigger id="edit-status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="overdue">Overdue</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-issue-date">Issue Date</Label>
-              <Input
-                id="edit-issue-date"
-                type="date"
-                value={editedInvoice.issueDate}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, issueDate: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-due-date">Due Date</Label>
-              <Input
-                id="edit-due-date"
-                type="date"
-                value={editedInvoice.dueDate}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, dueDate: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-amount">Amount</Label>
-              <Input
-                id="edit-amount"
-                type="number"
-                min="0"
-                step="0.01"
-                value={editedInvoice.amount}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditedInvoice({ ...editedInvoice, amount: parseFloat(e.target.value) || 0 })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-notes">Notes</Label>
-              <Textarea
-                id="edit-notes"
-                value={editedInvoice.notes || ''}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditedInvoice({ ...editedInvoice, notes: e.target.value })}
-                placeholder="Add notes here..."
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Save Changes
-            </Button>
-          </form>
+          <InvoiceForm
+            invoice={invoice}
+            onSubmit={handleUpdate}
+            submitLabel="Save Changes"
+          />
         </DialogContent>
       </Dialog>
     </>
@@ -199,31 +228,14 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [newInvoice, setNewInvoice] = useState<Omit<Invoice, 'id'>>({
-    invoiceNumber: `INV-${new Date().getFullYear()}-${String(mockInvoices.length + 1).padStart(3, '0')}`,
-    customerName: '',
-    status: 'draft',
-    issueDate: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    amount: 0
-  })
 
-  const handleCreateInvoice = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleCreateInvoice = (newInvoice: Omit<Invoice, 'id'>) => {
     const invoice = {
       ...newInvoice,
       id: Math.random().toString(36).substr(2, 9)
     }
     setInvoices([...invoices, invoice])
     setIsCreateDialogOpen(false)
-    setNewInvoice({
-      invoiceNumber: `INV-${new Date().getFullYear()}-${String(invoices.length + 2).padStart(3, '0')}`,
-      customerName: '',
-      status: 'draft',
-      issueDate: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      amount: 0
-    })
   }
 
   const handleDeleteInvoice = (invoiceId: string) => {
@@ -258,6 +270,15 @@ export default function InvoicesPage() {
     { label: 'Amount', value: 'amount' },
   ]
 
+  const defaultInvoice = {
+    invoiceNumber: `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, '0')}`,
+    customerName: '',
+    status: 'draft' as const,
+    issueDate: new Date().toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    amount: 0
+  }
+
   return (
     <>
       <DataListPage<Invoice>
@@ -283,88 +304,11 @@ export default function InvoicesPage() {
           <DialogHeader>
             <DialogTitle>Create New Invoice</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleCreateInvoice} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="create-invoice-number">Invoice Number</Label>
-              <Input
-                id="create-invoice-number"
-                value={newInvoice.invoiceNumber}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, invoiceNumber: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-customer">Customer Name</Label>
-              <Input
-                id="create-customer"
-                value={newInvoice.customerName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, customerName: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-status">Status</Label>
-              <Select
-                value={newInvoice.status}
-                onValueChange={(value: Invoice['status']) => setNewInvoice({ ...newInvoice, status: value })}
-              >
-                <SelectTrigger id="create-status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="overdue">Overdue</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-issue-date">Issue Date</Label>
-              <Input
-                id="create-issue-date"
-                type="date"
-                value={newInvoice.issueDate}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, issueDate: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-due-date">Due Date</Label>
-              <Input
-                id="create-due-date"
-                type="date"
-                value={newInvoice.dueDate}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, dueDate: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-amount">Amount</Label>
-              <Input
-                id="create-amount"
-                type="number"
-                min="0"
-                step="0.01"
-                value={newInvoice.amount}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInvoice({ ...newInvoice, amount: parseFloat(e.target.value) || 0 })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-notes">Notes</Label>
-              <Textarea
-                id="create-notes"
-                value={newInvoice.notes || ''}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewInvoice({ ...newInvoice, notes: e.target.value })}
-                placeholder="Add notes here..."
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Create Invoice
-            </Button>
-          </form>
+          <InvoiceForm
+            invoice={defaultInvoice}
+            onSubmit={handleCreateInvoice}
+            submitLabel="Create Invoice"
+          />
         </DialogContent>
       </Dialog>
     </>

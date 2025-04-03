@@ -6,11 +6,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface User {
   id: string
@@ -49,17 +49,104 @@ const mockUsers: User[] = [
   },
 ]
 
+interface UserFormProps {
+  user: Partial<User>
+  onSubmit: (user: Omit<User, 'id'>) => void
+  submitLabel: string
+}
+
+function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
+  const [formData, setFormData] = useState<Omit<User, 'id'>>({
+    name: user.name || '',
+    email: user.email || '',
+    role: user.role || '',
+    department: user.department || '',
+    joinedDate: user.joinedDate || new Date().toISOString().split('T')[0]
+  })
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    onSubmit(formData)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="role">Role</Label>
+        <Select
+          value={formData.role}
+          onValueChange={(value) => setFormData({ ...formData, role: value })}
+        >
+          <SelectTrigger id="role">
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Developer">Developer</SelectItem>
+            <SelectItem value="Designer">Designer</SelectItem>
+            <SelectItem value="Manager">Manager</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="department">Department</Label>
+        <Select
+          value={formData.department}
+          onValueChange={(value) => setFormData({ ...formData, department: value })}
+        >
+          <SelectTrigger id="department">
+            <SelectValue placeholder="Select department" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Engineering">Engineering</SelectItem>
+            <SelectItem value="Design">Design</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="joined-date">Joined Date</Label>
+        <Input
+          id="joined-date"
+          type="date"
+          value={formData.joinedDate}
+          onChange={(e) => setFormData({ ...formData, joinedDate: e.target.value })}
+          required
+        />
+      </div>
+      <Button type="submit" className="w-full">
+        {submitLabel}
+      </Button>
+    </form>
+  )
+}
+
 function UserCard({ user, onDelete, onUpdate }: { 
   user: User
   onDelete: (id: string) => void
   onUpdate: (user: User) => void 
 }) {
   const [isEditing, setIsEditing] = useState(false)
-  const [editedUser, setEditedUser] = useState(user)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onUpdate(editedUser)
+  const handleUpdate = (updatedUser: Omit<User, 'id'>) => {
+    onUpdate({ ...updatedUser, id: user.id })
     setIsEditing(false)
   }
 
@@ -90,44 +177,11 @@ function UserCard({ user, onDelete, onUpdate }: {
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={editedUser.name}
-                onChange={(e) => setEditedUser({ ...editedUser, name: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={editedUser.email}
-                onChange={(e) => setEditedUser({ ...editedUser, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Input
-                id="role"
-                value={editedUser.role}
-                onChange={(e) => setEditedUser({ ...editedUser, role: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
-              <Input
-                id="department"
-                value={editedUser.department}
-                onChange={(e) => setEditedUser({ ...editedUser, department: e.target.value })}
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Save Changes
-            </Button>
-          </form>
+          <UserForm
+            user={user}
+            onSubmit={handleUpdate}
+            submitLabel="Save Changes"
+          />
         </DialogContent>
       </Dialog>
     </>
@@ -137,13 +191,15 @@ function UserCard({ user, onDelete, onUpdate }: {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [newUser, setNewUser] = useState<Omit<User, 'id'>>({
-    name: '',
-    email: '',
-    role: '',
-    department: '',
-    joinedDate: new Date().toISOString().split('T')[0]
-  })
+
+  const handleCreateUser = (newUser: Omit<User, 'id'>) => {
+    const user = {
+      ...newUser,
+      id: Math.random().toString(36).substr(2, 9)
+    }
+    setUsers([...users, user])
+    setIsCreateDialogOpen(false)
+  }
 
   const handleDeleteUser = (userId: string) => {
     setUsers(users.filter(user => user.id !== userId))
@@ -153,23 +209,6 @@ export default function UsersPage() {
     setUsers(users.map(user => 
       user.id === updatedUser.id ? updatedUser : user
     ))
-  }
-
-  const handleCreateUser = (e: React.FormEvent) => {
-    e.preventDefault()
-    const user = {
-      ...newUser,
-      id: Math.random().toString(36).substr(2, 9)
-    }
-    setUsers([...users, user])
-    setIsCreateDialogOpen(false)
-    setNewUser({
-      name: '',
-      email: '',
-      role: '',
-      department: '',
-      joinedDate: new Date().toISOString().split('T')[0]
-    })
   }
 
   const filterFields = [
@@ -199,6 +238,14 @@ export default function UsersPage() {
     { label: 'Join Date', value: 'joinedDate' },
   ]
 
+  const defaultUser = {
+    name: '',
+    email: '',
+    role: '',
+    department: '',
+    joinedDate: new Date().toISOString().split('T')[0]
+  }
+
   return (
     <>
       <DataListPage<User>
@@ -224,48 +271,11 @@ export default function UsersPage() {
           <DialogHeader>
             <DialogTitle>Create New User</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleCreateUser} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="create-name">Name</Label>
-              <Input
-                id="create-name"
-                value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-email">Email</Label>
-              <Input
-                id="create-email"
-                type="email"
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-role">Role</Label>
-              <Input
-                id="create-role"
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-department">Department</Label>
-              <Input
-                id="create-department"
-                value={newUser.department}
-                onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Create User
-            </Button>
-          </form>
+          <UserForm
+            user={defaultUser}
+            onSubmit={handleCreateUser}
+            submitLabel="Create User"
+          />
         </DialogContent>
       </Dialog>
     </>
