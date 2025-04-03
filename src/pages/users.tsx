@@ -10,6 +10,10 @@ import {
 } from "@/components/ui/select"
 import { UserCard } from '@/components/users/UserCard'
 import { CreateUserDialog } from '@/components/users/CreateUserDialog'
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card"
 
 interface User {
   id: string
@@ -24,28 +28,29 @@ interface User {
 const mockUsers: User[] = [
   {
     id: '1',
-    name: 'ABC ASD',
-    email: 'cjohn@example.com',
+    name: 'John Doe',
+    email: 'john@example.com',
     role: 'Developer',
     department: 'Engineering',
     joinedDate: '2023-01-01'
   },
   {
     id: '2',
-    name: 'BVASD ADS',
-    email: 'bjohn@example.com',
-    role: 'Developer',
-    department: 'Engineering',
-    joinedDate: '2023-01-01'
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    role: 'Designer',
+    department: 'Design',
+    joinedDate: '2023-02-15'
   },
   {
     id: '3',
-    name: 'ASD ASD',
-    email: 'ajohn@example.com',
-    role: 'Developer',
+    name: 'Mike Johnson',
+    email: 'mike@example.com',
+    role: 'Manager',
     department: 'Engineering',
-    joinedDate: '2023-01-01'
+    joinedDate: '2023-03-10'
   },
+  // Add more mock users as needed
 ]
 
 export default function UsersPage() {
@@ -54,21 +59,40 @@ export default function UsersPage() {
   const [sortBy, setSortBy] = useState<keyof User>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [roleFilter, setRoleFilter] = useState<string>('all')
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all')
+
+  // Get unique roles and departments for filter options
+  const uniqueRoles = useMemo(() => 
+    Array.from(new Set(users.map(user => user.role))).sort(),
+    [users]
+  )
+
+  const uniqueDepartments = useMemo(() => 
+    Array.from(new Set(users.map(user => user.department))).sort(),
+    [users]
+  )
 
   const filteredAndSortedUsers = useMemo(() => {
     return users
-      .filter(user => 
-        user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase()) ||
-        user.department.toLowerCase().includes(search.toLowerCase())
-      )
+      .filter(user => {
+        const matchesSearch = 
+          user.name.toLowerCase().includes(search.toLowerCase()) ||
+          user.email.toLowerCase().includes(search.toLowerCase()) ||
+          user.department.toLowerCase().includes(search.toLowerCase())
+        
+        const matchesRole = roleFilter === 'all' || user.role === roleFilter
+        const matchesDepartment = departmentFilter === 'all' || user.department === departmentFilter
+
+        return matchesSearch && matchesRole && matchesDepartment
+      })
       .sort((a, b) => {
         if (sortOrder === 'asc') {
           return a[sortBy] > b[sortBy] ? 1 : -1
         }
         return a[sortBy] < b[sortBy] ? 1 : -1
       })
-  }, [users, search, sortBy, sortOrder])
+  }, [users, search, sortBy, sortOrder, roleFilter, departmentFilter])
 
   const handleDeleteUser = (userId: string) => {
     setUsers(users.filter(user => user.id !== userId))
@@ -98,42 +122,89 @@ export default function UsersPage() {
         </Button>
       </div>
 
-      <div className="flex gap-4 mb-6">
-        <Input
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-sm"
-        />
-        
-        <Select
-          value={sortBy}
-          onValueChange={(value) => setSortBy(value as keyof User)}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="email">Email</SelectItem>
-            <SelectItem value="department">Department</SelectItem>
-            <SelectItem value="joinedDate">Join Date</SelectItem>
-          </SelectContent>
-        </Select>
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Search</label>
+              <Input
+                placeholder="Search users..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
-        <Select
-          value={sortOrder}
-          onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort order" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="asc">Ascending</SelectItem>
-            <SelectItem value="desc">Descending</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Role</label>
+              <Select
+                value={roleFilter}
+                onValueChange={setRoleFilter}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  {uniqueRoles.map(role => (
+                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Department</label>
+              <Select
+                value={departmentFilter}
+                onValueChange={setDepartmentFilter}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {uniqueDepartments.map(dept => (
+                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Sort By</label>
+              <div className="flex gap-2">
+                <Select
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as keyof User)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="department">Department</SelectItem>
+                    <SelectItem value="joinedDate">Join Date</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={sortOrder}
+                  onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort order" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asc">Ascending</SelectItem>
+                    <SelectItem value="desc">Descending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredAndSortedUsers.map(user => (
