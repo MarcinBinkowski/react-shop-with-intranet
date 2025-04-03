@@ -1,115 +1,163 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { useIsMobile } from "@/hooks/use-mobile"
 import { DataTableProps } from "./types"
-import { useDataTable } from "./hooks/use-data-table"
-import { DataTableHeader } from "./data-table-header"
+import {
+  Table,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
 import { DataTableBody } from "./data-table-body"
-import { MobileCard } from "./mobile-card"
+import { Button } from "@/components/ui/button"
+import { Filter, ArrowUpDown } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
-export function DataTable<T>({
+export function DataTable<T extends Record<string, any>>({
   data,
   columns,
-  filters = [],
-  rowActions = [],
-  bulkActions = [],
-  searchPlaceholder = "Search...",
   getRowId,
-  mobileCard,
-  renderRowMenu,
+  searchPlaceholder = "Search...",
+  rowActions,
+  filters,
+  onSort,
+  sortColumn,
+  sortDirection,
 }: DataTableProps<T>) {
-  const isMobile = useIsMobile()
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({})
 
-  const {
-    searchTerm,
-    setSearchTerm,
-    activeFilters,
-    sortField,
-    sortDirection,
-    selectedRows,
-    filteredData,
-    handleSort,
-    toggleSelectAll,
-    toggleSelectRow,
-    handleFilterChange,
-    getSelectedRows,
-    getCellValue,
-  } = useDataTable({
-    data,
-    columns,
-    filters,
-    getRowId,
+  const filteredData = data.filter((row) => {
+    // Apply search term filter
+    if (searchTerm) {
+      const matchesSearch = columns.some((column) => {
+        const value = column.cell
+          ? String(column.cell(row))
+          : String(row[column.id] ?? "")
+        return value.toLowerCase().includes(searchTerm.toLowerCase())
+      })
+      if (!matchesSearch) return false
+    }
+
+    // Apply column filters
+    if (filters) {
+      for (const filter of filters) {
+        const selectedValues = activeFilters[filter.id] || []
+        if (selectedValues.length > 0) {
+          const matchesFilter = selectedValues.some((value) => {
+            const option = filter.options.find((opt) => opt.value === value)
+            return option?.filter(row)
+          })
+          if (!matchesFilter) return false
+        }
+      }
+    }
+
+    return true
   })
 
-  const handleBulkAction = (action: typeof bulkActions[number]) => {
-    action.onClick(getSelectedRows())
+  const toggleFilter = (filterId: string, value: string) => {
+    setActiveFilters((prev) => {
+      const currentValues = prev[filterId] || []
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter((v) => v !== value)
+        : [...currentValues, value]
+      return {
+        ...prev,
+        [filterId]: newValues,
+      }
+    })
   }
 
-  const handleRowAction = (action: typeof rowActions[number], row: T) => {
-    action.onClick(row)
+  const handleSort = (columnId: string) => {
+    if (!onSort) return
+
+    if (sortColumn === columnId) {
+      onSort(columnId, sortDirection === "asc" ? "desc" : "asc")
+    } else {
+      onSort(columnId, "asc")
+    }
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <DataTableHeader
-          columns={columns}
-          filters={filters}
-          bulkActions={bulkActions}
-          searchPlaceholder={searchPlaceholder}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          activeFilters={activeFilters}
-          onFilterChange={handleFilterChange}
-          onSort={handleSort}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          selectedRowsCount={selectedRows.length}
-          onBulkAction={handleBulkAction}
-          isFilterOpen={isFilterOpen}
-          onToggleFilters={() => setIsFilterOpen(!isFilterOpen)}
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder={searchPlaceholder}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
         />
-      </CardHeader>
-      <CardContent>
-        {isMobile && mobileCard ? (
-          <div className="space-y-4">
-            {filteredData.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No items found.</div>
-            ) : (
-              filteredData.map((row) => {
-                const rowId = getRowId(row)
-                const isSelected = selectedRows.includes(rowId)
-                return (
-                  <MobileCard
-                    key={rowId}
-                    row={row}
-                    config={mobileCard}
-                    isSelected={isSelected}
-                    onToggleSelect={() => toggleSelectRow(rowId)}
-                  />
-                )
-              })
-            )}
-          </div>
-        ) : (
+        {filters && filters.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="ml-auto">
+                <Filter className="mr-2 h-4 w-4" />
+                Filters
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              {filters.map((filter) => (
+                <div key={filter.id} className="px-2 py-1.5">
+                  <div className="text-sm font-medium">{filter.label}</div>
+                  {filter.options.map((option) => (
+                    <DropdownMenuCheckboxItem
+                      key={option.value}
+                      checked={(activeFilters[filter.id] || []).includes(option.value)}
+                      onCheckedChange={() => toggleFilter(filter.id, option.value)}
+                    >
+                      {option.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </div>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {columns.map((column) => (
+                <TableHead
+                  key={column.id}
+                  className={column.sortable ? "cursor-pointer select-none" : ""}
+                  onClick={() => column.sortable && handleSort(column.id)}
+                >
+                  <div className="flex items-center gap-2">
+                    {column.header}
+                    {column.sortable && (
+                      <ArrowUpDown className="h-4 w-4" />
+                    )}
+                    {sortColumn === column.id && (
+                      <span className="text-xs">
+                        {sortDirection === "asc" ? "↑" : "↓"}
+                      </span>
+                    )}
+                  </div>
+                </TableHead>
+              ))}
+              {rowActions && rowActions.length > 0 && (
+                <TableHead className="w-[50px]"></TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
           <DataTableBody
             data={filteredData}
             columns={columns}
             rowActions={rowActions}
-            selectedRows={selectedRows}
-            onToggleSelectAll={toggleSelectAll}
-            onToggleSelectRow={toggleSelectRow}
-            onRowAction={handleRowAction}
             getRowId={getRowId}
-            renderRowMenu={renderRowMenu}
-            getCellValue={getCellValue}
           />
-        )}
-      </CardContent>
-    </Card>
+        </Table>
+      </div>
+    </div>
   )
 }
 

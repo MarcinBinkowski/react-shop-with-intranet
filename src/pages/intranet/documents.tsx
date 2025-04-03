@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -38,9 +39,11 @@ import {
   FileCode,
   MoreHorizontal,
   Edit,
+  Upload,
 } from "lucide-react"
 import { DataTable } from "@/components/data-table/data-table"
-import { DataTableCardConfig, DataTableColumn, DataTableFilter } from "@/components/data-table/types"
+import { DataTableCardConfig, DataTableColumn, DataTableFilter, DataTableAction } from "@/components/data-table/types"
+
 // Document data type
 interface Document {
   id: number
@@ -51,6 +54,7 @@ interface Document {
   uploadedBy: string
   uploadDate: string
   status: string
+  lastModified: string
 }
 
 // Sample document data
@@ -64,6 +68,7 @@ const documents: Document[] = [
     uploadedBy: "Sarah Johnson",
     uploadDate: "2023-04-15",
     status: "Approved",
+    lastModified: "2024-03-15",
   },
   {
     id: 2,
@@ -74,6 +79,7 @@ const documents: Document[] = [
     uploadedBy: "Michael Chen",
     uploadDate: "2023-03-22",
     status: "Approved",
+    lastModified: "2024-03-10",
   },
   {
     id: 3,
@@ -84,6 +90,7 @@ const documents: Document[] = [
     uploadedBy: "Alex Rodriguez",
     uploadDate: "2023-05-01",
     status: "Draft",
+    lastModified: "2024-02-28",
   },
   {
     id: 4,
@@ -94,6 +101,7 @@ const documents: Document[] = [
     uploadedBy: "Jessica Lee",
     uploadDate: "2023-04-28",
     status: "Approved",
+    lastModified: "2024-03-20",
   },
   {
     id: 5,
@@ -104,6 +112,7 @@ const documents: Document[] = [
     uploadedBy: "David Wilson",
     uploadDate: "2023-04-10",
     status: "Review",
+    lastModified: "2024-03-18",
   },
   {
     id: 6,
@@ -114,6 +123,7 @@ const documents: Document[] = [
     uploadedBy: "Emma Garcia",
     uploadDate: "2023-05-05",
     status: "Draft",
+    lastModified: "2024-03-15",
   },
   {
     id: 7,
@@ -124,6 +134,7 @@ const documents: Document[] = [
     uploadedBy: "James Smith",
     uploadDate: "2023-04-20",
     status: "Approved",
+    lastModified: "2024-03-10",
   },
   {
     id: 8,
@@ -134,10 +145,15 @@ const documents: Document[] = [
     uploadedBy: "Olivia Brown",
     uploadDate: "2023-03-15",
     status: "Confidential",
+    lastModified: "2024-03-15",
   },
 ]
 
 const DocumentsPage = () => {
+  const [sortColumn, setSortColumn] = useState<string>()
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const [sortedData, setSortedData] = useState(documents)
+
   // Helper function to render document icons
   const getDocumentIcon = (type: string) => {
     switch (type) {
@@ -167,6 +183,10 @@ const DocumentsPage = () => {
         return <Badge className="bg-blue-500">{status}</Badge>
       case "Confidential":
         return <Badge className="bg-red-500">{status}</Badge>
+      case "Active":
+        return <Badge className="bg-green-500">{status}</Badge>
+      case "Archived":
+        return <Badge className="bg-gray-500">{status}</Badge>
       default:
         return <Badge>{status}</Badge>
     }
@@ -177,42 +197,43 @@ const DocumentsPage = () => {
     {
       id: "name",
       header: "Document",
-      accessorKey: "name",
-      cell: (document) => (
+      sortable: true,
+      cell: (document: Document) => (
         <div className="flex items-center gap-2">
-          {getDocumentIcon(document.type)}
-          <div>
-            <div className="font-medium">{document.name}</div>
-            <div className="text-sm text-muted-foreground">{document.type}</div>
-          </div>
+          <FileText className="h-4 w-4 text-muted-foreground" />
+          <span>{document.name}</span>
         </div>
       ),
     },
     {
-      id: "category",
-      header: "Category",
-      accessorKey: "category",
-    },
-    {
-      id: "uploadedBy",
-      header: "Uploaded By",
-      accessorKey: "uploadedBy",
-    },
-    {
-      id: "uploadDate",
-      header: "Date",
-      accessorKey: (document) => new Date(document.uploadDate).toLocaleDateString(),
+      id: "type",
+      header: "Type",
+      sortable: true,
+      cell: (document: Document) => (
+        <span>{document.type}</span>
+      ),
     },
     {
       id: "size",
       header: "Size",
-      accessorKey: "size",
+      sortable: true,
+      cell: (document: Document) => (
+        <span>{document.size}</span>
+      ),
+    },
+    {
+      id: "lastModified",
+      header: "Last Modified",
+      sortable: true,
+      cell: (document: Document) => (
+        <span>{new Date(document.lastModified).toLocaleDateString()}</span>
+      ),
     },
     {
       id: "status",
       header: "Status",
-      accessorKey: "status",
-      cell: (document) => getStatusBadge(document.status),
+      sortable: true,
+      cell: (document: Document) => getStatusBadge(document.status),
     },
   ]
 
@@ -253,19 +274,29 @@ const DocumentsPage = () => {
           value: "Confidential",
           filter: (document) => document.status === "Confidential",
         },
+        {
+          label: "Active",
+          value: "Active",
+          filter: (document) => document.status === "Active",
+        },
+        {
+          label: "Archived",
+          value: "Archived",
+          filter: (document) => document.status === "Archived",
+        },
       ],
     },
   ]
 
   // Define row actions
-  const rowActions = [
+  const rowActions: DataTableAction<Document>[] = [
     {
-      label: "Edit document",
+      label: "Edit Document",
       icon: <Edit className="h-4 w-4" />,
-      onClick: (product: Document) => console.log("Edit", product),
+      onClick: (document: Document) => console.log("Edit", document),
     },
     {
-      label: "Delete document",
+      label: "Delete Document",
       icon: <Trash className="h-4 w-4" />,
       onClick: (document: Document) => console.log("Delete", document),
       className: "text-destructive",
@@ -331,7 +362,32 @@ const DocumentsPage = () => {
     ]
   }
 
-  
+  const handleSort = (columnId: string, direction: "asc" | "desc") => {
+    setSortColumn(columnId)
+    setSortDirection(direction)
+
+    const sorted = [...documents].sort((a, b) => {
+      // Get raw values for sorting
+      const aValue = a[columnId as keyof Document]
+      const bValue = b[columnId as keyof Document]
+
+      if (typeof aValue === "string") {
+        return direction === "asc"
+          ? aValue.localeCompare(String(bValue))
+          : String(bValue).localeCompare(aValue)
+      }
+
+      if (typeof aValue === "number") {
+        return direction === "asc"
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue)
+      }
+
+      return 0
+    })
+
+    setSortedData(sorted)
+  }
 
   return (
     <div className="space-y-6">
@@ -343,7 +399,7 @@ const DocumentsPage = () => {
         <Dialog>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 h-4 w-4" />
               Upload Document
             </Button>
           </DialogTrigger>
@@ -391,6 +447,8 @@ const DocumentsPage = () => {
                       <SelectItem value="Review">Review</SelectItem>
                       <SelectItem value="Approved">Approved</SelectItem>
                       <SelectItem value="Confidential">Confidential</SelectItem>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Archived">Archived</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -404,7 +462,7 @@ const DocumentsPage = () => {
       </div>
 
       <DataTable
-        data={documents}
+        data={sortedData}
         columns={columns}
         filters={filters}
         rowActions={rowActions}
@@ -412,6 +470,9 @@ const DocumentsPage = () => {
         searchPlaceholder="Search documents..."
         getRowId={(document) => document.id}
         mobileCard={mobileCard}
+        onSort={handleSort}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
       />
     </div>
   )

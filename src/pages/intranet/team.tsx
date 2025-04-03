@@ -1,12 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Dialog,
   DialogContent,
@@ -16,252 +15,129 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Card } from "@/components/ui/card"
-import {
-  UserPlus,
-  Phone,
-  MapPin,
-  User,
-  Calendar,
-  Shield,
-  MoreHorizontal,
-  Briefcase,
-  Edit,
-  Trash,
-  MessageSquare,
-  Award,
-  BarChart,
-  Users,
-} from "lucide-react"
-import { DataTable} from "@/components/data-table/data-table"
-import { DataTableCardConfig, DataTableFilter } from "@/components/data-table/types"
+import { UserPlus, Building2, Edit, Trash } from "lucide-react"
+import { DataTable } from "@/components/data-table/data-table"
+import { DataTableColumn, DataTableAction, DataTableFilter } from "@/components/data-table/types"
 
-// Team Member data type
+// Team member data type
 interface TeamMember {
   id: number
   name: string
   email: string
-  phone: string
-  location: string
   role: string
   department: string
-  joinDate: string
   status: string
-  avatar?: string
-  isAdmin: boolean
 }
 
 // Sample team member data
 const teamMembers: TeamMember[] = [
   {
     id: 1,
-    name: "Emma Johnson",
-    email: "emma.j@company.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, NY",
-    role: "Product Manager",
-    department: "Product",
-    joinDate: "2021-05-12",
+    name: "John Smith",
+    email: "john.smith@company.com",
+    role: "Software Engineer",
+    department: "Engineering",
     status: "Active",
-    isAdmin: true,
   },
   {
     id: 2,
-    name: "Alex Rodriguez",
-    email: "alex.r@company.com",
-    phone: "+1 (555) 234-5678",
-    location: "San Francisco, CA",
-    role: "Senior Developer",
-    department: "Engineering",
-    joinDate: "2020-08-15",
+    name: "Sarah Johnson",
+    email: "sarah.j@company.com",
+    role: "Product Manager",
+    department: "Product",
     status: "Active",
-    isAdmin: false,
   },
   {
     id: 3,
-    name: "Sarah Chen",
-    email: "sarah.c@company.com",
-    phone: "+1 (555) 345-6789",
-    location: "Boston, MA",
+    name: "Michael Brown",
+    email: "michael.b@company.com",
     role: "UX Designer",
     department: "Design",
-    joinDate: "2022-01-10",
-    status: "Active",
-    isAdmin: false,
+    status: "On Leave",
   },
   {
     id: 4,
-    name: "Michael Brown",
-    email: "michael.b@company.com",
-    phone: "+1 (555) 456-7890",
-    location: "Chicago, IL",
-    role: "Marketing Director",
+    name: "Emily Davis",
+    email: "emily.d@company.com",
+    role: "Marketing Manager",
     department: "Marketing",
-    joinDate: "2019-11-05",
     status: "Active",
-    isAdmin: true,
   },
   {
     id: 5,
-    name: "Jessica Wilson",
-    email: "jessica.w@company.com",
-    phone: "+1 (555) 567-8901",
-    location: "Austin, TX",
-    role: "Finance Analyst",
-    department: "Finance",
-    joinDate: "2021-09-20",
-    status: "On Leave",
-    isAdmin: false,
-  },
-  {
-    id: 6,
-    name: "David Garcia",
-    email: "david.g@company.com",
-    phone: "+1 (555) 678-9012",
-    location: "Seattle, WA",
-    role: "Frontend Developer",
-    department: "Engineering",
-    joinDate: "2022-03-14",
-    status: "Active",
-    isAdmin: false,
-  },
-  {
-    id: 7,
-    name: "Lisa Thompson",
-    email: "lisa.t@company.com",
-    phone: "+1 (555) 789-0123",
-    location: "Portland, OR",
-    role: "HR Manager",
-    department: "HR",
-    joinDate: "2020-06-08",
-    status: "Active",
-    isAdmin: true,
-  },
-  {
-    id: 8,
-    name: "James Martinez",
-    email: "james.m@company.com",
-    phone: "+1 (555) 890-1234",
-    location: "Denver, CO",
+    name: "David Wilson",
+    email: "david.w@company.com",
     role: "Sales Representative",
     department: "Sales",
-    joinDate: "2021-07-22",
-    status: "Inactive",
-    isAdmin: false,
-  },
-  {
-    id: 9,
-    name: "Olivia Lee",
-    email: "olivia.l@company.com",
-    phone: "+1 (555) 901-2345",
-    location: "Miami, FL",
-    role: "Content Strategist",
-    department: "Marketing",
-    joinDate: "2022-02-01",
     status: "Active",
-    isAdmin: false,
-  },
-  {
-    id: 10,
-    name: "Robert Kim",
-    email: "robert.k@company.com",
-    phone: "+1 (555) 012-3456",
-    location: "Los Angeles, CA",
-    role: "Backend Developer",
-    department: "Engineering",
-    joinDate: "2021-04-30",
-    status: "Active",
-    isAdmin: false,
   },
 ]
 
 const TeamPage = () => {
+  const [sortColumn, setSortColumn] = useState<string>()
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const [sortedData, setSortedData] = useState(teamMembers)
+
   // Helper function to render status badges
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Active":
         return <Badge className="bg-green-500">{status}</Badge>
-      case "Inactive":
-        return <Badge className="bg-gray-500">{status}</Badge>
       case "On Leave":
         return <Badge className="bg-yellow-500">{status}</Badge>
+      case "Inactive":
+        return <Badge className="bg-gray-500">{status}</Badge>
       default:
         return <Badge>{status}</Badge>
     }
   }
 
-  // Define columns for the data table
-  const columns: DataTableColumn<TeamMember>[] = [
+  // Define row actions
+  const rowActions: DataTableAction<TeamMember>[] = [
     {
-      id: "name",
-      header: "Team Member",
-      accessorKey: "name",
-      cell: (member) => (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            {member.avatar ? (
-              <AvatarImage src={member.avatar} alt={member.name} />
-            ) : (
-              <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-            )}
-          </Avatar>
-          <div>
-            <div className="font-medium flex items-center">
-              {member.name}
-              {member.isAdmin && <Shield className="ml-2 h-4 w-4 text-blue-500" title="Admin" />}
-            </div>
-            <div className="text-sm text-muted-foreground">{member.email}</div>
-          </div>
-        </div>
-      ),
+      label: "Edit Member",
+      icon: <Edit className="h-4 w-4" />,
+      onClick: (member) => console.log("Edit", member),
     },
     {
-      id: "role",
-      header: "Role",
-      accessorKey: "role",
-    },
-    {
-      id: "department",
-      header: "Department",
-      accessorKey: "department",
-    },
-    {
-      id: "location",
-      header: "Location",
-      accessorKey: "location",
-    },
-    {
-      id: "joinDate",
-      header: "Joined",
-      accessorKey: (member) => new Date(member.joinDate).toLocaleDateString(),
-    },
-    {
-      id: "status",
-      header: "Status",
-      accessorKey: "status",
-      cell: (member) => getStatusBadge(member.status),
+      label: "Remove Member",
+      icon: <Trash className="h-4 w-4" />,
+      onClick: (member) => console.log("Delete", member),
+      className: "text-destructive",
     },
   ]
 
-  // Define filters for the data table
+  // Define filters
   const filters: DataTableFilter<TeamMember>[] = [
     {
       id: "department",
       label: "Department",
       options: [
-        ...Array.from(new Set(teamMembers.map((m) => m.department))).map((department) => ({
-          label: department,
-          value: department,
-          filter: (member: TeamMember) => member.department === department,
-        })),
+        {
+          label: "Engineering",
+          value: "Engineering",
+          filter: (member) => member.department === "Engineering",
+        },
+        {
+          label: "Product",
+          value: "Product",
+          filter: (member) => member.department === "Product",
+        },
+        {
+          label: "Design",
+          value: "Design",
+          filter: (member) => member.department === "Design",
+        },
+        {
+          label: "Marketing",
+          value: "Marketing",
+          filter: (member) => member.department === "Marketing",
+        },
+        {
+          label: "Sales",
+          value: "Sales",
+          filter: (member) => member.department === "Sales",
+        },
       ],
     },
     {
@@ -274,106 +150,86 @@ const TeamPage = () => {
           filter: (member) => member.status === "Active",
         },
         {
-          label: "Inactive",
-          value: "Inactive",
-          filter: (member) => member.status === "Inactive",
-        },
-        {
           label: "On Leave",
           value: "On Leave",
           filter: (member) => member.status === "On Leave",
         },
-      ],
-    },
-    {
-      id: "admin",
-      label: "Admin Status",
-      options: [
         {
-          label: "Admins",
-          value: "admin",
-          filter: (member) => member.isAdmin === true,
-        },
-        {
-          label: "Regular Members",
-          value: "regular",
-          filter: (member) => member.isAdmin === false,
+          label: "Inactive",
+          value: "Inactive",
+          filter: (member) => member.status === "Inactive",
         },
       ],
     },
   ]
 
-  // Define row actions
-  const rowActions = [
+  // Define columns for the data table
+  const columns: DataTableColumn<TeamMember>[] = [
     {
-        label: "Edit Member",
-        icon: <Edit className="h-4 w-4" />,
-        onClick: (product: TeamMember) => console.log("Edit", product),
+      id: "name",
+      header: "Team Member",
+      sortable: true,
+      cell: (member: TeamMember) => (
+        <div className="flex items-center gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{member.name}</div>
+            <div className="text-sm text-muted-foreground">{member.email}</div>
+          </div>
+        </div>
+      ),
     },
     {
-      label: "Remove Member",
-      icon: <Trash className="h-4 w-4" />,
-      onClick: (member: TeamMember) => console.log("Delete", member),
-      className: "text-destructive",
+      id: "role",
+      header: "Role",
+      sortable: true,
+      cell: (member: TeamMember) => (
+        <div className="flex items-center gap-2">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <span>{member.role}</span>
+        </div>
+      ),
+    },
+    {
+      id: "department",
+      header: "Department",
+      sortable: true,
+    },
+    {
+      id: "status",
+      header: "Status",
+      sortable: true,
+      cell: (member: TeamMember) => getStatusBadge(member.status),
     },
   ]
 
-  const bulkActions = [
-    {
-      label: "Remove Selected",
-      icon: <Trash className="h-4 w-4" />,
-      onClick: (members: TeamMember[]) => console.log("Delete", members),
-      className: "text-destructive",
-    },
-  ]
+  const handleSort = (columnId: string, direction: "asc" | "desc") => {
+    setSortColumn(columnId)
+    setSortDirection(direction)
 
-  const mobileCard: DataTableCardConfig<TeamMember> = {
-    primary: {
-      title: (member) => member.name,
-      subtitle: (member) => member.role,
-      avatar: (member) => (
-        <Avatar>
-          <AvatarImage src={member.avatar} alt={member.name} />
-          <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-        </Avatar>
-      )
-    },
-    fields: [
-      {
-        label: "Department",
-        value: (member) => member.department
-      },
-      {
-        label: "Email",
-        value: (member) => member.email,
-        className: "text-sm text-muted-foreground"
-      },
-      {
-        label: "Status",
-        value: (member) => getStatusBadge(member.status)
-      },
-      {
-        label: "Role",
-        value: (member) => (
-          <Badge variant="outline" className="font-normal">
-            {member.isAdmin ? "Admin" : "Member"}
-          </Badge>
-        )
+    const sorted = [...teamMembers].sort((a, b) => {
+      // Get raw values for sorting
+      const aValue = a[columnId as keyof TeamMember]
+      const bValue = b[columnId as keyof TeamMember]
+
+      if (typeof aValue === "string") {
+        return direction === "asc"
+          ? aValue.localeCompare(String(bValue))
+          : String(bValue).localeCompare(aValue)
       }
-    ],
-    actions: [
-      {
-        label: "Edit member",
-        icon: <Edit className="mr-2 h-4 w-4" />,
-        onClick: (member) => console.log("Edit", member)
-      },
-      {
-        label: "Remove member",
-        icon: <Trash className="mr-2 h-4 w-4" />,
-        onClick: (member) => console.log("Remove", member),
-        variant: "destructive"
+
+      if (typeof aValue === "number") {
+        return direction === "asc"
+          ? Number(aValue) - Number(bValue)
+          : Number(bValue) - Number(aValue)
       }
-    ]
+
+      return 0
+    })
+
+    setSortedData(sorted)
   }
 
   return (
@@ -381,7 +237,9 @@ const TeamPage = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Team</h1>
-          <p className="text-muted-foreground">Manage your organization's team members</p>
+          <p className="text-muted-foreground">
+            Manage your team members
+          </p>
         </div>
         <Dialog>
           <DialogTrigger asChild>
@@ -393,53 +251,32 @@ const TeamPage = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Team Member</DialogTitle>
-              <DialogDescription>Add a new member to your organization.</DialogDescription>
+              <DialogDescription>
+                Add a new member to your team.
+              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="Enter full name" />
+                <Input id="name" placeholder="Enter team member name" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="email@company.com" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="member@company.com"
+                  />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" placeholder="+1 (555) 123-4567" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="role">Role</Label>
-                  <Input id="role" placeholder="Job title" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Select>
-                    <SelectTrigger id="department">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Product">Product</SelectItem>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="Design">Design</SelectItem>
-                      <SelectItem value="Marketing">Marketing</SelectItem>
-                      <SelectItem value="Sales">Sales</SelectItem>
-                      <SelectItem value="Finance">Finance</SelectItem>
-                      <SelectItem value="HR">HR</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input id="role" placeholder="Enter role" />
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="location">Location</Label>
-                <Input id="location" placeholder="City, State" />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="admin" />
-                <Label htmlFor="admin">Admin Access</Label>
+                <Label htmlFor="department">Department</Label>
+                <Input id="department" placeholder="Enter department" />
               </div>
             </div>
             <DialogFooter>
@@ -449,16 +286,16 @@ const TeamPage = () => {
         </Dialog>
       </div>
 
-
       <DataTable
-        data={teamMembers}
+        data={sortedData}
         columns={columns}
-        filters={filters}
-        rowActions={rowActions}
-        bulkActions={bulkActions}
-        searchPlaceholder="Search team members..."
         getRowId={(member) => member.id}
-        mobileCard={mobileCard}
+        searchPlaceholder="Search team members..."
+        rowActions={rowActions}
+        filters={filters}
+        onSort={handleSort}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
       />
     </div>
   )

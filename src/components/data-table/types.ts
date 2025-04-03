@@ -1,10 +1,10 @@
+import { ReactNode } from "react"
+
 export interface DataTableColumn<T> {
-  id: keyof T | 'actions'
+  id: string
   header: string
-  cell?: (item: T) => React.ReactNode
-  accessorKey?: keyof T
+  cell?: (row: T) => ReactNode
   sortable?: boolean
-  className?: string
 }
 
 export interface DataTableFilter<T> {
@@ -13,15 +13,15 @@ export interface DataTableFilter<T> {
   options: {
     label: string
     value: string
-    filter: (item: T) => boolean
+    filter: (row: T) => boolean
   }[]
 }
 
 export interface DataTableAction<T> {
   label: string
-  icon?: React.ReactNode
-  onClick: (item: T) => void
-  variant?: 'default' | 'destructive'
+  icon?: ReactNode
+  onClick: (row: T) => void
+  className?: string
 }
 
 export interface DataTableCardConfig<T> {
@@ -41,11 +41,14 @@ export interface DataTableCardConfig<T> {
 export interface DataTableProps<T> {
   data: T[]
   columns: DataTableColumn<T>[]
-  filters?: DataTableFilter<T>[]
-  rowActions?: DataTableAction<T>[]
-  bulkActions?: DataTableAction<T[]>[]
-  searchPlaceholder?: string
   getRowId: (row: T) => string | number
+  searchPlaceholder?: string
+  rowActions?: DataTableAction<T>[]
+  filters?: DataTableFilter<T>[]
+  onSort?: (columnId: string, direction: "asc" | "desc") => void
+  sortColumn?: string
+  sortDirection?: "asc" | "desc"
+  bulkActions?: DataTableAction<T[]>[]
   mobileCard?: DataTableCardConfig<T>
   renderRowMenu?: (row: T) => React.ReactNode
 }
