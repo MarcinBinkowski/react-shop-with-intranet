@@ -1,11 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
@@ -18,43 +16,27 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Plus,
   FileText,
-  Download,
-  Share2,
+  Link,
+  Edit,
   Trash,
   Eye,
-  FileArchive,
-  FileIcon as FilePdf,
-  FileImage,
-  FileSpreadsheet,
-  FileCode,
-  MoreHorizontal,
-  Edit,
-  Upload,
+  Share2,
+  ExternalLink,
 } from "lucide-react"
 import { DataTable } from "@/components/data-table/data-table"
-import { DataTableCardConfig, DataTableColumn, DataTableFilter, DataTableAction } from "@/components/data-table/types"
+import { DataTableColumn, DataTableAction, DataTableFilter } from "@/components/data-table/types"
+import { PageHeader } from "@/components/page-header/page-header"
 
 // Document data type
 interface Document {
   id: number
   name: string
-  type: string
+  url: string
   category: string
   size: string
-  uploadedBy: string
-  uploadDate: string
+  addedDate: string
   status: string
-  lastModified: string
 }
 
 // Sample document data
@@ -62,90 +44,47 @@ const documents: Document[] = [
   {
     id: 1,
     name: "Q1 Financial Report",
-    type: "PDF",
+    url: "https://docs.company.com/finance/q1-report",
     category: "Finance",
     size: "2.4 MB",
-    uploadedBy: "Sarah Johnson",
-    uploadDate: "2023-04-15",
+    addedDate: "2024-03-15T00:00:00",
     status: "Approved",
-    lastModified: "2024-03-15",
   },
   {
     id: 2,
-    name: "Employee Handbook 2023",
-    type: "PDF",
+    name: "Employee Handbook 2024",
+    url: "https://docs.company.com/hr/handbook",
     category: "HR",
     size: "5.7 MB",
-    uploadedBy: "Michael Chen",
-    uploadDate: "2023-03-22",
+    addedDate: "2024-03-10T00:00:00",
     status: "Approved",
-    lastModified: "2024-03-10",
   },
   {
     id: 3,
     name: "Product Roadmap",
-    type: "Spreadsheet",
+    url: "https://docs.company.com/product/roadmap",
     category: "Product",
     size: "1.2 MB",
-    uploadedBy: "Alex Rodriguez",
-    uploadDate: "2023-05-01",
+    addedDate: "2024-02-28T00:00:00",
     status: "Draft",
-    lastModified: "2024-02-28",
   },
   {
     id: 4,
-    name: "Marketing Campaign Assets",
-    type: "Archive",
+    name: "Marketing Campaign Plan",
+    url: "https://docs.company.com/marketing/campaign",
     category: "Marketing",
-    size: "34.1 MB",
-    uploadedBy: "Jessica Lee",
-    uploadDate: "2023-04-28",
-    status: "Approved",
-    lastModified: "2024-03-20",
+    size: "3.4 MB",
+    addedDate: "2024-03-20T00:00:00",
+    status: "Review",
   },
   {
     id: 5,
-    name: "Website Redesign Mockups",
-    type: "Image",
+    name: "Website Design Specs",
+    url: "https://docs.company.com/design/website",
     category: "Design",
-    size: "8.3 MB",
-    uploadedBy: "David Wilson",
-    uploadDate: "2023-04-10",
-    status: "Review",
-    lastModified: "2024-03-18",
-  },
-  {
-    id: 6,
-    name: "API Documentation",
-    type: "Code",
-    category: "Engineering",
-    size: "0.8 MB",
-    uploadedBy: "Emma Garcia",
-    uploadDate: "2023-05-05",
-    status: "Draft",
-    lastModified: "2024-03-15",
-  },
-  {
-    id: 7,
-    name: "Sales Presentation",
-    type: "PDF",
-    category: "Sales",
-    size: "3.5 MB",
-    uploadedBy: "James Smith",
-    uploadDate: "2023-04-20",
-    status: "Approved",
-    lastModified: "2024-03-10",
-  },
-  {
-    id: 8,
-    name: "Legal Contracts",
-    type: "PDF",
-    category: "Legal",
-    size: "1.9 MB",
-    uploadedBy: "Olivia Brown",
-    uploadDate: "2023-03-15",
+    size: "2.8 MB",
+    addedDate: "2024-03-18T00:00:00",
     status: "Confidential",
-    lastModified: "2024-03-15",
   },
 ]
 
@@ -153,24 +92,8 @@ const DocumentsPage = () => {
   const [sortColumn, setSortColumn] = useState<string>()
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
   const [sortedData, setSortedData] = useState(documents)
-
-  // Helper function to render document icons
-  const getDocumentIcon = (type: string) => {
-    switch (type) {
-      case "PDF":
-        return <FilePdf className="h-5 w-5 text-red-500" />
-      case "Spreadsheet":
-        return <FileSpreadsheet className="h-5 w-5 text-green-500" />
-      case "Image":
-        return <FileImage className="h-5 w-5 text-purple-500" />
-      case "Archive":
-        return <FileArchive className="h-5 w-5 text-yellow-500" />
-      case "Code":
-        return <FileCode className="h-5 w-5 text-blue-500" />
-      default:
-        return <FileText className="h-5 w-5 text-gray-500" />
-    }
-  }
+  const [searchTerm, setSearchTerm] = useState("")
+  const [activeFilters, setActiveFilters] = useState({})
 
   // Helper function to render status badges
   const getStatusBadge = (status: string) => {
@@ -182,10 +105,6 @@ const DocumentsPage = () => {
       case "Draft":
         return <Badge className="bg-blue-500">{status}</Badge>
       case "Confidential":
-        return <Badge className="bg-red-500">{status}</Badge>
-      case "Active":
-        return <Badge className="bg-green-500">{status}</Badge>
-      case "Archived":
         return <Badge className="bg-gray-500">{status}</Badge>
       default:
         return <Badge>{status}</Badge>
@@ -201,32 +120,28 @@ const DocumentsPage = () => {
       cell: (document: Document) => (
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-muted-foreground" />
-          <span>{document.name}</span>
+          <div>
+            <div className="font-medium">{document.name}</div>
+            <div className="text-sm text-muted-foreground">{document.category}</div>
+          </div>
         </div>
       ),
     },
     {
-      id: "type",
-      header: "Type",
+      id: "category",
+      header: "Category",
       sortable: true,
-      cell: (document: Document) => (
-        <span>{document.type}</span>
-      ),
     },
     {
-      id: "size",
-      header: "Size",
+      id: "addedDate",
+      header: "Added Date",
       sortable: true,
       cell: (document: Document) => (
-        <span>{document.size}</span>
-      ),
-    },
-    {
-      id: "lastModified",
-      header: "Last Modified",
-      sortable: true,
-      cell: (document: Document) => (
-        <span>{new Date(document.lastModified).toLocaleDateString()}</span>
+        <span>{new Date(document.addedDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        })}</span>
       ),
     },
     {
@@ -237,17 +152,37 @@ const DocumentsPage = () => {
     },
   ]
 
-  // Define filters for the data table
+  // Define filters
   const filters: DataTableFilter<Document>[] = [
     {
       id: "category",
       label: "Category",
       options: [
-        ...Array.from(new Set(documents.map((doc) => doc.category))).map((category) => ({
-          label: category,
-          value: category,
-          filter: (document: Document) => document.category === category,
-        })),
+        {
+          label: "Finance",
+          value: "Finance",
+          filter: (document) => document.category === "Finance",
+        },
+        {
+          label: "HR",
+          value: "HR",
+          filter: (document) => document.category === "HR",
+        },
+        {
+          label: "Product",
+          value: "Product",
+          filter: (document) => document.category === "Product",
+        },
+        {
+          label: "Marketing",
+          value: "Marketing",
+          filter: (document) => document.category === "Marketing",
+        },
+        {
+          label: "Design",
+          value: "Design",
+          filter: (document) => document.category === "Design",
+        },
       ],
     },
     {
@@ -274,16 +209,6 @@ const DocumentsPage = () => {
           value: "Confidential",
           filter: (document) => document.status === "Confidential",
         },
-        {
-          label: "Active",
-          value: "Active",
-          filter: (document) => document.status === "Active",
-        },
-        {
-          label: "Archived",
-          value: "Archived",
-          filter: (document) => document.status === "Archived",
-        },
       ],
     },
   ]
@@ -291,76 +216,27 @@ const DocumentsPage = () => {
   // Define row actions
   const rowActions: DataTableAction<Document>[] = [
     {
-      label: "Edit Document",
+      label: "View Document",
+      icon: <Eye className="h-4 w-4" />,
+      onClick: (document) => window.open(document.url, "_blank"),
+    },
+    {
+      label: "Share Link",
+      icon: <Share2 className="h-4 w-4" />,
+      onClick: (document) => console.log("Share", document.url),
+    },
+    {
+      label: "Edit Details",
       icon: <Edit className="h-4 w-4" />,
-      onClick: (document: Document) => console.log("Edit", document),
+      onClick: (document) => console.log("Edit", document),
     },
     {
-      label: "Delete Document",
+      label: "Remove Link",
       icon: <Trash className="h-4 w-4" />,
-      onClick: (document: Document) => console.log("Delete", document),
+      onClick: (document) => console.log("Delete", document),
       className: "text-destructive",
     },
   ]
-
-  // Define bulk actions
-  const bulkActions = [
-    {
-      label: "Delete selected",
-      icon: <Trash className="h-4 w-4" />,
-      onClick: (documents: Document[]) => console.log("Delete", documents),
-      className: "text-destructive",
-    }
-  ]
-
-  const mobileCard: DataTableCardConfig<Document> = {
-    primary: {
-      title: (document) => document.name,
-      subtitle: (document) => document.category,
-      avatar: (document) => getDocumentIcon(document.type)
-    },
-    fields: [
-      {
-        label: "Size",
-        value: (document) => document.size
-      },
-      {
-        label: "Uploaded by",
-        value: (document) => document.uploadedBy
-      },
-      {
-        label: "Date",
-        value: (document) => new Date(document.uploadDate).toLocaleDateString()
-      },
-      {
-        label: "Status",
-        value: (document) => getStatusBadge(document.status)
-      }
-    ],
-    actions: [
-      {
-        label: "View document",
-        icon: <Eye className="mr-2 h-4 w-4" />,
-        onClick: (document) => console.log("View", document)
-      },
-      {
-        label: "Download",
-        icon: <Download className="mr-2 h-4 w-4" />,
-        onClick: (document) => console.log("Download", document)
-      },
-      {
-        label: "Share",
-        icon: <Share2 className="mr-2 h-4 w-4" />,
-        onClick: (document) => console.log("Share", document)
-      },
-      {
-        label: "Delete document",
-        icon: <Trash className="mr-2 h-4 w-4" />,
-        onClick: (document) => console.log("Delete", document),
-        variant: "destructive"
-      }
-    ]
-  }
 
   const handleSort = (columnId: string, direction: "asc" | "desc") => {
     setSortColumn(columnId)
@@ -389,87 +265,130 @@ const DocumentsPage = () => {
     setSortedData(sorted)
   }
 
+  const getCellValue = (column: DataTableColumn<Document>, document: Document): React.ReactNode => {
+    if (column.cell) {
+      return column.cell(document)
+    }
+    return ''
+  }
+
+  const filteredData = useMemo(() => {
+    return documents
+      .filter((document) => {
+        // Search filter - only search by name
+        const searchMatches =
+          searchTerm === "" ||
+          document.name.toLowerCase().includes(searchTerm.toLowerCase())
+
+        // Custom filters
+        const filterMatches = Object.entries(activeFilters).every(([filterId, filterValue]) => {
+          if (!filterValue) return true
+          const filter = filters.find((f) => f.id === filterId)
+          if (!filter) return true
+          const option = filter.options.find((o) => o.value === filterValue)
+          return option ? option.filter(document) : true
+        })
+
+        return searchMatches && filterMatches
+      })
+      .sort((a, b) => {
+        if (!sortColumn) return 0
+
+        const column = columns.find((col) => col.id === sortColumn)
+        if (!column) return 0
+
+        const valueA = getCellValue(column, a)
+        const valueB = getCellValue(column, b)
+
+        if (typeof valueA === "string" && typeof valueB === "string") {
+          return sortDirection === "asc" ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA)
+        }
+
+        if (typeof valueA === "number" && typeof valueB === "number") {
+          return sortDirection === "asc" ? valueA - valueB : valueB - valueA
+        }
+
+        return 0
+      })
+  }, [documents, columns, filters, searchTerm, activeFilters, sortColumn, sortDirection])
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Documents</h1>
-          <p className="text-muted-foreground">Manage and organize company documents</p>
-        </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Document
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Upload New Document</DialogTitle>
-              <DialogDescription>Upload a new document to the company repository.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Document Name</Label>
-                <Input id="name" placeholder="Enter document name" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="file">File</Label>
-                <Input id="file" type="file" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select>
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Finance">Finance</SelectItem>
-                      <SelectItem value="HR">HR</SelectItem>
-                      <SelectItem value="Product">Product</SelectItem>
-                      <SelectItem value="Marketing">Marketing</SelectItem>
-                      <SelectItem value="Design">Design</SelectItem>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="Sales">Sales</SelectItem>
-                      <SelectItem value="Legal">Legal</SelectItem>
-                    </SelectContent>
-                  </Select>
+      <PageHeader
+        title="Documents"
+        description="Manage document links and references"
+        action={{
+          label: "Add Document Link",
+          icon: Link,
+          children: (
+            <Dialog>
+              <DialogTrigger asChild>
+                <span />
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Document Link</DialogTitle>
+                  <DialogDescription>
+                    Add a new document link to your repository.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Document Name</Label>
+                    <Input id="name" placeholder="Enter document name" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="url">Document URL</Label>
+                    <Input id="url" placeholder="https://docs.company.com/..." />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Select>
+                        <SelectTrigger id="category">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Finance">Finance</SelectItem>
+                          <SelectItem value="HR">HR</SelectItem>
+                          <SelectItem value="Product">Product</SelectItem>
+                          <SelectItem value="Marketing">Marketing</SelectItem>
+                          <SelectItem value="Design">Design</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="status">Status</Label>
+                      <Select>
+                        <SelectTrigger id="status">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Approved">Approved</SelectItem>
+                          <SelectItem value="Review">Review</SelectItem>
+                          <SelectItem value="Draft">Draft</SelectItem>
+                          <SelectItem value="Confidential">Confidential</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select>
-                    <SelectTrigger id="status">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Draft">Draft</SelectItem>
-                      <SelectItem value="Review">Review</SelectItem>
-                      <SelectItem value="Approved">Approved</SelectItem>
-                      <SelectItem value="Confidential">Confidential</SelectItem>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Archived">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Upload</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+                <DialogFooter>
+                  <Button type="submit">Add Link</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          ),
+        }}
+      />
 
       <DataTable
-        data={sortedData}
+        data={filteredData}
         columns={columns}
-        filters={filters}
-        rowActions={rowActions}
-        bulkActions={bulkActions}
-        searchPlaceholder="Search documents..."
         getRowId={(document) => document.id}
-        mobileCard={mobileCard}
+        searchPlaceholder="Search documents..."
+        rowActions={rowActions}
+        filters={filters}
         onSort={handleSort}
         sortColumn={sortColumn}
         sortDirection={sortDirection}

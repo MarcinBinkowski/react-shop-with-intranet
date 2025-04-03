@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
 import { Plus, Package, Edit, Trash } from "lucide-react"
 import { DataTable } from "@/components/data-table/data-table"
 import { DataTableColumn, DataTableAction, DataTableFilter } from "@/components/data-table/types"
+import { PageHeader } from "@/components/page-header/page-header"
 
 // Product data type
 interface Product {
