@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
 import { DataCard } from '@/components/common/DataCard'
 import {
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createUser, deleteUser, getUsers, updateUser } from '@/api/users'
 
 interface User {
   id: string
@@ -183,6 +184,7 @@ function UserCard({ user, onDelete, onUpdate }: {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const dynamicFilterFields = useMemo(() => {
     const roles = Array.from(new Set(users.map(user => user.role)))
@@ -207,24 +209,49 @@ export default function UsersPage() {
       }
     ]
   }, [users])
+  useEffect(() => {
+    fetchUsers()
+  }, [])
 
-  const handleCreateUser = (newUser: Omit<User, 'id'>) => {
-    const user = {
-      ...newUser,
-      id: Math.random().toString(36).substr(2, 9)
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true)
+      const data = await getUsers()
+      setUsers(data)
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    } finally {
+      setIsLoading(false)
     }
-    setUsers([...users, user])
-    setIsCreateDialogOpen(false)
+  }
+  
+  const handleCreateUser = async (newUser: Omit<User, 'id'>) => {
+    try {
+      const createdUser = await createUser(newUser)
+      setUsers(prev => [...prev, createdUser])
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating user:', error)
+    }
+  }
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await deleteUser(userId)
+      setUsers(prev => prev.filter(user => user.id !== userId))
+    } catch (error) {
+      console.error('Error deleting user:', error)
+    }
   }
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers(users.filter(user => user.id !== userId))
-  }
-
-  const handleUpdateUser = (updatedUser: User) => {
-    setUsers(users.map(user => 
-      user.id === updatedUser.id ? updatedUser : user
-    ))
+  const handleUpdateUser = async (updatedUser: User) => {
+    try {
+      await updateUser(updatedUser)
+      setUsers(prev => prev.map(user => 
+        user.id === updatedUser.id ? updatedUser : user
+      ))
+    } catch (error) {
+      console.error('Error updating user:', error)
+    }
   }
 
   const sortFields = [
@@ -241,7 +268,9 @@ export default function UsersPage() {
     department: '',
     joinedDate: new Date().toISOString().split('T')[0]
   }
-
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
   return (
     <>
       <DataListPage<User>

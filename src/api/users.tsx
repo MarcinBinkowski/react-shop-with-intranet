@@ -6,7 +6,7 @@ const fetchOptions = {
     'Content-Type': 'application/json' 
   }
 }
-const API_URL = '/api'
+const API_URL = '/api/Users'
 
 
 // Get all users
