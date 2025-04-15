@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
 import { DataCard } from '@/components/common/DataCard'
 import {
@@ -33,7 +33,7 @@ const mockUsers: User[] = [
   },
   {
     id: '2',
-    name: 'Ktos Jakis',
+    name: 'Ktos Jakis2',
     email: 'ktos@jakis.com',
     role: 'Designer',
     department: 'Design',
@@ -184,6 +184,30 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>(mockUsers)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
+  const dynamicFilterFields = useMemo(() => {
+    const roles = Array.from(new Set(users.map(user => user.role)))
+    const departments = Array.from(new Set(users.map(user => user.department)))
+    
+    return [
+      {
+        name: 'role',
+        label: 'Role',
+        options: roles.map(role => ({
+          label: role,
+          value: role
+        }))
+      },
+      {
+        name: 'department',
+        label: 'Department',
+        options: departments.map(dept => ({
+          label: dept,
+          value: dept
+        }))
+      }
+    ]
+  }, [users])
+
   const handleCreateUser = (newUser: Omit<User, 'id'>) => {
     const user = {
       ...newUser,
@@ -202,26 +226,6 @@ export default function UsersPage() {
       user.id === updatedUser.id ? updatedUser : user
     ))
   }
-
-  const filterFields = [
-    {
-      name: 'role',
-      label: 'Role',
-      options: [
-        { label: 'Developer', value: 'Developer' },
-        { label: 'Designer', value: 'Designer' },
-        { label: 'Manager', value: 'Manager' },
-      ]
-    },
-    {
-      name: 'department',
-      label: 'Department',
-      options: [
-        { label: 'Engineering', value: 'Engineering' },
-        { label: 'Design', value: 'Design' },
-      ]
-    }
-  ]
 
   const sortFields = [
     { label: 'Name', value: 'name' },
@@ -251,7 +255,7 @@ export default function UsersPage() {
             onUpdate={handleUpdateUser}
           />
         )}
-        filterFields={filterFields}
+        filterFields={dynamicFilterFields}
         sortFields={sortFields}
         searchPlaceholder="Search users..."
         onCreateClick={() => setIsCreateDialogOpen(true)}
@@ -272,4 +276,4 @@ export default function UsersPage() {
       </Dialog>
     </>
   )
-} 
+}
