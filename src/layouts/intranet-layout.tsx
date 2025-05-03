@@ -11,8 +11,8 @@ const intranetNavItems = [
         icon: <Package className="h-4 w-4" />,
       },
       {
-        name: "Users",
-        href: "/intranet/users",
+        name: "Employee",
+        href: "/intranet/employees",
         icon: <User className="h-4 w-4" />,
       },
       {

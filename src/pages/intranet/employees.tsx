@@ -11,10 +11,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createUser, deleteUser, getUsers, updateUser } from '@/api/users'
+import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from '@/api/employees'
 import { formatDate } from '@/lib/utils'
 
-interface User {
+interface Employee {
   id: string
   name: string
   email: string
@@ -23,19 +23,19 @@ interface User {
   joinedDate: string
 }
 
-interface UserFormProps {
-  user: Partial<User>
-  onSubmit: (user: Omit<User, 'id'>) => void
+interface EmployeeFormProps {
+  employee: Partial<Employee>
+  onSubmit: (employee: Omit<Employee, 'id'>) => void
   submitLabel: string
 }
 
-function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
-  const [formData, setFormData] = useState<Omit<User, 'id'>>({
-    name: user.name || '',
-    email: user.email || '',
-    role: user.role || '',
-    department: user.department || '',
-    joinedDate: user.joinedDate || new Date().toISOString().split('T')[0]
+function EmployeeForm({ employee, onSubmit, submitLabel }: EmployeeFormProps) {
+  const [formData, setFormData] = useState<Omit<Employee, 'id'>>({
+    name: employee.name || '',
+    email: employee.email || '',
+    role: employee.role || '',
+    department: employee.department || '',
+    joinedDate: employee.joinedDate || new Date().toISOString().split('T')[0]
   })
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -102,47 +102,47 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
   )
 }
 
-function UserCard({ user, onDelete, onUpdate }: { 
-  user: User
+function EmployeeCard({ employee, onDelete, onUpdate }: { 
+  employee: Employee
   onDelete: (id: string) => void
-  onUpdate: (user: User) => void 
+  onUpdate: (employee: Employee) => void 
 }) {
   const [isEditing, setIsEditing] = useState(false)
 
-  const handleUpdate = (updatedUser: Omit<User, 'id'>) => {
-    onUpdate({ ...updatedUser, id: user.id })
+  const handleUpdate = (updatedEmployee: Omit<Employee, 'id'>) => {
+    onUpdate({ ...updatedEmployee, id: employee.id })
     setIsEditing(false)
   }
 
   return (
     <>
       <DataCard
-        title={user.name}
+        title={employee.name}
         onEdit={() => setIsEditing(true)}
-        onDelete={() => onDelete(user.id)}
+        onDelete={() => onDelete(employee.id)}
       >
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Email:</span> {user.email}
+          <span className="font-semibold">Email:</span> {employee.email}
         </p>
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Role:</span> {user.role}
+          <span className="font-semibold">Role:</span> {employee.role}
         </p>
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Department:</span> {user.department}
+          <span className="font-semibold">Department:</span> {employee.department}
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Joined:</span>{' '}
-          {formatDate(user.joinedDate)}
+          {formatDate(employee.joinedDate)}
         </p>
       </DataCard>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Edit Employee</DialogTitle>
           </DialogHeader>
-          <UserForm
-            user={user}
+          <EmployeeForm
+            employee={employee}
             onSubmit={handleUpdate}
             submitLabel="Save Changes"
           />
@@ -152,14 +152,14 @@ function UserCard({ user, onDelete, onUpdate }: {
   )
 }
 
-export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([])
+export default function EmployeesPage() {
+  const [employees, setEmployees] = useState<Employee[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   const dynamicFilterFields = useMemo(() => {
-    const roles = Array.from(new Set(users.map(user => user.role)))
-    const departments = Array.from(new Set(users.map(user => user.department)))
+    const roles = Array.from(new Set(employees.map(employee => employee.role)))
+    const departments = Array.from(new Set(employees.map(employee => employee.department)))
     
     return [
       {
@@ -179,53 +179,53 @@ export default function UsersPage() {
         }))
       }
     ]
-  }, [users])
+  }, [employees])
   useEffect(() => {
-    fetchUsers()
+    fetchEmployees()
   }, [])
 
-  const fetchUsers = async () => {
+  const fetchEmployees = async () => {
     try {
       setIsLoading(true)
-      const data = await getUsers()
-      setUsers(data)
+      const data = await getEmployees()
+      setEmployees(data)
     } catch (error) {
-      console.error('Error fetching users:', error)
+      console.error('Error fetching employees:', error)
     } finally {
       setIsLoading(false)
     }
   }
   
-  const handleCreateUser = async (newUser: Omit<User, 'id'>) => {
+  const handleCreateEmployee = async (newEmployee: Omit<Employee, 'id'>) => {
     try {
       setIsLoading(true)
-      const createdUser = await createUser(newUser)
-      setUsers(prev => [...prev, createdUser])
+      const createdEmployee = await createEmployee(newEmployee)
+      setEmployees(prev => [...prev, createdEmployee])
       setIsCreateDialogOpen(false)
     } catch (error) {
-      console.error('Error creating user:', error)
+      console.error('Error creating employee:', error)
     }
     finally {
       setIsLoading(false)
     }
   }
-  const handleDeleteUser = async (userId: string) => {
+  const handleDeleteEmployee = async (employeeId: string) => {
     try {
-      await deleteUser(userId)
-      setUsers(prev => prev.filter(user => user.id !== userId))
+      await deleteEmployee(employeeId)
+      setEmployees(prev => prev.filter(employee => employee.id !== employeeId))
     } catch (error) {
-      console.error('Error deleting user:', error)
+      console.error('Error deleting employee:', error)
     }
   }
 
-  const handleUpdateUser = async (updatedUser: User) => {
+  const handleUpdateEmployee= async (updatedEmployee: Employee) => {
     try {
-      await updateUser(updatedUser)
-      setUsers(prev => prev.map(user => 
-        user.id === updatedUser.id ? updatedUser : user
+      await updateEmployee(updatedEmployee)
+      setEmployees(prev => prev.map(employee => 
+        employee.id === updatedEmployee.id ? updatedEmployee : employee
       ))
     } catch (error) {
-      console.error('Error updating user:', error)
+      console.error('Error updating employee:', error)
     }
   }
 
@@ -236,7 +236,7 @@ export default function UsersPage() {
     { label: 'Join Date', value: 'joinedDate' },
   ]
 
-  const defaultUser = {
+  const defaultEmployee = {
     name: '',
     email: '',
     role: '',
@@ -248,20 +248,20 @@ export default function UsersPage() {
   }
   return (
     <>
-      <DataListPage<User>
-        title="Users"
-        items={users}
-        renderItem={(user) => (
-          <UserCard 
-            key={user.id} 
-            user={user} 
-            onDelete={handleDeleteUser}
-            onUpdate={handleUpdateUser}
+      <DataListPage<Employee>
+        title="Employees"
+        items={employees}
+        renderItem={(employee) => (
+          <EmployeeCard 
+            key={employee.id} 
+            employee={employee} 
+            onDelete={handleDeleteEmployee}
+            onUpdate={handleUpdateEmployee}
           />
         )}
         filterFields={dynamicFilterFields}
         sortFields={sortFields}
-        searchPlaceholder="Search users..."
+        searchPlaceholder="Search employees..."
         onCreateClick={() => setIsCreateDialogOpen(true)}
         searchFields={['name', 'email', 'department']}
       />
@@ -269,12 +269,12 @@ export default function UsersPage() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New User</DialogTitle>
+            <DialogTitle>Create New Employee</DialogTitle>
           </DialogHeader>
-          <UserForm
-            user={defaultUser}
-            onSubmit={handleCreateUser}
-            submitLabel="Create User"
+          <EmployeeForm
+            employee={defaultEmployee}
+            onSubmit={handleCreateEmployee}
+            submitLabel="Create Employee"
           />
         </DialogContent>
       </Dialog>
