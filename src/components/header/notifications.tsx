@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Button } from '../ui/button'
-import { Bell } from 'lucide-react'
+import { Bell, Search } from 'lucide-react'
 import NotificationItem from './notifications-item'
 import { 
   DropdownMenu, 
@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '../ui/dropdown-menu'
+import { Input } from '../ui/input'
 import { getNotifications, getUnreadNotifications, markNotificationAsRead } from '@/api/notifications'
 import { useUser } from '@/context/user-context'
 import { useNavigate } from 'react-router-dom'
@@ -23,6 +24,7 @@ interface NotificationData {
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState<NotificationData[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [showAllNotifications, setShowAllNotifications] = useState(false)
   const [open, setOpen] = useState(false)
   const { user } = useUser()
@@ -64,6 +66,13 @@ export default function Notifications() {
 
   const unreadCount = notifications.filter(n => !n.isRead).length
 
+  const filteredNotifications = showAllNotifications 
+    ? notifications.filter(notification => 
+        notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        notification.content.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : notifications
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -77,31 +86,55 @@ export default function Notifications() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel>
-          {showAllNotifications ? 'All Notifications' : 'Unread Notifications'}
-        </DropdownMenuLabel>
+        <div className="flex flex-col gap-2 p-2">
+          <DropdownMenuLabel>
+            {showAllNotifications ? 'All Notifications' : 'Unread Notifications'}
+          </DropdownMenuLabel>
+          
+          {showAllNotifications && (
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search notifications..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+          )}
+        </div>
+        
         <DropdownMenuSeparator />
-        {notifications.length > 0 ? (
-          notifications.map((item, index) => (
-            <NotificationItem
-              key={item.id}
-              id={item.id}
-              title={`${index + 1}. ${item.title}`}
-              description={item.content}
-              isRead={item.isRead}
-              onMarkAsRead={handleMarkAsRead}
-            />
-          ))
-        ) : (
-          <DropdownMenuItem disabled>
-            No notifications
-          </DropdownMenuItem>
-        )}
+        
+        <div className="max-h-[300px] overflow-y-auto">
+          {filteredNotifications.length > 0 ? (
+            filteredNotifications.map((item, index) => (
+              <NotificationItem
+                key={item.id}
+                id={item.id}
+                title={`${index + 1}. ${item.title}`}
+                description={item.content}
+                isRead={item.isRead}
+                onMarkAsRead={handleMarkAsRead}
+              />
+            ))
+          ) : (
+            <DropdownMenuItem disabled>
+              {searchQuery 
+                ? 'No matching notifications' 
+                : 'No notifications'}
+            </DropdownMenuItem>
+          )}
+        </div>
+        
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer justify-center"
           onSelect={(e) => {
             e.preventDefault()
+            if (showAllNotifications) {
+              setSearchQuery('')
+            }
             showAllNotifications ? fetchUnreadNotifications() : fetchAllNotifications()
           }}
         >

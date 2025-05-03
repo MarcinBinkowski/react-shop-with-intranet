@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
 import {
   Dialog,
@@ -196,17 +196,6 @@ export default function NotificationsPage() {
     }
   }
 
-  const filterFields = [
-    {
-      name: 'isRead',
-      label: 'Status',
-      options: [
-        { label: 'Read', value: 'true' },
-        { label: 'Unread', value: 'false' }
-      ]
-    }
-  ]
-
   const sortFields = [
     { label: 'Title', value: 'title' },
     { label: 'User ID', value: 'userId' }
@@ -219,6 +208,31 @@ export default function NotificationsPage() {
     userId: 0
   }
 
+  const dynamicFilterFields = useMemo(() => {
+    const userIds = Array.from(new Set(notifications.map(notification => notification.userId)))
+    const statuses = ['Read', 'Unread']
+    
+    return [
+      {
+        name: 'userId',
+        label: 'User',
+        options: userIds.sort((a, b) => a - b).map(userId => ({
+            label: `User ${userId}`,
+            value: userId.toString()
+          }))
+        
+      },
+      {
+        name: 'isRead',
+        label: 'Status',
+        options: statuses.map(status => ({
+            label: status,
+            value: status === 'Read' ? 'true' : 'false'
+          }))
+      }
+    ]
+  }, [notifications])
+
   if (isLoading) {
     return <div>Loading...</div>
   }
@@ -228,7 +242,7 @@ export default function NotificationsPage() {
       <DataListPage<Notification>
         title="Notifications"
         items={notifications}
-        filterFields={filterFields}
+        filterFields={dynamicFilterFields}
         sortFields={sortFields}
         searchPlaceholder="Search notifications..."
         onCreateClick={() => setIsCreateDialogOpen(true)}
