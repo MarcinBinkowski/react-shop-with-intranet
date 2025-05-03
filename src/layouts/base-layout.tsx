@@ -35,7 +35,6 @@ interface BaseLayoutProps {
   }[]
 }
 
-// This wrapper component allows us to access the sidebar context
 const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
   const { toggleSidebar } = useSidebar()
   const auth = useUser()

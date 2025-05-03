@@ -13,5 +13,3 @@ export function ShowMenuButton({ onMenuClick }: ShowMenuButtonProps) {
       </div>
   )
 }
-
-//  default ShowMenuButton

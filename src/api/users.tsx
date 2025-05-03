@@ -1,6 +1,5 @@
 import type { User } from '@/pages/intranet/users'
 
-// Simple helper for common fetch options
 const fetchOptions = {
   headers: { 
     'Content-Type': 'application/json' 

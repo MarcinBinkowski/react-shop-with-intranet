@@ -202,7 +202,7 @@ export default function UsersPage() {
   const defaultUser = {
     name: '',
     email: '',
-    password: '', // Added required password field
+    password: '',
     address: '',
     birthDate: new Date().toISOString().split('T')[0],
     joinedDate: new Date().toISOString().split('T')[0],
@@ -230,7 +230,6 @@ export default function UsersPage() {
       const createdUser = await createUser(newUser)
       setUsers(prev => [...prev, createdUser])
       setIsCreateDialogOpen(false)
-      // await fetchUsers()
     } catch (error) {
       console.error('Error creating user:', error)
     }

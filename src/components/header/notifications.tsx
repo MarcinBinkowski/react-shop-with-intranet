@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '../ui/dropdown-menu'
-import { getUnreadNotifications } from '@/api/notifications'
+import { getNotifications, getUnreadNotifications, markNotificationAsRead } from '@/api/notifications'
 import { useUser } from '@/context/user-context'
 import { useNavigate } from 'react-router-dom'
 
@@ -18,13 +18,14 @@ interface NotificationData {
   id: string
   title: string
   content: string
-  // time?: string 
+  isRead: boolean
 }
 
 export default function Notifications() {
-  const [unreadNotifications, setUnreadNotifications] = useState<NotificationData[]>([])
+  const [notifications, setNotifications] = useState<NotificationData[]>([])
+  const [showAllNotifications, setShowAllNotifications] = useState(false)
+  const [open, setOpen] = useState(false)
   const { user } = useUser()
-  const navigate = useNavigate()
 
   useEffect(() => {
     if (user?.id) {
@@ -35,48 +36,76 @@ export default function Notifications() {
   const fetchUnreadNotifications = async () => {
     if (!user?.id) return
     const data = await getUnreadNotifications(user.id)
-    setUnreadNotifications(data)
+    setNotifications(data.sort((a, b) => Number(b.id) - Number(a.id)))
+    setShowAllNotifications(false)
   }
 
-  const handleViewAll = () => {
-    navigate('/notifications')
+  const fetchAllNotifications = async () => {
+    if (!user?.id) return
+    const data = await getNotifications()
+    setNotifications(data.sort((a, b) => Number(b.id) - Number(a.id)))
+    setShowAllNotifications(true)
   }
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await markNotificationAsRead(id)
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === id 
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      )
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error)
+    }
+  }
+
+  const unreadCount = notifications.filter(n => !n.isRead).length
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          {unreadNotifications.length > 0 && (
+          {unreadCount > 0 && (
             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-              {unreadNotifications.length}
+              {unreadCount}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {showAllNotifications ? 'All Notifications' : 'Unread Notifications'}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {unreadNotifications.length > 0 ? (
-          unreadNotifications.map((item) => (
+        {notifications.length > 0 ? (
+          notifications.map((item, index) => (
             <NotificationItem
               key={item.id}
               id={item.id}
-              title={item.title}
+              title={`${index + 1}. ${item.title}`}
               description={item.content}
+              isRead={item.isRead}
+              onMarkAsRead={handleMarkAsRead}
             />
           ))
         ) : (
           <DropdownMenuItem disabled>
-            No unread notifications
+            No notifications
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer justify-center"
-          onClick={handleViewAll}
+          onSelect={(e) => {
+            e.preventDefault()
+            showAllNotifications ? fetchUnreadNotifications() : fetchAllNotifications()
+          }}
         >
-          View all notifications
+          {showAllNotifications ? 'View unread' : 'View all notifications'}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

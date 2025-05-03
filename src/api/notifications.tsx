@@ -5,7 +5,7 @@ const fetchOptions = {
     'Content-Type': 'application/json' 
   }
 }
-const API_URL = '/api/Notifications'
+const API_URL = '/api/notifications'
 
 export async function getNotifications(userId?: number) {
   try {
@@ -58,11 +58,19 @@ export async function deleteNotification(id: string) {
   }
 }
 
-export async function markNotificationAsRead(id: number) {
+export async function markNotificationAsRead(id: string) {
   try {
     const response = await fetch(`${API_URL}/markasread/${id}`, {
-      method: 'PATCH'
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     })
+    
+    if (!response.ok) {
+      throw new Error('Failed to mark notification as read')
+    }
+    
     return await response.json()
   } catch (error) {
     console.error('Failed to mark notification as read:', error)
