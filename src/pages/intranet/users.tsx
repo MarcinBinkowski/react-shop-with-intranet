@@ -202,7 +202,6 @@ export default function UsersPage() {
       const createdUser = await createUser(newUser)
       setUsers(prev => [...prev, createdUser])
       setIsCreateDialogOpen(false)
-      // await fetchUsers()
     } catch (error) {
       console.error('Error creating user:', error)
     }

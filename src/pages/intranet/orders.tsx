@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
 import { DataCard } from '@/components/common/DataCard'
 import {
@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDateForForm } from '@/lib/utils'
+import { getOrders, createOrder, deleteOrder, updateOrder } from '@/api/orders'
 
 interface Order {
   id: string
@@ -26,29 +27,6 @@ interface Order {
   notes?: string
 }
 
-const mockOrders: Order[] = [
-  {
-    id: '1',
-    orderNumber: 'ORD-2024-001',
-    customerName: 'John Smith',
-    status: 'delivered',
-    orderDate: '2024-03-15',
-    deliveryDate: '2024-03-20',
-    amount: 299.99,
-    shippingAddress: '123 Main St, New York, NY 10001',
-    notes: 'Please leave at the front door'
-  },
-  {
-    id: '2',
-    orderNumber: 'ORD-2024-002',
-    customerName: 'Jane Doe',
-    status: 'processing',
-    orderDate: '2024-04-01',
-    deliveryDate: '2024-04-05',
-    amount: 149.50,
-    shippingAddress: '456 Oak Ave, Los Angeles, CA 90001'
-  },
-]
 
 interface OrderFormProps {
   order: Partial<Order>
@@ -61,9 +39,8 @@ function OrderForm({ order, onSubmit, submitLabel }: OrderFormProps) {
     orderNumber: order.orderNumber || '',
     customerName: order.customerName || '',
     status: order.status || 'pending',
-    orderDate: order.orderDate || new Date().toISOString().split('T')[0],
-    deliveryDate: order.deliveryDate || new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    amount: order.amount || 0,
+    orderDate: formatDateForForm(order.orderDate),
+    deliveryDate: formatDateForForm(order.deliveryDate),    amount: order.amount || 0,
     shippingAddress: order.shippingAddress || '',
     notes: order.notes
   })
@@ -244,26 +221,60 @@ function OrderCard({ order, onDelete, onUpdate }: {
 }
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders)
+  const [orders, setOrders] = useState<Order[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleCreateOrder = (newOrder: Omit<Order, 'id'>) => {
-    const order = {
-      ...newOrder,
-      id: Math.random().toString(36).substr(2, 9)
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true)
+      const data = await getOrders()
+      setOrders(data)
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+    } finally {
+      setIsLoading(false)
     }
-    setOrders([...orders, order])
-    setIsCreateDialogOpen(false)
   }
 
-  const handleDeleteOrder = (orderId: string) => {
-    setOrders(orders.filter(order => order.id !== orderId))
+  const handleCreateOrder = async (newOrder: Omit<Order, 'id'>) => {
+    try {
+      setIsLoading(true)
+      const createdOrder = await createOrder(newOrder)
+      setOrders(prev => [...prev, createdOrder])
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating order:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleUpdateOrder = (updatedOrder: Order) => {
-    setOrders(orders.map(order => 
-      order.id === updatedOrder.id ? updatedOrder : order
-    ))
+  const handleDeleteOrder = async (orderId: string) => {
+    try {
+      await deleteOrder(orderId)
+      setOrders(prev => prev.filter(order => order.id !== orderId))
+    } catch (error) {
+      console.error('Error deleting order:', error)
+    }
+  }
+
+  const handleUpdateOrder = async (updatedOrder: Order) => {
+    try {
+      setIsLoading(true)
+      await updateOrder(updatedOrder)
+      setOrders(prev => prev.map(order => 
+        order.id === updatedOrder.id ? updatedOrder : order
+      ))
+    } catch (error) {
+      console.error('Error updating order:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const filterFields = [
@@ -296,6 +307,9 @@ export default function OrdersPage() {
     deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     amount: 0,
     shippingAddress: ''
+  }
+  if (isLoading) {
+    return <div>Loading...</div>
   }
 
   return (

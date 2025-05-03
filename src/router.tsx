@@ -4,13 +4,11 @@ import StoreLayout from "./layouts/store-layout"
 import IntranetLayout from "./layouts/intranet-layout"
 import LoginPage from "./pages/login"
 import { UserProvider } from "./context/user-context"
-// import Dashboard from "./pages/intranet/dashboard"
 import Index from "./pages/store"
 import UsersPage from "./pages/intranet/users"
 import ProductsPage from "./pages/intranet/products"
 import InvoicesPage from "./pages/intranet/invoices"
 import OrdersPage from "./pages/intranet/orders"
-// import DocumentsPage from "./pages/intranet/documents"
 
 
 const AppRoutes: React.FC = () => {

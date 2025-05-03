@@ -5,9 +5,8 @@ const fetchOptions = {
     'Content-Type': 'application/json' 
   }
 }
-const API_URL = '/api/Invoices'
+const API_URL = '/api/invoices'
 
-// Get all invoices
 export async function getInvoices() {
   try {
     const response = await fetch(API_URL)
@@ -19,7 +18,6 @@ export async function getInvoices() {
   }
 }
 
-// Create a new invoice
 export async function createInvoice(invoice: Omit<Invoice, 'id'>) {
   try {
     const response = await fetch(API_URL, {
@@ -34,7 +32,6 @@ export async function createInvoice(invoice: Omit<Invoice, 'id'>) {
   }
 }
 
-// Update an existing invoice
 export async function updateInvoice(invoice: Invoice) {
   try {
     const response = await fetch(`${API_URL}/${invoice.id}`, {
@@ -48,8 +45,6 @@ export async function updateInvoice(invoice: Invoice) {
     throw error
   }
 }
-
-// Delete an invoice
 export async function deleteInvoice(id: string) {
   try {
     await fetch(`${API_URL}/${id}`, {

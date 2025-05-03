@@ -8,7 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 export const formatDateForForm = (dateString: string | undefined) => {
   if (!dateString) return new Date().toISOString().split('T')[0]
   const date = new Date(dateString)
-  // Ensure we're working with local date
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
     .toISOString()
     .split('T')[0]

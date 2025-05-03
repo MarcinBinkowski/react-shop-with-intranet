@@ -10,7 +10,6 @@ export function ViewSwitcher() {
   const location = useLocation()
   const { user } = useUser()
 
-  // Only show the switcher if the user is an admin
   if (!user?.isAdmin) {
     return null
   }
