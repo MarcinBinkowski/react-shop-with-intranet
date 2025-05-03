@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Edit, Trash2 } from "lucide-react"
+import { useIsMobile } from '@/hooks/use-mobile'
 
 export interface Notification {
   id: string
@@ -100,6 +101,7 @@ export default function NotificationsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     fetchNotifications()
@@ -161,84 +163,94 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-    <div className="flex justify-between items-center pb-4 border-b">
-      <h2 className="text-3xl font-bold tracking-tight">Notifications</h2>
-      <Button onClick={() => setIsCreateDialogOpen(true)}>Create New</Button>
-    </div>
+      <div className="flex justify-between items-center pb-4 border-b">
+        <h2 className="text-3xl font-bold tracking-tight">
+          {isMobile ? 'Notifs.' : 'Notifications'}
+        </h2>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          {isMobile ? 'New' : 'Create New'}
+        </Button>
+      </div>
 
-    <div className="rounded-md border shadow-sm overflow-hidden">
+      <div className="rounded-md border shadow-sm overflow-x-auto">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[60px]">
-              <span className="sr-only sm:not-sr-only">Status</span>
-              <span className="sm:hidden">St.</span>
-            </TableHead>
-            <TableHead>
-              <span className="sr-only sm:not-sr-only">Title</span>
-              <span className="sm:hidden">Ttl.</span>
-            </TableHead>
-            <TableHead className="hidden md:table-cell">Content</TableHead>
-            <TableHead className="w-[80px]">
-              <span className="sr-only sm:not-sr-only">User ID</span>
-              <span className="sm:hidden">UID</span>
-            </TableHead>
-            <TableHead className="w-[100px] text-right pr-6">
-              <span className="sr-only sm:not-sr-only">Actions</span>
-              <span className="sm:hidden">Act.</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {notifications.map((notification) => (
-            <TableRow key={notification.id}>
-              <TableCell className="w-[60px]">
-                <div className="flex justify-center">
-                  <Checkbox checked={notification.isRead} disabled />
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="font-medium" title={notification.title}>
-                  {notification.title}
-                </div>
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                <div className="truncate max-w-[400px]" title={notification.content}>
-                  {notification.content}
-                </div>
-              </TableCell>
-              <TableCell className="w-[80px]">
-                <div className="text-center" title={notification.userId}>
-                  {notification.userId}
-                </div>
-              </TableCell>
-              <TableCell className="w-[100px] text-right">
-                <div className="flex justify-end gap-1 pr-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setSelectedNotification(notification)
-                      setIsEditDialogOpen(true)
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeleteNotification(notification.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-
+  <TableHeader>
+    <TableRow>
+      <TableHead className="w-[60px] text-center">
+        {isMobile ? 'St.' : 'Status'}
+      </TableHead>
+      <TableHead className="w-[25%]">
+        {isMobile ? 'Ttl.' : 'Title'}
+      </TableHead>
+      <TableHead className="hidden md:table-cell w-[45%]">
+        Content
+      </TableHead>
+      <TableHead className="w-[80px] text-center">
+        {isMobile ? 'UID' : 'User ID'}
+      </TableHead>
+      <TableHead className="w-[100px] text-right">
+        {isMobile ? 'Act.' : 'Actions'}
+      </TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {notifications.map((notification) => (
+      <TableRow key={notification.id}>
+        <TableCell className="text-center">
+          <div className="flex justify-center">
+            <Checkbox checked={notification.isRead} disabled />
+          </div>
+        </TableCell>
+        <TableCell>
+          <div 
+            className="font-medium truncate" 
+            title={notification.title}
+          >
+            {notification.title}
+          </div>
+        </TableCell>
+        <TableCell className="hidden md:table-cell">
+          <div 
+            className="truncate" 
+            title={notification.content}
+          >
+            {notification.content}
+          </div>
+        </TableCell>
+        <TableCell className="text-center">
+          <div 
+            className="truncate" 
+            title={notification.userId}
+          >
+            {notification.userId}
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex justify-end gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSelectedNotification(notification)
+                setIsEditDialogOpen(true)
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDeleteNotification(notification.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+      </div>
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
