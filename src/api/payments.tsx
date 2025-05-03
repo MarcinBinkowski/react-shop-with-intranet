@@ -1,4 +1,4 @@
-import type { Payment } from '@/types/payment'
+import type { Payment } from '@/pages/intranet/payments'
 
 const fetchOptions = {
   headers: { 

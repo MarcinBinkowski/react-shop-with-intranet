@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { formatDate, formatDateForForm } from '@/lib/utils'
 import { getOrders, createOrder, deleteOrder, updateOrder } from '@/api/orders'
 
-interface Order {
+export interface Order {
   id: string
   orderNumber: string
   customerName: string

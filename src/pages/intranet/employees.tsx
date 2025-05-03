@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from '@/api/employees'
 import { formatDate } from '@/lib/utils'
 
-interface Employee {
+export interface Employee {
   id: string
   name: string
   email: string

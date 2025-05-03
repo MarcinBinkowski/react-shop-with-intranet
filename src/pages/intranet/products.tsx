@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createProduct, deleteProduct, getProducts, updateProduct } from '@/api/products'
 
-interface Product {
+export interface Product {
   id: string
   name: string
   category: string

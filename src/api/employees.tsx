@@ -1,4 +1,4 @@
-import type { Employee } from '@/types/employee'
+import type { Employee } from '@/pages/intranet/employees'
 
 const fetchOptions = {
   headers: { 

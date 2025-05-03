@@ -14,7 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { formatDate, formatDateForForm } from '@/lib/utils'
 import { createPayment, deletePayment, getPayments, updatePayment } from '@/api/payments'
-import type { Payment } from '@/types/payment'
+
+export interface Payment {
+    id: string
+    paymentMethod: string
+    amount: number
+    paymentDate: string
+    transactionId?: string
+    notes?: string
+    orderId: string
+  }
 
 interface PaymentFormProps {
   payment: Partial<Payment>

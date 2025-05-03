@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { createInvoice, deleteInvoice, getInvoices, updateInvoice } from '@/api/invoices'
 import { formatDate, formatDateForForm } from '@/lib/utils'
 
-interface Invoice {
+export interface Invoice {
   id: string
   invoiceNumber: string
   customerName: string

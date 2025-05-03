@@ -1,4 +1,4 @@
-import type { Order } from '@/types/order'
+import type { Order } from '@/pages/intranet/orders'
 
 const fetchOptions = {
   headers: { 
