@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
 import { DataCard } from '@/components/common/DataCard'
 import {
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { createProduct, deleteProduct, getProducts, updateProduct } from '@/api/products'
 
 interface Product {
   id: string
@@ -167,24 +168,52 @@ function ProductCard({ product, onDelete, onUpdate }: {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleCreateProduct = (newProduct: Omit<Product, 'id'>) => {
-    const product = {
-      ...newProduct,
-      id: Math.random().toString(36).substr(2, 9)
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true)
+      const data = await getProducts()
+      setProducts(data)
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    } finally {
+      setIsLoading(false)
     }
-    setProducts([...products, product])
-    setIsCreateDialogOpen(false)
   }
 
-  const handleDeleteProduct = (productId: string) => {
-    setProducts(products.filter(product => product.id !== productId))
+  const handleCreateProduct = async (newProduct: Omit<Product, 'id'>) => {
+    try {
+      const createdProduct = await createProduct(newProduct)
+      setProducts(prev => [...prev, createdProduct])
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating product:', error)
+    }
   }
 
-  const handleUpdateProduct = (updatedProduct: Product) => {
-    setProducts(products.map(product => 
-      product.id === updatedProduct.id ? updatedProduct : product
-    ))
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteProduct(productId)
+      setProducts(prev => prev.filter(product => product.id !== productId))
+    } catch (error) {
+      console.error('Error deleting product:', error)
+    }
+  }
+
+  const handleUpdateProduct = async (updatedProduct: Product) => {
+    try {
+      await updateProduct(updatedProduct)
+      setProducts(prev => prev.map(product => 
+        product.id === updatedProduct.id ? updatedProduct : product
+      ))
+    } catch (error) {
+      console.error('Error updating product:', error)
+    }
   }
 
   const filterFields = [
@@ -222,7 +251,9 @@ export default function ProductsPage() {
     stock: 0,
     status: 'In Stock'
   }
-
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
   return (
     <>
       <DataListPage<Product>

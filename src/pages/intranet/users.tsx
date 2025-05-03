@@ -59,7 +59,7 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
           id="email"
           type="email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          onChange={(e) => setFormData({ ...formData,  e.target.value })}
           required
         />
       </div>
@@ -94,7 +94,7 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <Label htmlFor="joined-date">Joined Date</Label>
         <Input
           id="joined-date"
@@ -103,7 +103,7 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
           onChange={(e) => setFormData({ ...formData, joinedDate: e.target.value })}
           required
         />
-      </div>
+      </div> */}
       <Button type="submit" className="w-full">
         {submitLabel}
       </Button>
@@ -130,6 +130,9 @@ function UserCard({ user, onDelete, onUpdate }: {
         onEdit={() => setIsEditing(true)}
         onDelete={() => onDelete(user.id)}
       >
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Name:</span> {user.name}
+        </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Email:</span> {user.email}
         </p>
@@ -211,7 +214,7 @@ export default function UsersPage() {
       const createdUser = await createUser(newUser)
       setUsers(prev => [...prev, createdUser])
       setIsCreateDialogOpen(false)
-      await fetchUsers()
+      // await fetchUsers()
     } catch (error) {
       console.error('Error creating user:', error)
     }
