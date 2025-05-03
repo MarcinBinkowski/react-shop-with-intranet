@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createUser, deleteUser, getUsers, updateUser } from '@/api/users'
+import { formatDate } from '@/lib/utils'
 
 interface User {
   id: string
@@ -59,7 +60,7 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
           id="email"
           type="email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData,  e.target.value })}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           required
         />
       </div>
@@ -94,16 +95,6 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
           </SelectContent>
         </Select>
       </div>
-      {/* <div className="space-y-2">
-        <Label htmlFor="joined-date">Joined Date</Label>
-        <Input
-          id="joined-date"
-          type="date"
-          value={formData.joinedDate}
-          onChange={(e) => setFormData({ ...formData, joinedDate: e.target.value })}
-          required
-        />
-      </div> */}
       <Button type="submit" className="w-full">
         {submitLabel}
       </Button>
@@ -131,9 +122,6 @@ function UserCard({ user, onDelete, onUpdate }: {
         onDelete={() => onDelete(user.id)}
       >
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Name:</span> {user.name}
-        </p>
-        <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Email:</span> {user.email}
         </p>
         <p className="text-sm text-muted-foreground">
@@ -144,7 +132,7 @@ function UserCard({ user, onDelete, onUpdate }: {
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Joined:</span>{' '}
-          {new Date(user.joinedDate).toLocaleDateString()}
+          {formatDate(user.joinedDate)}
         </p>
       </DataCard>
 

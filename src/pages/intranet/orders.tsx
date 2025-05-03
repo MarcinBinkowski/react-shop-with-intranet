@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { formatDate } from '@/lib/utils'
 
 interface Order {
   id: string
@@ -205,11 +206,11 @@ function OrderCard({ order, onDelete, onUpdate }: {
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Order Date:</span>{' '}
-          {new Date(order.orderDate).toLocaleDateString()}
+          {formatDate(order.orderDate)}
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Delivery Date:</span>{' '}
-          {new Date(order.deliveryDate).toLocaleDateString()}
+           {formatDate(order.deliveryDate)}
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Amount:</span> ${order.amount.toFixed(2)}
@@ -288,7 +289,7 @@ export default function OrdersPage() {
   ]
 
   const defaultOrder = {
-    orderNumber: `ORD-${new Date().getFullYear()}-${String(orders.length + 1).padStart(3, '0')}`,
+    orderNumber: `${new Date().getFullYear()}-`,
     customerName: '',
     status: 'pending' as const,
     orderDate: new Date().toISOString().split('T')[0],

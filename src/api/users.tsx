@@ -40,7 +40,7 @@ export async function createUser(user: Omit<User, 'id'>) {
 // Update an existing user
 export async function updateUser(user: User) {
   try {
-    const response = await fetch(`${API_URL}${user.id}`, {
+    const response = await fetch(`${API_URL}/${user.id}`, {
       method: 'PUT',
       ...fetchOptions,
       body: JSON.stringify(user)

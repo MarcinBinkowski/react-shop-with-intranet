@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
 import { DataCard } from '@/components/common/DataCard'
 import {
@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { createInvoice, deleteInvoice, getInvoices, updateInvoice } from '@/api/invoices'
+import { formatDate, formatDateForForm } from '@/lib/utils'
 
 interface Invoice {
   id: string
@@ -24,27 +26,6 @@ interface Invoice {
   notes?: string
 }
 
-const mockInvoices: Invoice[] = [
-  {
-    id: '1',
-    invoiceNumber: 'INV-2024-001',
-    customerName: 'John Smith',
-    status: 'paid',
-    issueDate: '2024-03-15',
-    dueDate: '2024-04-14',
-    amount: 2231.86,
-    notes: 'Thank you for your business!'
-  },
-  {
-    id: '2',
-    invoiceNumber: 'INV-2024-002',
-    customerName: 'Jane Doe',
-    status: 'sent',
-    issueDate: '2024-04-01',
-    dueDate: '2024-05-01',
-    amount: 960.00
-  },
-]
 
 interface InvoiceFormProps {
   invoice: Partial<Invoice>
@@ -57,9 +38,9 @@ function InvoiceForm({ invoice, onSubmit, submitLabel }: InvoiceFormProps) {
     invoiceNumber: invoice.invoiceNumber || '',
     customerName: invoice.customerName || '',
     status: invoice.status || 'draft',
-    issueDate: invoice.issueDate || new Date().toISOString().split('T')[0],
-    dueDate: invoice.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    amount: invoice.amount || 0,
+    issueDate: formatDateForForm(invoice.issueDate),
+    dueDate: formatDateForForm(invoice.dueDate),
+        amount: invoice.amount || 0,
     notes: invoice.notes
   })
 
@@ -192,11 +173,10 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Issue Date:</span>{' '}
-          {new Date(invoice.issueDate).toLocaleDateString()}
-        </p>
+          {formatDate(invoice.issueDate)}        </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Due Date:</span>{' '}
-          {new Date(invoice.dueDate).toLocaleDateString()}
+          {formatDate(invoice.dueDate)}
         </p>
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Amount:</span> ${invoice.amount.toFixed(2)}
@@ -226,27 +206,60 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
 }
 
 export default function InvoicesPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices)
+  const [invoices, setInvoices] = useState<Invoice[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleCreateInvoice = (newInvoice: Omit<Invoice, 'id'>) => {
-    const invoice = {
-      ...newInvoice,
-      id: Math.random().toString(36).substr(2, 9)
+
+  useEffect(() => {
+    fetchInvoices()
+  }, [])
+
+  const fetchInvoices = async () => {
+    try {
+      setIsLoading(true)
+      const data = await getInvoices()
+      setInvoices(data)
+    } catch (error) {
+      console.error('Error fetching invoices:', error)
+    } finally {
+      setIsLoading(false)
     }
-    setInvoices([...invoices, invoice])
-    setIsCreateDialogOpen(false)
   }
 
-  const handleDeleteInvoice = (invoiceId: string) => {
-    setInvoices(invoices.filter(invoice => invoice.id !== invoiceId))
+  const handleCreateInvoice = async (newInvoice: Omit<Invoice, 'id'>) => {
+    try {
+      setIsLoading(true)
+      const createdInvoice = await createInvoice(newInvoice)
+      setInvoices(prev => [...prev, createdInvoice])
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating invoice:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleUpdateInvoice = (updatedInvoice: Invoice) => {
-    setInvoices(invoices.map(invoice => 
-      invoice.id === updatedInvoice.id ? updatedInvoice : invoice
-    ))
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    try {
+      await deleteInvoice(invoiceId)
+      setInvoices(prev => prev.filter(invoice => invoice.id !== invoiceId))
+    } catch (error) {
+      console.error('Error deleting invoice:', error)
+    }
   }
+
+  const handleUpdateInvoice = async (updatedInvoice: Invoice) => {
+    try {
+      await updateInvoice(updatedInvoice)
+      setInvoices(prev => prev.map(invoice => 
+        invoice.id === updatedInvoice.id ? updatedInvoice : invoice
+      ))
+    } catch (error) {
+      console.error('Error updating invoice:', error)
+    }
+  }
+
 
   const filterFields = [
     {
@@ -271,12 +284,15 @@ export default function InvoicesPage() {
   ]
 
   const defaultInvoice = {
-    invoiceNumber: `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, '0')}`,
+    invoiceNumber: `${new Date().getFullYear()}-`,
     customerName: '',
     status: 'draft' as const,
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     amount: 0
+  }
+  if (isLoading) {
+    return <div>Loading...</div>
   }
 
   return (
