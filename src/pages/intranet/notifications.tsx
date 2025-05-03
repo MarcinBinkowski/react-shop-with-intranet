@@ -160,34 +160,41 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center pb-4 border-b">
         <h2 className="text-3xl font-bold tracking-tight">Notifications</h2>
         <Button onClick={() => setIsCreateDialogOpen(true)}>Create New</Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">Status</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Content</TableHead>
-              <TableHead>User ID</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[80px] text-center">Status</TableHead>
+              <TableHead className="w-[250px]">Title</TableHead>
+              <TableHead className="min-w-[400px]">Content</TableHead>
+              <TableHead className="w-[120px]">User ID</TableHead>
+              <TableHead className="w-[100px] text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {notifications.map((notification) => (
               <TableRow key={notification.id}>
-                <TableCell>
-                  <Checkbox checked={notification.isRead} disabled />
+                <TableCell className="text-center">
+                  <div className="flex justify-center">
+                    <Checkbox 
+                      checked={notification.isRead} 
+                      disabled 
+                    />
+                  </div>
                 </TableCell>
-                <TableCell>{notification.title}</TableCell>
-                <TableCell>{notification.content}</TableCell>
+                <TableCell className="font-medium">{notification.title}</TableCell>
+                <TableCell className="max-w-[400px] truncate">
+                  {notification.content}
+                </TableCell>
                 <TableCell>{notification.userId}</TableCell>
                 <TableCell>
-                  <div className="flex space-x-2">
+                  <div className="flex justify-center space-x-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -214,7 +221,7 @@ export default function NotificationsPage() {
       </div>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Create New Notification</DialogTitle>
           </DialogHeader>
@@ -227,7 +234,7 @@ export default function NotificationsPage() {
       </Dialog>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Notification</DialogTitle>
           </DialogHeader>
@@ -242,4 +249,5 @@ export default function NotificationsPage() {
       </Dialog>
     </div>
   )
+
 }
