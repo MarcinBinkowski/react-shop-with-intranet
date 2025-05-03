@@ -227,11 +227,16 @@ export default function UsersPage() {
   
   const handleCreateUser = async (newUser: Omit<User, 'id'>) => {
     try {
+      setIsLoading(true)
       const createdUser = await createUser(newUser)
       setUsers(prev => [...prev, createdUser])
       setIsCreateDialogOpen(false)
+      await fetchUsers()
     } catch (error) {
       console.error('Error creating user:', error)
+    }
+    finally {
+      setIsLoading(false)
     }
   }
   const handleDeleteUser = async (userId: string) => {

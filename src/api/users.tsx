@@ -23,6 +23,7 @@ export async function getUsers() {
 
 // Create a new user
 export async function createUser(user: Omit<User, 'id'>) {
+  console.info('Creating user:', user)
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
