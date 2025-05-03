@@ -22,26 +22,6 @@ interface User {
   joinedDate: string
 }
 
-// Mock data
-const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'Marcin',
-    email: 'Marcni.Binkowski@gmail.com',
-    role: 'Developer',
-    department: 'Engineering',
-    joinedDate: '2023-01-01'
-  },
-  {
-    id: '2',
-    name: 'Ktos Jakis2',
-    email: 'ktos@jakis.com',
-    role: 'Designer',
-    department: 'Design',
-    joinedDate: '2023-02-15'
-  },
-]
-
 interface UserFormProps {
   user: Partial<User>
   onSubmit: (user: Omit<User, 'id'>) => void
@@ -182,7 +162,7 @@ function UserCard({ user, onDelete, onUpdate }: {
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(mockUsers)
+  const [users, setUsers] = useState<User[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 

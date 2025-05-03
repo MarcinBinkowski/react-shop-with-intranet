@@ -21,32 +21,6 @@ interface Product {
   status: string
 }
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Laptop Pro',
-    category: 'Electronics',
-    price: 1299.99,
-    stock: 50,
-    status: 'In Stock'
-  },
-  {
-    id: '2',
-    name: 'Wireless Mouse',
-    category: 'Accessories',
-    price: 29.99,
-    stock: 100,
-    status: 'In Stock'
-  },
-  {
-    id: '3',
-    name: 'Gaming Monitor',
-    category: 'Electronics',
-    price: 499.99,
-    stock: 0,
-    status: 'Out of Stock'
-  },
-]
 
 interface ProductFormProps {
   product: Partial<Product>
@@ -191,7 +165,7 @@ function ProductCard({ product, onDelete, onUpdate }: {
 }
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>(mockProducts)
+  const [products, setProducts] = useState<Product[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   const handleCreateProduct = (newProduct: Omit<Product, 'id'>) => {
