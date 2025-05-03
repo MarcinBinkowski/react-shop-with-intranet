@@ -265,16 +265,13 @@ export default function OrdersPage() {
 
   const handleUpdateOrder = async (updatedOrder: Order) => {
     try {
-      setIsLoading(true)
       await updateOrder(updatedOrder)
       setOrders(prev => prev.map(order => 
         order.id === updatedOrder.id ? updatedOrder : order
       ))
     } catch (error) {
       console.error('Error updating order:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    } 
   }
 
   const filterFields = [

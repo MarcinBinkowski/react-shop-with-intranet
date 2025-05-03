@@ -207,16 +207,12 @@ export default function ProductsPage() {
 
   const handleUpdateProduct = async (updatedProduct: Product) => {
     try {
-      setIsLoading(true)
       await updateProduct(updatedProduct)
       setProducts(prev => prev.map(product => 
         product.id === updatedProduct.id ? updatedProduct : product
       ))
     } catch (error) {
       console.error('Error updating product:', error)
-    }
-    finally {
-      setIsLoading(false)
     }
   }
 

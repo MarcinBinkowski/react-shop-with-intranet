@@ -32,7 +32,7 @@ const intranetNavItems = [
       },
       {
         name: "Payments",
-        href: "/intranet/orders",
+        href: "/intranet/payments",
         icon: <DollarSign className="h-4 w-4" />,
       },
       

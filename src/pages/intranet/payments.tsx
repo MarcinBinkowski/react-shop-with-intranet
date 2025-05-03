@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { DataListPage } from '@/components/common/DataListPage'
 import { DataCard } from '@/components/common/DataCard'
 import {
@@ -7,39 +7,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createUser, deleteUser, getUsers, updateUser } from '@/api/users'
+import { Textarea } from "@/components/ui/textarea"
 import { formatDate, formatDateForForm } from '@/lib/utils'
+import { createPayment, deletePayment, getPayments, updatePayment } from '@/api/payments'
+import type { Payment } from '@/types/payment'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  password: string
-  address?: string
-  birthDate: string
-  joinedDate: string
-  isAdmin: boolean
-}
-
-interface UserFormProps {
-  user: Partial<User>
-  onSubmit: (user: Omit<User, 'id'>) => void
+interface PaymentFormProps {
+  payment: Partial<Payment>
+  onSubmit: (payment: Omit<Payment, 'id'>) => void
   submitLabel: string
 }
 
-function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
-  const [formData, setFormData] = useState<Omit<User, 'id'>>({
-    name: user.name || '',
-    email: user.email || '',
-    password: user.password || '',
-    address: user.address || '',
-    birthDate: formatDateForForm(user.birthDate),
-    joinedDate: formatDateForForm(user.joinedDate),
-    isAdmin: user.isAdmin || false
+function PaymentForm({ payment, onSubmit, submitLabel }: PaymentFormProps) {
+  const [formData, setFormData] = useState<Omit<Payment, 'id'>>({
+    paymentMethod: payment.paymentMethod || '',
+    amount: payment.amount || 0,
+    paymentDate: formatDateForForm(payment.paymentDate),
+    notes: payment.notes || '',
+    orderId: payment.orderId || ''
   })
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,68 +39,60 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="paymentMethod">Payment Method</Label>
+        <Select
+          value={formData.paymentMethod}
+          onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
+        >
+          <SelectTrigger id="paymentMethod">
+            <SelectValue placeholder="Select payment method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Credit Card">Credit Card</SelectItem>
+            <SelectItem value="PayPal">PayPal</SelectItem>
+            <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="amount">Amount</Label>
         <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          id="amount"
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.amount}
+          onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
           required
-          minLength={2}
-          maxLength={100}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="paymentDate">Payment Date</Label>
         <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-          minLength={3}
-          maxLength={100}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          required
-          minLength={6}
-          maxLength={100}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          maxLength={200}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="birthDate">Birth Date</Label>
-        <Input
-          id="birthDate"
+          id="paymentDate"
           type="date"
-          value={formData.birthDate}
-          onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+          value={formData.paymentDate}
+          onChange={(e) => setFormData({ ...formData, paymentDate: e.target.value })}
           required
         />
       </div>
-      <div className="flex items-center space-x-2">
-        <input
-          id="isAdmin"
-          type="checkbox"
-          checked={formData.isAdmin}
-          onChange={(e) => setFormData({ ...formData, isAdmin: e.target.checked })}
-          className="h-4 w-4 rounded border-gray-300"
+      <div className="space-y-2">
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea
+          id="notes"
+          value={formData.notes}
+          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          maxLength={500}
         />
-        <Label htmlFor="isAdmin">Is Admin</Label>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="orderId">Order ID</Label>
+        <Input
+          id="orderId"
+          value={formData.orderId}
+          onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
+          required
+        />
       </div>
       <Button type="submit" className="w-full">
         {submitLabel}
@@ -120,54 +101,52 @@ function UserForm({ user, onSubmit, submitLabel }: UserFormProps) {
   )
 }
 
-function UserCard({ user, onDelete, onUpdate }: { 
-  user: User
+function PaymentCard({ payment, onDelete, onUpdate }: {
+  payment: Payment
   onDelete: (id: string) => void
-  onUpdate: (user: User) => void 
+  onUpdate: (payment: Payment) => void
 }) {
   const [isEditing, setIsEditing] = useState(false)
 
-  const handleUpdate = (updatedUser: Omit<User, 'id'>) => {
-    onUpdate({ ...updatedUser, id: user.id })
+  const handleUpdate = (updatedPayment: Omit<Payment, 'id'>) => {
+    onUpdate({ ...updatedPayment, id: payment.id })
     setIsEditing(false)
   }
 
   return (
     <>
       <DataCard
-        title={user.name}
+        title={`Payment #${payment.id}`}
         onEdit={() => setIsEditing(true)}
-        onDelete={() => onDelete(user.id)}
+        onDelete={() => onDelete(payment.id)}
       >
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Email:</span> {user.email}
+          <span className="font-semibold">Method:</span> {payment.paymentMethod}
         </p>
-        {user.address && (
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold">Address:</span> {user.address}
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Amount:</span> ${payment.amount.toFixed(2)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Date:</span> {formatDate(payment.paymentDate)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Order ID:</span> {payment.orderId}
+        </p>
+        {payment.notes && (
+          <p className="text-sm text-muted-foreground mt-2">
+            <span className="font-semibold">Notes:</span><br />
+            {payment.notes}
           </p>
         )}
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Birth Date:</span>{' '}
-          {formatDate(user.birthDate)}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Joined Date:</span>{' '}
-          {formatDate(user.joinedDate)}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Role:</span>{' '}
-          {user.isAdmin ? 'Administrator' : 'User'}
-        </p>
       </DataCard>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Edit Payment</DialogTitle>
           </DialogHeader>
-          <UserForm
-            user={user}
+          <PaymentForm
+            payment={payment}
             onSubmit={handleUpdate}
             submitLabel="Save Changes"
           />
@@ -177,120 +156,117 @@ function UserCard({ user, onDelete, onUpdate }: {
   )
 }
 
-export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([])
+export default function PaymentsPage() {
+  const [payments, setPayments] = useState<Payment[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  useEffect(() => {
+    fetchPayments()
+  }, [])
+
+  const fetchPayments = async () => {
+    try {
+      setIsLoading(true)
+      const data = await getPayments()
+      setPayments(data)
+    } catch (error) {
+      console.error('Error fetching payments:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCreatePayment = async (newPayment: Omit<Payment, 'id'>) => {
+    try {
+      const createdPayment = await createPayment(newPayment)
+      setPayments(prev => [...prev, createdPayment])
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating payment:', error)
+    }
+  }
+
+  const handleDeletePayment = async (paymentId: string) => {
+    try {
+      await deletePayment(paymentId)
+      setPayments(prev => prev.filter(payment => payment.id !== paymentId))
+    } catch (error) {
+      console.error('Error deleting payment:', error)
+    }
+  }
+
+  const handleUpdatePayment = async (updatedPayment: Payment) => {
+    try {
+      await updatePayment(updatedPayment)
+      console.info(payments)
+      setPayments(prev => prev.map(payment => 
+        payment.id === updatedPayment.id ? updatedPayment : payment
+      ))
+      console.info(payments)
+    } catch (error) {
+      console.error('Error updating payment:', error)
+    } 
+  }
+
   const filterFields = [
     {
-      name: 'isAdmin',
-      label: 'Role',
+      name: 'paymentMethod',
+      label: 'Payment Method',
       options: [
-        { label: 'Administrator', value: 'true' },
-        { label: 'User', value: 'false' }
+        { label: 'Credit Card', value: 'Credit Card' },
+        { label: 'PayPal', value: 'PayPal' },
+        { label: 'Bank Transfer', value: 'Bank Transfer' },
       ]
     }
   ]
 
   const sortFields = [
-    { label: 'Name', value: 'name' },
-    { label: 'Email', value: 'email' },
-    { label: 'Birth Date', value: 'birthDate' },
-    { label: 'Joined Date', value: 'joinedDate' },
+    { label: 'Payment Date', value: 'paymentDate' },
+    { label: 'Amount', value: 'amount' },
+    { label: 'Payment Method', value: 'paymentMethod' },
   ]
 
-  const defaultUser = {
-    name: '',
-    email: '',
-    password: '', // Added required password field
-    address: '',
-    birthDate: new Date().toISOString().split('T')[0],
-    joinedDate: new Date().toISOString().split('T')[0],
-    isAdmin: false
-  }
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true)
-      const data = await getUsers()
-      setUsers(data)
-    } catch (error) {
-      console.error('Error fetching users:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  
-  const handleCreateUser = async (newUser: Omit<User, 'id'>) => {
-    try {
-      setIsLoading(true)
-      const createdUser = await createUser(newUser)
-      setUsers(prev => [...prev, createdUser])
-      setIsCreateDialogOpen(false)
-      // await fetchUsers()
-    } catch (error) {
-      console.error('Error creating user:', error)
-    }
-    finally {
-      setIsLoading(false)
-    }
-  }
-  const handleDeleteUser = async (userId: string) => {
-    try {
-      await deleteUser(userId)
-      setUsers(prev => prev.filter(user => user.id !== userId))
-    } catch (error) {
-      console.error('Error deleting user:', error)
-    }
-  }
-
-  const handleUpdateUser = async (updatedUser: User) => {
-    try {
-      await updateUser(updatedUser)
-      setUsers(prev => prev.map(user => 
-        user.id === updatedUser.id ? updatedUser : user
-      ))
-    } catch (error) {
-      console.error('Error updating user:', error)
-    }
+  const defaultPayment = {
+    paymentMethod: '',
+    amount: 0,
+    paymentDate: new Date().toISOString().split('T')[0],
+    orderId: '',
   }
 
   if (isLoading) {
     return <div>Loading...</div>
   }
+
   return (
     <>
-      <DataListPage<User>
-        title="Users"
-        items={users}
-        renderItem={(user) => (
-          <UserCard 
-            key={user.id} 
-            user={user} 
-            onDelete={handleDeleteUser}
-            onUpdate={handleUpdateUser}
+      <DataListPage<Payment>
+        title="Payments"
+        items={payments}
+        renderItem={(payment) => (
+          <PaymentCard
+            key={payment.id}
+            payment={payment}
+            onDelete={handleDeletePayment}
+            onUpdate={handleUpdatePayment}
           />
         )}
         filterFields={filterFields}
         sortFields={sortFields}
-        searchPlaceholder="Search users..."
+        searchPlaceholder="Search payments..."
         onCreateClick={() => setIsCreateDialogOpen(true)}
-        searchFields={['name', 'email', 'address']}
+        searchFields={['paymentMethod', 'notes']}
       />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New User</DialogTitle>
+            <DialogTitle>Create New Payment</DialogTitle>
           </DialogHeader>
-          <UserForm
-            user={defaultUser}
-            onSubmit={handleCreateUser}
-            submitLabel="Create User"
+          <PaymentForm
+            payment={defaultPayment}
+            onSubmit={handleCreatePayment}
+            submitLabel="Create Payment"
           />
         </DialogContent>
       </Dialog>
