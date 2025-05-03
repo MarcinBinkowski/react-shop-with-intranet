@@ -24,7 +24,6 @@ export interface NotificationItemProps {
     id: string
     title: string
     description: string
-    time: string
   }
 
 export  interface AuthActionsProps {

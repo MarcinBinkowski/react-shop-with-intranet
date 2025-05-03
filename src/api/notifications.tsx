@@ -58,7 +58,7 @@ export async function deleteNotification(id: string) {
   }
 }
 
-export async function markNotificationAsRead(id: string) {
+export async function markNotificationAsRead(id: number) {
   try {
     const response = await fetch(`${API_URL}/markasread/${id}`, {
       method: 'PATCH'
@@ -67,5 +67,16 @@ export async function markNotificationAsRead(id: string) {
   } catch (error) {
     console.error('Failed to mark notification as read:', error)
     throw error
+  }
+}
+
+export async function getUnreadNotifications(userId: number) {
+  try {
+    const response = await fetch(`${API_URL}/unread/${userId}`)
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Failed to fetch unread notifications:', error)
+    return []
   }
 }

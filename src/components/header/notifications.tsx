@@ -1,39 +1,84 @@
-import React from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '../ui/button'
 import { Bell } from 'lucide-react'
 import NotificationItem from './notifications-item'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '../ui/dropdown-menu'
+import { getUnreadNotifications } from '@/api/notifications'
+import { useUser } from '@/context/user-context'
+import { useNavigate } from 'react-router-dom'
 
-const data = [
-  {id: "1", title: "New order", description: "Order #1234 has been placed", time: "2m ago" },
-  {id: "2", title: "Payment received", description: "$1,234.56 payment received", time: "1h ago" },
-  {id: "3", title: "New user", description: "User John Doe has registered", time: "5h ago" },
-  {id: "4", title: "Server update", description: "Server maintenance completed", time: "1d ago" },
-]
+interface NotificationData {
+  id: string
+  title: string
+  content: string
+  // time?: string 
+}
 
 export default function Notifications() {
+  const [unreadNotifications, setUnreadNotifications] = useState<NotificationData[]>([])
+  const { user } = useUser()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUnreadNotifications()
+    }
+  }, [user?.id])
+
+  const fetchUnreadNotifications = async () => {
+    if (!user?.id) return
+    const data = await getUnreadNotifications(user.id)
+    setUnreadNotifications(data)
+  }
+
+  const handleViewAll = () => {
+    navigate('/notifications')
+  }
+
   return (
     <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="icon" className="relative">
-        <Bell className="h-5 w-5" />
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-          5
-        </span>
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-80">
-      <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      {data.map((item) => (
-          <NotificationItem
-            key={item.id}
-            {...item}
-          />
-        ))}
-      <DropdownMenuSeparator />
-      <DropdownMenuItem className="cursor-pointer justify-center">View all notifications</DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          {unreadNotifications.length > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+              {unreadNotifications.length}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80">
+        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {unreadNotifications.length > 0 ? (
+          unreadNotifications.map((item) => (
+            <NotificationItem
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              description={item.content}
+            />
+          ))
+        ) : (
+          <DropdownMenuItem disabled>
+            No unread notifications
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem 
+          className="cursor-pointer justify-center"
+          onClick={handleViewAll}
+        >
+          View all notifications
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
