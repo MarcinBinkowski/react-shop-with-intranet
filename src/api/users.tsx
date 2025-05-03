@@ -39,7 +39,7 @@ export async function createUser(user: Omit<User, 'id'>) {
 // Update an existing user
 export async function updateUser(user: User) {
   try {
-    const response = await fetch(`API_URL${user.id}`, {
+    const response = await fetch(`${API_URL}${user.id}`, {
       method: 'PUT',
       ...fetchOptions,
       body: JSON.stringify(user)
@@ -54,7 +54,8 @@ export async function updateUser(user: User) {
 // Delete a user
 export async function deleteUser(id: string) {
   try {
-    await fetch(`API_URL${id}`, {
+    console.info('Deleting user with ID:', id)
+    await fetch(`${API_URL}/${id}`, {
       method: 'DELETE'
     })
     return true
