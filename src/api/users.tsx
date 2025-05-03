@@ -9,7 +9,6 @@ const fetchOptions = {
 const API_URL = '/api/Users'
 
 
-// Get all users
 export async function getUsers() {
   try {
     const response = await fetch(API_URL)
@@ -21,7 +20,6 @@ export async function getUsers() {
   }
 }
 
-// Create a new user
 export async function createUser(user: Omit<User, 'id'>) {
   console.info('Creating user:', user)
   try {
@@ -37,7 +35,6 @@ export async function createUser(user: Omit<User, 'id'>) {
   }
 }
 
-// Update an existing user
 export async function updateUser(user: User) {
   try {
     const response = await fetch(`${API_URL}/${user.id}`, {
@@ -52,7 +49,6 @@ export async function updateUser(user: User) {
   }
 }
 
-// Delete a user
 export async function deleteUser(id: string) {
   try {
     console.info('Deleting user with ID:', id)

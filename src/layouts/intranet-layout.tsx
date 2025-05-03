@@ -1,4 +1,4 @@
-import { Building2, FileText, Users, Calendar, Briefcase, BarChart3, Package, User } from "lucide-react"
+import { Building2, FileText, Users, Calendar, Briefcase, BarChart3, Package, User, DollarSign, BriefcaseBusiness} from "lucide-react"
 import { BaseLayout } from "@/layouts/base-layout"
 
 const intranetNavItems = [
@@ -13,6 +13,11 @@ const intranetNavItems = [
       {
         name: "Employee",
         href: "/intranet/employees",
+        icon: <BriefcaseBusiness className="h-4 w-4" />,
+      },
+      {
+        name: "Users",
+        href: "/intranet/users",
         icon: <User className="h-4 w-4" />,
       },
       {
@@ -25,8 +30,11 @@ const intranetNavItems = [
         href: "/intranet/orders",
         icon: <Package className="h-4 w-4" />,
       },
-      
-      
+      {
+        name: "Payments",
+        href: "/intranet/orders",
+        icon: <DollarSign className="h-4 w-4" />,
+      },
       
 
     ],

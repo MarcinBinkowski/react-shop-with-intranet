@@ -6,9 +6,11 @@ import LoginPage from "./pages/login"
 import { UserProvider } from "./context/user-context"
 import Index from "./pages/store"
 import EmployeesPage from "./pages/intranet/employees"
+import UsersPage from "./pages/intranet/users"
 import ProductsPage from "./pages/intranet/products"
 import InvoicesPage from "./pages/intranet/invoices"
 import OrdersPage from "./pages/intranet/orders"
+import PaymentsPage from "./pages/intranet/payments"
 
 
 const AppRoutes: React.FC = () => {
@@ -20,9 +22,11 @@ const AppRoutes: React.FC = () => {
         <Route path="/intranet" element={<IntranetLayout />}>
         {/* <Route index element={<Dashboard />} /> */}
           <Route path="employees" element={<EmployeesPage />} />
+          <Route path="users" element={<UsersPage />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="invoices" element={<InvoicesPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="payments" element={<PaymentsPage />} />
 
 
 
