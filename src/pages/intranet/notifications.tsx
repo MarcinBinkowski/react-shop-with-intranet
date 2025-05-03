@@ -1,232 +1,271 @@
-import React, { useEffect, useState } from 'react'
-import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table"
+import { useState, useEffect } from 'react'
+import { DataListPage } from '@/components/common/DataListPage'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Edit, Trash2 } from "lucide-react"
-import {
-  getNotifications,
-  createNotification,
-  updateNotification,
-  deleteNotification
-} from '@/api/notifications'
-import type { Notification } from '@/types/notification'
+import { Textarea } from "@/components/ui/textarea" 
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { getNotifications, createNotification, updateNotification, deleteNotification } from '@/api/notifications'
+import { DataCard } from '@/components/common/DataCard'
+
+export interface Notification {
+  id: string
+  title: string
+  content: string
+  isRead: boolean
+  userId: number
+}
 
 interface NotificationFormProps {
   notification: Partial<Notification>
-  onSubmit: (n: Omit<Notification,'id'>) => void
+  onSubmit: (notification: Omit<Notification, 'id'>) => void
   submitLabel: string
 }
+
 function NotificationForm({ notification, onSubmit, submitLabel }: NotificationFormProps) {
-  const [data, setData] = useState<Omit<Notification,'id'>>({
+  const [formData, setFormData] = useState<Omit<Notification, 'id'>>({
     title: notification.title || '',
     content: notification.content || '',
     isRead: notification.isRead || false,
-    userId: notification.userId || ''
+    userId: notification.userId || 0
   })
-  const handle = (e: React.FormEvent) => {
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    onSubmit(data)
+    onSubmit(formData)
   }
+
   return (
-    <form onSubmit={handle} className="space-y-4">
-      <div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
         <Input
           id="title"
-          value={data.title}
-          onChange={e => setData({ ...data, title: e.target.value })}
-          required maxLength={200}
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          required
+          maxLength={200}
         />
       </div>
-      <div>
+      
+      <div className="space-y-2">
         <Label htmlFor="content">Content</Label>
         <Textarea
           id="content"
-          value={data.content}
-          onChange={e => setData({ ...data, content: e.target.value })}
-          required maxLength={1000}
+          value={formData.content}
+          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          required
+          maxLength={1000}
         />
       </div>
-      <div className="flex items-center">
+
+      <div className="flex items-center space-x-2">
         <Checkbox
           id="isRead"
-          checked={data.isRead}
-          onCheckedChange={v => setData({ ...data, isRead: v as boolean })}
+          checked={formData.isRead}
+          onCheckedChange={(checked) => 
+            setFormData({ ...formData, isRead: checked as boolean })
+          }
         />
-        <Label htmlFor="isRead" className="ml-2">Read</Label>
+        <Label htmlFor="isRead">Mark as read</Label>
       </div>
-      <div>
+
+      <div className="space-y-2">
         <Label htmlFor="userId">User ID</Label>
         <Input
           id="userId"
-          value={data.userId}
-          onChange={e => setData({ ...data, userId: e.target.value })}
+          type="number"
+          min={0}
+          value={formData.userId}
+          onChange={(e) => setFormData({ ...formData, userId: parseInt(e.target.value) })}
           required
         />
       </div>
-      <Button type="submit" className="w-full">{submitLabel}</Button>
+
+      <Button type="submit" className="w-full">
+        {submitLabel}
+      </Button>
     </form>
+  )
+}
+
+function NotificationCard({ notification, onDelete, onUpdate }: { 
+  notification: Notification
+  onDelete: (id: string) => void
+  onUpdate: (notification: Notification) => void 
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+
+  const handleUpdate = (updatedNotification: Omit<Notification, 'id'>) => {
+    onUpdate({ ...updatedNotification, id: notification.id })
+    setIsEditing(false)
+  }
+
+  return (
+    <>
+      <DataCard
+        title={notification.title}
+        onEdit={() => setIsEditing(true)}
+        onDelete={() => onDelete(notification.id)}
+      >
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Content:</span> {notification.content}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Status:</span> {notification.isRead ? 'Read' : 'Unread'}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">User ID:</span> {notification.userId}
+        </p>
+      </DataCard>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Notification</DialogTitle>
+          </DialogHeader>
+          <NotificationForm
+            notification={notification}
+            onSubmit={handleUpdate}
+            submitLabel="Save Changes"
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [selected, setSelected] = useState<Notification | null>(null)
 
-  useEffect(() => { fetchNotifications() }, [])
+  useEffect(() => {
+    fetchNotifications()
+  }, [])
 
   const fetchNotifications = async () => {
-    setIsLoading(true)
     try {
+      setIsLoading(true)
       const data = await getNotifications()
       setNotifications(data)
-    } catch (e) {
-      console.error(e)
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleCreate = async (n: Omit<Notification,'id'>) => {
+  const handleCreateNotification = async (newNotification: Omit<Notification, 'id'>) => {
     try {
-      const created = await createNotification(n)
+      const created = await createNotification(newNotification)
       setNotifications(prev => [...prev, created])
-      setIsCreateOpen(false)
-    } catch (e) {
-      console.error(e)
+      setIsCreateDialogOpen(false)
+    } catch (error) {
+      console.error('Error creating notification:', error)
     }
   }
 
-  const handleUpdate = async (u: Notification) => {
+  const handleUpdateNotification = async (updatedNotification: Notification) => {
     try {
-      await updateNotification(u)
-      setNotifications(prev =>
-        prev.map(n => n.id === u.id ? u : n)
-      )
-      setIsEditOpen(false)
-    } catch (e) {
-      console.error(e)
+      await updateNotification(updatedNotification)
+      setNotifications(prev => prev.map(notification => 
+        notification.id === updatedNotification.id ? updatedNotification : notification
+      ))
+      setIsEditDialogOpen(false)
+      setSelectedNotification(null)
+    } catch (error) {
+      console.error('Error updating notification:', error)
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteNotification = async (id: string) => {
     try {
       await deleteNotification(id)
-      setNotifications(prev => prev.filter(n => n.id !== id))
-    } catch (e) {
-      console.error(e)
+      setNotifications(prev => prev.filter(notification => notification.id !== id))
+    } catch (error) {
+      console.error('Error deleting notification:', error)
     }
   }
 
-  if (isLoading) return <div>Loading...</div>
+  const filterFields = [
+    {
+      name: 'isRead',
+      label: 'Status',
+      options: [
+        { label: 'Read', value: 'true' },
+        { label: 'Unread', value: 'false' }
+      ]
+    }
+  ]
+
+  const sortFields = [
+    { label: 'Title', value: 'title' },
+    { label: 'User ID', value: 'userId' }
+  ]
+
+  const defaultNotification = {
+    title: '',
+    content: '',
+    isRead: false,
+    userId: 0
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
-    <div className="p-4 space-y-6 w-full">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Notifications</h1>
-        <Button onClick={() => setIsCreateOpen(true)}>New</Button>
-      </div>
+    <div className="w-full">
+      <DataListPage<Notification>
+        title="Notifications"
+        items={notifications}
+        filterFields={filterFields}
+        sortFields={sortFields}
+        searchPlaceholder="Search notifications..."
+        onCreateClick={() => setIsCreateDialogOpen(true)}
+        searchFields={['title', 'content']}
+        renderItem={(notification) => (
+          <NotificationCard
+            key={notification.id} 
+            notification={notification} 
+            onDelete={handleDeleteNotification}
+            onUpdate={handleUpdateNotification}
+          />
+        )}
+      />
 
-      <div className="overflow-x-auto rounded border">
-        <Table className="w-full">
-        <TableHeader>
-  <TableRow>
-    <TableHead className="w-[80px] text-center whitespace-nowrap">
-      Status
-    </TableHead>
-    <TableHead className="w-[25%] whitespace-nowrap">
-      Title
-    </TableHead>
-    {/* remove hidden/md so content always shows */}
-    <TableHead className="w-[45%] whitespace-nowrap">
-      Content
-    </TableHead>
-    <TableHead className="w-[100px] text-center whitespace-nowrap">
-      User ID
-    </TableHead>
-    <TableHead className="w-[100px] text-right pr-4 whitespace-nowrap">
-      Actions
-    </TableHead>
-  </TableRow>
-</TableHeader>
-<TableBody>
-  {notifications.map(n => (
-    <TableRow key={n.id}>
-      <TableCell className="text-center">
-        <Checkbox checked={n.isRead} disabled />
-      </TableCell>
-      <TableCell>
-        <div className="truncate" title={n.title}>{n.title}</div>
-      </TableCell>
-      {/* always show content, truncate within its 45% width */}
-      <TableCell className="w-[45%]">
-        <div className="truncate" title={n.content}>{n.content}</div>
-      </TableCell>
-      <TableCell className="text-center">
-        <div className="truncate" title={n.userId}>{n.userId}</div>
-      </TableCell>
-      <TableCell className="text-right pr-4">
-        <div className="flex justify-end space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => { setSelected(n); setIsEditOpen(true) }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(n.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle>New Notification</DialogTitle></DialogHeader>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Notification</DialogTitle>
+          </DialogHeader>
           <NotificationForm
-            notification={{ title: '', content: '', isRead: false, userId: '' }}
-            onSubmit={handleCreate}
-            submitLabel="Create"
+            notification={defaultNotification}
+            onSubmit={handleCreateNotification}
+            submitLabel="Create Notification"
           />
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle>Edit Notification</DialogTitle></DialogHeader>
-          {selected && (
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Notification</DialogTitle>
+          </DialogHeader>
+          {selectedNotification && (
             <NotificationForm
-              notification={selected}
-              onSubmit={(data) => handleUpdate({ ...data, id: selected.id })}
-              submitLabel="Save"
+              notification={selectedNotification}
+              onSubmit={(data) => handleUpdateNotification({ ...data, id: selectedNotification.id })}
+              submitLabel="Save Changes"
             />
           )}
         </DialogContent>

@@ -104,7 +104,7 @@ const BaseLayoutContent = ({ icon, title, navItems }: BaseLayoutProps) => {
           auth={auth}
           navigate={navigate}
         />
-        <main className="p-6 max-w-7xl mx-auto w-full">{<Outlet />}</main>
+        <main className="p-6 w-full">{<Outlet />}</main>
       </SidebarInset>
     </div>
   )
