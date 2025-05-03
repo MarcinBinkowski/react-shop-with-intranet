@@ -1,4 +1,4 @@
-import { Building2, FileText, Package, User, DollarSign, BriefcaseBusiness} from "lucide-react"
+import { Building2, FileText, Package, User, DollarSign, BriefcaseBusiness, Bell} from "lucide-react"
 import { BaseLayout } from "@/layouts/base-layout"
 
 const intranetNavItems = [
@@ -34,6 +34,11 @@ const intranetNavItems = [
         name: "Payments",
         href: "/intranet/payments",
         icon: <DollarSign className="h-4 w-4" />,
+      },
+      {
+        name: "Notifications",
+        href: "/intranet/notifications",
+        icon: <Bell className="h-4 w-4" />,
       },
       
 

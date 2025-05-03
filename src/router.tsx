@@ -11,6 +11,7 @@ import ProductsPage from "./pages/intranet/products"
 import InvoicesPage from "./pages/intranet/invoices"
 import OrdersPage from "./pages/intranet/orders"
 import PaymentsPage from "./pages/intranet/payments"
+import NotificationsPage from "./pages/intranet/notifications"
 
 
 const AppRoutes: React.FC = () => {
@@ -27,6 +28,7 @@ const AppRoutes: React.FC = () => {
           <Route path="invoices" element={<InvoicesPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="payments" element={<PaymentsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
 
 
 

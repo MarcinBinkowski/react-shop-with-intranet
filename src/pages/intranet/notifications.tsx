@@ -1,41 +1,46 @@
 import { useEffect, useState } from 'react'
-import { DataListPage } from '@/components/common/DataListPage'
-import { DataCard } from '@/components/common/DataCard'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { formatDate, formatDateForForm } from '@/lib/utils'
-import { createPayment, deletePayment, getPayments, updatePayment } from '@/api/payments'
+import { createNotification, deleteNotification, getNotifications, updateNotification } from '@/api/notifications'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Edit, Trash2 } from "lucide-react"
 
 export interface Notification {
-    id: string
-    title: string
-    content: string
-    isRead: boolean
-    userId: string
-  }
+  id: string
+  title: string
+  content: string
+  isRead: boolean
+  userId: string
+}
 
-interface PaymentFormProps {
-  payment: Partial<Payment>
-  onSubmit: (payment: Omit<Payment, 'id'>) => void
+interface NotificationFormProps {
+  notification: Partial<Notification>
+  onSubmit: (notification: Omit<Notification, 'id'>) => void
   submitLabel: string
 }
 
-function PaymentForm({ payment, onSubmit, submitLabel }: PaymentFormProps) {
-  const [formData, setFormData] = useState<Omit<Payment, 'id'>>({
-    paymentMethod: payment.paymentMethod || '',
-    amount: payment.amount || 0,
-    paymentDate: formatDateForForm(payment.paymentDate),
-    notes: payment.notes || '',
-    orderId: payment.orderId || ''
+function NotificationForm({ notification, onSubmit, submitLabel }: NotificationFormProps) {
+  const [formData, setFormData] = useState<Omit<Notification, 'id'>>({
+    title: notification.title || '',
+    content: notification.content || '',
+    isRead: notification.isRead || false,
+    userId: notification.userId || ''
   })
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -46,58 +51,39 @@ function PaymentForm({ payment, onSubmit, submitLabel }: PaymentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="paymentMethod">Payment Method</Label>
-        <Select
-          value={formData.paymentMethod}
-          onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
-        >
-          <SelectTrigger id="paymentMethod">
-            <SelectValue placeholder="Select payment method" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Credit Card">Credit Card</SelectItem>
-            <SelectItem value="PayPal">PayPal</SelectItem>
-            <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="amount">Amount</Label>
+        <Label htmlFor="title">Title</Label>
         <Input
-          id="amount"
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.amount}
-          onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+          id="title"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           required
+          maxLength={200}
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="paymentDate">Payment Date</Label>
-        <Input
-          id="paymentDate"
-          type="date"
-          value={formData.paymentDate}
-          onChange={(e) => setFormData({ ...formData, paymentDate: e.target.value })}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="content">Content</Label>
         <Textarea
-          id="notes"
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          maxLength={500}
+          id="content"
+          value={formData.content}
+          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+          required
+          maxLength={1000}
         />
       </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="isRead"
+          checked={formData.isRead}
+          onCheckedChange={(checked) => setFormData({ ...formData, isRead: checked as boolean })}
+        />
+        <Label htmlFor="isRead">Is Read</Label>
+      </div>
       <div className="space-y-2">
-        <Label htmlFor="orderId">Order ID</Label>
+        <Label htmlFor="userId">User ID</Label>
         <Input
-          id="orderId"
-          value={formData.orderId}
-          onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
+          id="userId"
+          value={formData.userId}
+          onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
           required
         />
       </div>
@@ -108,137 +94,65 @@ function PaymentForm({ payment, onSubmit, submitLabel }: PaymentFormProps) {
   )
 }
 
-function PaymentCard({ payment, onDelete, onUpdate }: {
-  payment: Payment
-  onDelete: (id: string) => void
-  onUpdate: (payment: Payment) => void
-}) {
-  const [isEditing, setIsEditing] = useState(false)
-
-  const handleUpdate = (updatedPayment: Omit<Payment, 'id'>) => {
-    onUpdate({ ...updatedPayment, id: payment.id })
-    setIsEditing(false)
-  }
-
-  return (
-    <>
-      <DataCard
-        title={`Payment #${payment.id}`}
-        onEdit={() => setIsEditing(true)}
-        onDelete={() => onDelete(payment.id)}
-      >
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Method:</span> {payment.paymentMethod}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Amount:</span> ${payment.amount.toFixed(2)}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Date:</span> {formatDate(payment.paymentDate)}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Order ID:</span> {payment.orderId}
-        </p>
-        {payment.notes && (
-          <p className="text-sm text-muted-foreground mt-2">
-            <span className="font-semibold">Notes:</span><br />
-            {payment.notes}
-          </p>
-        )}
-      </DataCard>
-
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Payment</DialogTitle>
-          </DialogHeader>
-          <PaymentForm
-            payment={payment}
-            onSubmit={handleUpdate}
-            submitLabel="Save Changes"
-          />
-        </DialogContent>
-      </Dialog>
-    </>
-  )
-}
-
-export default function PaymentsPage() {
-  const [payments, setPayments] = useState<Payment[]>([])
+export default function NotificationsPage() {
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    fetchPayments()
+    fetchNotifications()
   }, [])
 
-  const fetchPayments = async () => {
+  const fetchNotifications = async () => {
     try {
       setIsLoading(true)
-      const data = await getPayments()
-      setPayments(data)
+      const data = await getNotifications()
+      setNotifications(data)
     } catch (error) {
-      console.error('Error fetching payments:', error)
+      console.error('Error fetching notifications:', error)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleCreatePayment = async (newPayment: Omit<Payment, 'id'>) => {
+  const handleCreateNotification = async (newNotification: Omit<Notification, 'id'>) => {
     try {
-      const createdPayment = await createPayment(newPayment)
-      setPayments(prev => [...prev, createdPayment])
+      const createdNotification = await createNotification(newNotification)
+      setNotifications(prev => [...prev, createdNotification])
       setIsCreateDialogOpen(false)
     } catch (error) {
-      console.error('Error creating payment:', error)
+      console.error('Error creating notification:', error)
     }
   }
 
-  const handleDeletePayment = async (paymentId: string) => {
+  const handleUpdateNotification = async (updatedNotification: Notification) => {
     try {
-      await deletePayment(paymentId)
-      setPayments(prev => prev.filter(payment => payment.id !== paymentId))
-    } catch (error) {
-      console.error('Error deleting payment:', error)
-    }
-  }
-
-  const handleUpdatePayment = async (updatedPayment: Payment) => {
-    try {
-      await updatePayment(updatedPayment)
-      console.info(payments)
-      setPayments(prev => prev.map(payment => 
-        payment.id === updatedPayment.id ? updatedPayment : payment
+      await updateNotification(updatedNotification)
+      setNotifications(prev => prev.map(notification => 
+        notification.id === updatedNotification.id ? updatedNotification : notification
       ))
-      console.info(payments)
+      setIsEditDialogOpen(false)
     } catch (error) {
-      console.error('Error updating payment:', error)
-    } 
+      console.error('Error updating notification:', error)
+    }
   }
 
-  const filterFields = [
-    {
-      name: 'paymentMethod',
-      label: 'Payment Method',
-      options: [
-        { label: 'Credit Card', value: 'Credit Card' },
-        { label: 'PayPal', value: 'PayPal' },
-        { label: 'Bank Transfer', value: 'Bank Transfer' },
-      ]
+  const handleDeleteNotification = async (notificationId: string) => {
+    try {
+      await deleteNotification(notificationId)
+      setNotifications(prev => prev.filter(notification => notification.id !== notificationId))
+    } catch (error) {
+      console.error('Error deleting notification:', error)
     }
-  ]
+  }
 
-  const sortFields = [
-    { label: 'Payment Date', value: 'paymentDate' },
-    { label: 'Amount', value: 'amount' },
-    { label: 'Payment Method', value: 'paymentMethod' },
-  ]
-
-  const defaultPayment = {
-    paymentMethod: '',
-    amount: 0,
-    paymentDate: new Date().toISOString().split('T')[0],
-    orderId: '',
+  const defaultNotification = {
+    title: '',
+    content: '',
+    isRead: false,
+    userId: ''
   }
 
   if (isLoading) {
@@ -246,37 +160,86 @@ export default function PaymentsPage() {
   }
 
   return (
-    <>
-      <DataListPage<Payment>
-        title="Payments"
-        items={payments}
-        renderItem={(payment) => (
-          <PaymentCard
-            key={payment.id}
-            payment={payment}
-            onDelete={handleDeletePayment}
-            onUpdate={handleUpdatePayment}
-          />
-        )}
-        filterFields={filterFields}
-        sortFields={sortFields}
-        searchPlaceholder="Search payments..."
-        onCreateClick={() => setIsCreateDialogOpen(true)}
-        searchFields={['paymentMethod', 'notes']}
-      />
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold tracking-tight">Notifications</h2>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>Create New</Button>
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">Status</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Content</TableHead>
+              <TableHead>User ID</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {notifications.map((notification) => (
+              <TableRow key={notification.id}>
+                <TableCell>
+                  <Checkbox checked={notification.isRead} disabled />
+                </TableCell>
+                <TableCell>{notification.title}</TableCell>
+                <TableCell>{notification.content}</TableCell>
+                <TableCell>{notification.userId}</TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedNotification(notification)
+                        setIsEditDialogOpen(true)
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteNotification(notification.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Payment</DialogTitle>
+            <DialogTitle>Create New Notification</DialogTitle>
           </DialogHeader>
-          <PaymentForm
-            payment={defaultPayment}
-            onSubmit={handleCreatePayment}
-            submitLabel="Create Payment"
+          <NotificationForm
+            notification={defaultNotification}
+            onSubmit={handleCreateNotification}
+            submitLabel="Create Notification"
           />
         </DialogContent>
       </Dialog>
-    </>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Notification</DialogTitle>
+          </DialogHeader>
+          {selectedNotification && (
+            <NotificationForm
+              notification={selectedNotification}
+              onSubmit={(updated) => handleUpdateNotification({ ...updated, id: selectedNotification.id })}
+              submitLabel="Save Changes"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
