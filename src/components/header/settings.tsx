@@ -16,7 +16,7 @@ interface SettingsProps {
 
 export function Settings({ auth, navigate }: SettingsProps) {
   const userName = auth.user?.name || 'User'
-  const userInitial = userName.charAt(0) || 'U'
+  const userInitial = userName.charAt(0)
   
   const handleLogout = () => {
     auth.logout()

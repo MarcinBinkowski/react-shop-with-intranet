@@ -20,7 +20,7 @@ export function ViewSwitcher() {
     if (isInIntranet) {
       navigate("/")
     } else {
-      navigate("/intranet")
+      navigate("/intranet/products")
     }
   }
 
