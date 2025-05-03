@@ -1,15 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
 
 interface User {
-  username: string
+  id: number
+  name: string
+  email: string
   isAdmin: boolean
 }
 
 export interface UserContextType {
   user: User | null
-  login: (username: string, isAdmin: boolean) => void
+  login: (user: User) => void
   logout: () => void
-  isAuthenticated: boolean
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -24,10 +25,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const login = (username: string, isAdmin: boolean) => {
-    const newUser = { username, isAdmin }
-    setUser(newUser)
-    localStorage.setItem("user", JSON.stringify(newUser))
+  const login = (userData: User) => {
+    setUser(userData)
+    localStorage.setItem("user", JSON.stringify(userData))
   }
 
   const logout = () => {
@@ -36,7 +36,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <UserContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <UserContext.Provider value={{ user, login, logout }}>
       {children}
     </UserContext.Provider>
   )

@@ -7,23 +7,23 @@ import { LogIn } from 'lucide-react'
 
 export function AuthActions({ auth, navigate}: AuthActionsProps) {
     console.log(auth)
-    return auth.isAuthenticated ? (
+    return auth.user ? (
         <>
-        <Messages />
-        <Notifications />
-        <Settings 
-          auth={auth}
-          navigate={navigate}
-        />
-      </>
-      ) : (
+            <Messages />
+            <Notifications />
+            <Settings 
+                auth={auth}
+                navigate={navigate}
+            />
+        </>
+    ) : (
         <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => navigate('/login')}
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/login')}
         >
-          <LogIn className="mr-2 h-4 w-4" />
-          Login
+            <LogIn className="mr-2 h-4 w-4" />
+            Login
         </Button>
-      )
-  }
+    )
+}

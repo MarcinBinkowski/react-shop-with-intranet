@@ -4,21 +4,46 @@ import { useUser } from "@/context/user-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { LockKeyhole, User } from 'lucide-react'
+import { Mail, LockKeyhole } from 'lucide-react'
+import { login } from "@/api/users"
+import { toast } from "sonner"
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [isAdmin, setIsAdmin] = useState(false)
-  const { login } = useUser()
+  const [isLoading, setIsLoading] = useState(false)
+  const { login: loginContext } = useUser()
   const navigate = useNavigate()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    login(username, isAdmin)
-    navigate("/")
+    setIsLoading(true)
+
+    try {
+      const result = await login({ email, password })
+      if (result.isValid) {
+        loginContext({
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          isAdmin: result.user.isAdmin
+        })
+        navigate("/")
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message === 'User not found' 
+          ? "User not found" 
+          : "Invalid password"
+        )
+      } else {
+        toast.error("Login failed")
+      }
+      console.error('Login failed:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -31,15 +56,16 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="username"
-                  placeholder="Enter your username"
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
                   className="pl-9"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -56,21 +82,19 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={6}
                 />
               </div>
-              <div className="text-sm text-muted-foreground">
-                (This is a mock login, any credentials will work)
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="admin" checked={isAdmin} onCheckedChange={(checked) => setIsAdmin(!!checked)} />
-              <Label htmlFor="admin" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Login as Admin
-              </Label>
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">Sign In</Button>
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
           </CardFooter>
         </form>
       </Card>

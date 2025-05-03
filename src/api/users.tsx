@@ -61,3 +61,40 @@ export async function deleteUser(id: string) {
     throw error
   }
 }
+
+
+interface LoginDto {
+  email: string;
+  password: string;
+}
+
+interface UserResponse {
+  id: number;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+}
+
+interface LoginResponse {
+  isValid: boolean;
+  user: UserResponse;
+}
+
+export async function login(credentials: LoginDto): Promise<LoginResponse> {
+  const response = await fetch('/api/users/checkpassword', {
+    method: 'POST',
+    ...fetchOptions,
+    body: JSON.stringify(credentials),
+  });
+
+  if (response.status === 404) {
+    throw new Error('User not found');
+  }
+
+  const data = await response.json();
+  if (!data.isValid) {
+    throw new Error('Invalid password');
+  }
+
+  return data;
+}
