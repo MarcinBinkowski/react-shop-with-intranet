@@ -1,4 +1,4 @@
-import { Building2, FileText, Users, Calendar, Briefcase, BarChart3, Package, User, DollarSign, BriefcaseBusiness} from "lucide-react"
+import { Building2, FileText, Package, User, DollarSign, BriefcaseBusiness} from "lucide-react"
 import { BaseLayout } from "@/layouts/base-layout"
 
 const intranetNavItems = [
