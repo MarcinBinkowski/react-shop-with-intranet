@@ -1,19 +1,14 @@
-import { useEffect, useState } from 'react'
-import { DataListPage } from '@/components/common/DataListPage'
-import { DataCard } from '@/components/common/DataCard'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useEffect, useState, useMemo } from 'react'
+import { getProducts } from '@/api/products'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createProduct, deleteProduct, getProducts, updateProduct } from '@/api/products'
+import { Search } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
-export interface Product {
+interface Product {
   id: string
   name: string
   category: string
@@ -23,163 +18,50 @@ export interface Product {
   imageBase64?: string
 }
 
-
-interface ProductFormProps {
-  product: Partial<Product>
-  onSubmit: (product: Omit<Product, 'id'>) => void
-  submitLabel: string
-}
-
-function ProductForm({ product, onSubmit, submitLabel }: ProductFormProps) {
-  const [formData, setFormData] = useState<Omit<Product, 'id'>>({
-    name: product.name || '',
-    category: product.category || '',
-    price: product.price || 0,
-    stock: product.stock || 0,
-    status: product.status || 'In Stock',
-    imageBase64: product.imageBase64 || ''  // Add this line
-  })
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
-
+function ProductCard({ product }: { product: Product }) {
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="category">Category</Label>
-        <Select
-          value={formData.category}
-          onValueChange={(value) => setFormData({ ...formData, category: value })}
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex-none">
+        <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
+          {product.imageBase64 ? (
+            <img
+              src={product.imageBase64}
+              alt={product.name}
+              className="h-full w-full object-cover object-center"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-gray-100">
+              <span className="text-gray-400">No image</span>
+            </div>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1">
+        <h3 className="font-semibold text-lg">{product.name}</h3>
+        <p className="text-sm text-muted-foreground">{product.category}</p>
+        <p className="text-xl font-bold mt-2">${product.price.toFixed(2)}</p>
+      </CardContent>
+      <CardFooter className="flex-none">
+        <Button 
+          className="w-full" 
+          variant={product.status === 'Out of Stock' ? 'secondary' : 'default'}
+          disabled={product.status === 'Out of Stock'}
         >
-          <SelectTrigger id="category">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Electronics">Electronics</SelectItem>
-            <SelectItem value="Accessories">Accessories</SelectItem>
-            <SelectItem value="Software">Software</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="price">Price</Label>
-        <Input
-          id="price"
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="stock">Stock</Label>
-        <Input
-          id="stock"
-          type="number"
-          min="0"
-          value={formData.stock}
-          onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Select
-          value={formData.status}
-          onValueChange={(value) => setFormData({ ...formData, status: value })}
-        >
-          <SelectTrigger id="status">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="In Stock">In Stock</SelectItem>
-            <SelectItem value="Low Stock">Low Stock</SelectItem>
-            <SelectItem value="Out of Stock">Out of Stock</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="imageBase64">Image URL</Label>
-        <Input
-          id="imageBase64"
-          value={formData.imageBase64}
-          onChange={(e) => setFormData({ ...formData, imageBase64: e.target.value })}
-          placeholder="Enter image URL or base64 string"
-        />
-      </div>
-      <Button type="submit" className="w-full">
-        {submitLabel}
-      </Button>
-    </form>
+          {product.status === 'Out of Stock' ? 'Out of Stock' : 'Add to Cart'}
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }
 
-function ProductCard({ product, onDelete, onUpdate }: { 
-  product: Product
-  onDelete: (id: string) => void
-  onUpdate: (product: Product) => void 
-}) {
-  const [isEditing, setIsEditing] = useState(false)
-
-  const handleUpdate = (updatedProduct: Omit<Product, 'id'>) => {
-    onUpdate({ ...updatedProduct, id: product.id })
-    setIsEditing(false)
-  }
-
-  return (
-    <>
-      <DataCard
-        title={product.name}
-        onEdit={() => setIsEditing(true)}
-        onDelete={() => onDelete(product.id)}
-      >
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Category:</span> {product.category}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Price:</span> ${product.price.toFixed(2)}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Stock:</span> {product.stock}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold">Status:</span> {product.status}
-        </p>
-      </DataCard>
-
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-          </DialogHeader>
-          <ProductForm
-            product={product}
-            onSubmit={handleUpdate}
-            submitLabel="Save Changes"
-          />
-        </DialogContent>
-      </Dialog>
-    </>
-  )
-}
-
-export default function ProductsPage() {
+export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([])
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'price' | 'name'>('name')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [showOutOfStock, setShowOutOfStock] = useState(true)
 
   useEffect(() => {
     fetchProducts()
@@ -197,107 +79,157 @@ export default function ProductsPage() {
     }
   }
 
-  const handleCreateProduct = async (newProduct: Omit<Product, 'id'>) => {
-    try {
-      const createdProduct = await createProduct(newProduct)
-      setProducts(prev => [...prev, createdProduct])
-      setIsCreateDialogOpen(false)
-    } catch (error) {
-      console.error('Error creating product:', error)
-    }
-  }
+  const categories = Array.from(new Set(products.map(p => p.category)))
 
-  const handleDeleteProduct = async (productId: string) => {
-    try {
-      await deleteProduct(productId)
-      setProducts(prev => prev.filter(product => product.id !== productId))
-    } catch (error) {
-      console.error('Error deleting product:', error)
-    }
-  }
-
-  const handleUpdateProduct = async (updatedProduct: Product) => {
-    try {
-      await updateProduct(updatedProduct)
-      setProducts(prev => prev.map(product => 
-        product.id === updatedProduct.id ? updatedProduct : product
-      ))
-    } catch (error) {
-      console.error('Error updating product:', error)
-    }
-  }
-
-  const filterFields = [
+  const filterFields = useMemo(() => [
     {
       name: 'category',
       label: 'Category',
       options: [
-        { label: 'Electronics', value: 'Electronics' },
-        { label: 'Accessories', value: 'Accessories' },
-        { label: 'Software', value: 'Software' },
+        { label: 'All Categories', value: 'all' },
+        ...categories.map(category => ({
+          label: category,
+          value: category
+        }))
       ]
     },
     {
       name: 'status',
-      label: 'Status',
+      label: 'Stock',
       options: [
-        { label: 'In Stock', value: 'In Stock' },
-        { label: 'Low Stock', value: 'Low Stock' },
-        { label: 'Out of Stock', value: 'Out of Stock' },
+        { label: 'All', value: 'all' },
+        { label: 'In Stock Only', value: 'inStock' }
       ]
     }
-  ]
+  ], [categories])
 
   const sortFields = [
     { label: 'Name', value: 'name' },
-    { label: 'Price', value: 'price' },
-    { label: 'Stock', value: 'stock' },
-    { label: 'Category', value: 'category' },
+    { label: 'Price', value: 'price' }
   ]
 
-  const defaultProduct = {
-    name: '',
-    category: '',
-    price: 0,
-    stock: 0,
-    status: 'In Stock',
-    imageBase64: null
-  }
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-  return (
-    <>
-      <DataListPage<Product>
-        title="Products"
-        items={products}
-        renderItem={(product) => (
-          <ProductCard 
-            key={product.id} 
-            product={product} 
-            onDelete={handleDeleteProduct}
-            onUpdate={handleUpdateProduct}
-          />
-        )}
-        filterFields={filterFields}
-        sortFields={sortFields}
-        searchPlaceholder="Search products..."
-        onCreateClick={() => setIsCreateDialogOpen(true)}
-        searchFields={['name', 'category']}
-      />
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter(product => {
+        const matchesSearch = !searchQuery || 
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory
+        const matchesStock = showOutOfStock || product.status !== 'Out of Stock'
+        return matchesSearch && matchesCategory && matchesStock
+      })
+      .sort((a, b) => {
+        const multiplier = sortOrder === 'asc' ? 1 : -1
+        if (sortBy === 'price') {
+          return (a.price - b.price) * multiplier
+        }
+        return a.name.localeCompare(b.name) * multiplier
+      })
+  }, [products, searchQuery, selectedCategory, showOutOfStock, sortBy, sortOrder])
 
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Product</DialogTitle>
-          </DialogHeader>
-          <ProductForm
-            product={defaultProduct}
-            onSubmit={handleCreateProduct}
-            submitLabel="Create Product"
-          />
-        </DialogContent>
-      </Dialog>
-    </>
+  if (isLoading) {
+    return <div className="container mx-auto py-8">Loading...</div>
+  }
+
+  return (
+    <div className="container mx-auto py-8">
+      <div className="mb-8 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Our Products</h1>
+        </div>
+        
+        {/* Search */}
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          {/* Filters */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Filters</Label>
+            <div className="flex flex-wrap gap-2">
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="show-out-of-stock"
+                  checked={showOutOfStock}
+                  onCheckedChange={setShowOutOfStock}
+                />
+                <Label htmlFor="show-out-of-stock">Show out of stock</Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Sort */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Sort</Label>
+            <div className="flex flex-wrap gap-2">
+              <Select
+                value={sortBy}
+                onValueChange={(value: 'price' | 'name') => setSortBy(value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortFields.map(field => (
+                    <SelectItem key={field.value} value={field.value}>
+                      {field.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={sortOrder}
+                onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Order" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="asc">
+                    {sortBy === 'price' ? 'Low to High' : 'A to Z'}
+                  </SelectItem>
+                  <SelectItem value="desc">
+                    {sortBy === 'price' ? 'High to Low' : 'Z to A'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {filteredProducts.map(product => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    </div>
   )
 }
