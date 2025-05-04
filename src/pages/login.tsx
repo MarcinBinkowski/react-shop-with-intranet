@@ -27,7 +27,8 @@ export default function LoginPage() {
           id: result.user.id,
           name: result.user.name,
           email: result.user.email,
-          isAdmin: result.user.isAdmin
+          isAdmin: result.user.isAdmin,
+          address: result.user.address,
         })
         navigate("/")
       }

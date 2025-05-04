@@ -5,6 +5,7 @@ interface User {
   name: string
   email: string
   isAdmin: boolean
+  address: string
 }
 
 export interface UserContextType {
@@ -24,7 +25,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setUser(JSON.parse(storedUser))
     }
   }, [])
-
+  console.log("UserProvider", user)
   const login = (userData: User) => {
     setUser(userData)
     localStorage.setItem("user", JSON.stringify(userData))

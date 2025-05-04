@@ -13,19 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { formatDate, formatDateForForm } from '@/lib/utils'
-import { getOrders, createOrder, deleteOrder, updateOrder } from '@/api/orders'
+import { getOrders, createOrder, deleteOrder, updateOrder, Order } from '@/api/orders'
 
-export interface Order {
-  id: string
-  orderNumber: string
-  customerName: string
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  orderDate: string
-  deliveryDate: string
-  amount: number
-  shippingAddress: string
-  notes?: string
-}
 
 
 interface OrderFormProps {

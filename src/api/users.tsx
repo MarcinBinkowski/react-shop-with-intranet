@@ -72,6 +72,7 @@ interface UserResponse {
   name: string;
   email: string;
   isAdmin: boolean;
+  address: string;
 }
 
 interface LoginResponse {
@@ -94,6 +95,6 @@ export async function login(credentials: LoginDto): Promise<LoginResponse> {
   if (!data.isValid) {
     throw new Error('Invalid password');
   }
-
+  console.log('Login successful:', data);
   return data;
 }
