@@ -1,4 +1,3 @@
-// import { UserContextType } from '../../context/UserContext'
 import { useContext } from 'react';
 import { UserContextType } from '../../context/user-context';
 import { NavigateFunction } from 'react-router-dom';

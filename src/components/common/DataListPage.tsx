@@ -58,12 +58,9 @@ export function DataListPage<T extends { id: string }>({
   const filteredAndSortedItems = useMemo(() => {
     return items
       .filter(item => {
-        // Search filter
         const matchesSearch = search === '' || searchFields.some(field => 
           String(item[field]).toLowerCase().includes(search.toLowerCase())
         )
-
-        // Custom filters
         const matchesFilters = filterFields.every(field => 
           filters[field.name] === 'all' || 
           String(item[field.name as keyof T]) === filters[field.name]

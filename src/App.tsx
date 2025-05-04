@@ -3,6 +3,7 @@ import { BrowserRouter} from "react-router-dom";
 import { ThemeProvider } from "./components/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import AppRoutes from "./router";
+import { CartProvider } from './context/cart-context'
 
 
 const queryClient = new QueryClient({
@@ -19,7 +20,9 @@ const App: React.FC = () => {
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-        <AppRoutes/>
+          <CartProvider>
+            <AppRoutes />
+          </CartProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>)

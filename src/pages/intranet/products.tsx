@@ -37,7 +37,7 @@ function ProductForm({ product, onSubmit, submitLabel }: ProductFormProps) {
     price: product.price || 0,
     stock: product.stock || 0,
     status: product.status || 'In Stock',
-    imageBase64: product.imageBase64 || ''  // Add this line
+    imageBase64: product.imageBase64 || ''
   })
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
