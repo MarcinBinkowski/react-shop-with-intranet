@@ -1,5 +1,16 @@
 import type { Payment } from '@/pages/intranet/payments'
 
+export interface Payment {
+    id: string
+    paymentMethod: string
+    amount: number
+    paymentDate: string
+    transactionId?: string
+    notes?: string
+    orderId: string
+  }
+
+
 const fetchOptions = {
   headers: { 
     'Content-Type': 'application/json' 
@@ -19,6 +30,7 @@ export async function getPayments() {
 
 export async function createPayment(payment: Omit<Payment, 'id'>) {
   try {
+    console.log('Creating payment:', payment)
     const response = await fetch(API_URL, {
       method: 'POST',
       ...fetchOptions,

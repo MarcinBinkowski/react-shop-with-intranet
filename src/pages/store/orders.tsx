@@ -9,6 +9,14 @@ import { createOrder, getUserOrders, updateOrder } from '@/api/orders'
 import { formatDate } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
 import { Label } from "@/components/ui/label"
+import { createPayment } from '@/api/payments'
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select"
 
 interface Order {
   id: string
@@ -22,16 +30,51 @@ interface Order {
   notes?: string
 }
 
+const PAYMENT_METHODS = {
+  'bank_transfer': {
+    name: 'Bank Transfer',
+    url: 'https://mbank.pl'
+  },
+  'paypal': {
+    name: 'PayPal',
+    url: 'https://paypal.com'
+  },
+  'credit_card': {
+    name: 'Credit Card',
+    url: 'https://pkobp.pl'
+  }
+} as const
+
+type PaymentMethod = keyof typeof PAYMENT_METHODS
+
 function OrderCard({ order, onUpdate }: { 
   order: Order
   onUpdate: (order: Order) => void 
 }) {
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer')
+
   const handlePayment = async () => {
     try {
-      const paymentWindow = window.open(`http://google.com`, '_blank', 'noopener,noreferrer')
+      const payment = {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        amount: order.amount,
+        method: paymentMethod,
+        status: 'pending',
+        date: new Date().toISOString()
+      }
+      
+      await createPayment(payment)
+
+      const paymentWindow = window.open(
+        PAYMENT_METHODS[paymentMethod].url, 
+        '_blank',
+        'noopener,noreferrer'
+      )
       if (paymentWindow) {
         paymentWindow.focus()
       }
+
       const updatedOrder = {
         ...order,
         status: 'processing'
@@ -73,12 +116,28 @@ function OrderCard({ order, onUpdate }: {
         </p>
       </CardContent>
       {order.status === 'pending' && (
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="w-full">
+            <Label htmlFor="payment-method">Payment Method</Label>
+            <Select
+              value={paymentMethod}
+              onValueChange={(value: PaymentMethod) => setPaymentMethod(value)}
+            >
+              <SelectTrigger id="payment-method" className="w-full">
+                <SelectValue placeholder="Select payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                <SelectItem value="paypal">PayPal</SelectItem>
+                <SelectItem value="credit_card">Credit Card</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button 
             className="w-full" 
             onClick={handlePayment}
           >
-            Pay Now
+            Pay Now with {PAYMENT_METHODS[paymentMethod].name}
           </Button>
         </CardFooter>
       )}
@@ -110,7 +169,7 @@ export default function StoreOrdersPage() {
 
   const handleUpdateOrder = async (updatedOrder: Order) => {
     try {
-      await updateOrder(updatedOrder)
+      // await updateOrder(updatedOrder)
       setOrders(prev => prev.map(order => 
         order.id === updatedOrder.id ? updatedOrder : order
       ))
