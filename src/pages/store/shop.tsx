@@ -8,6 +8,7 @@ import { Search } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { useCart } from '@/context/cart-context'
+import { Minus, Plus } from 'lucide-react'
 
 interface Product {
   id: string
@@ -20,8 +21,9 @@ interface Product {
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const { addItem } = useCart()
-  
+  const { addItem, removeItem, updateQuantity, getItemQuantity } = useCart()
+  const quantity = getItemQuantity(product.id)
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex-none">
@@ -45,14 +47,34 @@ function ProductCard({ product }: { product: Product }) {
         <p className="text-xl font-bold mt-2">${product.price.toFixed(2)}</p>
       </CardContent>
       <CardFooter className="flex-none">
-        <Button 
-          className="w-full" 
-          variant={product.status === 'Out of Stock' ? 'secondary' : 'default'}
-          disabled={product.status === 'Out of Stock'}
-          onClick={() => addItem(product)}
-        >
-          {product.status === 'Out of Stock' ? 'Out of Stock' : 'Add to Cart'}
-        </Button>
+        {quantity === 0 ? (
+          <Button 
+            className="w-full" 
+            variant={product.status === 'Out of Stock' ? 'secondary' : 'default'}
+            disabled={product.status === 'Out of Stock'}
+            onClick={() => addItem(product)}
+          >
+            {product.status === 'Out of Stock' ? 'Out of Stock' : 'Add to Cart'}
+          </Button>
+        ) : (
+          <div className="flex w-full items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => quantity === 1 ? removeItem(product.id) : updateQuantity(product.id, quantity - 1)}
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <span className="flex-1 text-center">{quantity}</span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => addItem(product)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardFooter>
     </Card>
   )
