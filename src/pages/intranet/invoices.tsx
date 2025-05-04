@@ -14,6 +14,10 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { createInvoice, deleteInvoice, getInvoices, updateInvoice } from '@/api/invoices'
 import { formatDate, formatDateForForm } from '@/lib/utils'
+import { Download } from 'lucide-react'
+import { pdf } from '@react-pdf/renderer'
+import { InvoicePreviewModal } from '@/components/invoices/InvoicePreviewModal'
+import { InvoicePDF } from '@/components/invoices/InvoicePDF'
 
 export interface Invoice {
   id: string
@@ -141,10 +145,27 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
   onUpdate: (invoice: Invoice) => void 
 }) {
   const [isEditing, setIsEditing] = useState(false)
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false)
 
   const handleUpdate = (updatedInvoice: Omit<Invoice, 'id'>) => {
     onUpdate({ ...updatedInvoice, id: invoice.id })
     setIsEditing(false)
+  }
+
+  const handleDownloadPDF = async () => {
+    try {
+      const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `invoice-${invoice.invoiceNumber}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+    }
   }
 
   const statusColors = {
@@ -161,6 +182,11 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
         title={invoice.invoiceNumber}
         onEdit={() => setIsEditing(true)}
         onDelete={() => onDelete(invoice.id)}
+        additionalAction={{
+          label: "Download PDF",
+          onClick: handleDownloadPDF,
+          variant: "outline"
+        }}
       >
         <p className="text-sm text-muted-foreground">
           <span className="font-semibold">Customer:</span> {invoice.customerName}
@@ -201,6 +227,12 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
           />
         </DialogContent>
       </Dialog>
+
+      <InvoicePreviewModal
+        invoice={invoice}
+        isOpen={isPdfPreviewOpen}
+        onClose={() => setIsPdfPreviewOpen(false)}
+      />
     </>
   )
 }

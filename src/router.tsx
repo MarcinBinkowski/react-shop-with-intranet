@@ -21,7 +21,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/intranet" element={<IntranetLayout />}>
-        {/* <Route index element={<Dashboard />} /> */}
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="products" element={<ProductsPage />} />

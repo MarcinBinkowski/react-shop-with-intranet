@@ -7,9 +7,20 @@ interface DataCardProps {
   onEdit?: () => void
   onDelete?: () => void
   children: ReactNode
+  additionalAction?: {
+    label: string
+    onClick: () => void
+    variant?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost"
+  }
 }
 
-export function DataCard({ title, onEdit, onDelete, children }: DataCardProps) {
+export function DataCard({ 
+  title, 
+  onEdit, 
+  onDelete, 
+  children,
+  additionalAction 
+}: DataCardProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -18,7 +29,7 @@ export function DataCard({ title, onEdit, onDelete, children }: DataCardProps) {
       <CardContent>
         <div className="space-y-2">
           {children}
-          {(onEdit || onDelete) && (
+          {(onEdit || onDelete || additionalAction) && (
             <div className="flex gap-2 pt-4">
               {onEdit && (
                 <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
@@ -32,8 +43,20 @@ export function DataCard({ title, onEdit, onDelete, children }: DataCardProps) {
               )}
             </div>
           )}
+            <div className="flex">
+              {additionalAction && (
+                  <Button 
+                    variant={additionalAction.variant || "outline"} 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={additionalAction.onClick}
+                  >
+                    {additionalAction.label}
+                  </Button>
+                )}
+              </div>
         </div>
       </CardContent>
     </Card>
   )
-} 
+}
