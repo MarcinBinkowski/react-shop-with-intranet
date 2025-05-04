@@ -33,7 +33,7 @@ const AppRoutes: React.FC = () => {
         </Route>
 
         <Route path="/" element={<StoreLayout />}>
-          <Route index element={<Index />} />
+          <Route index element={<ShopPage />} />
           <Route path="shop" element={<ShopPage />} />
           <Route path="cart" element={<CartPage />} />
         </Route>
