@@ -1,4 +1,4 @@
-import { Store, Home, Package, Users, ShoppingCart, BarChart3, ShoppingBasket, Box } from "lucide-react"
+import { Store, Home, Package, Users, ShoppingCart, BarChart3, ShoppingBasket, Box, DollarSign} from "lucide-react"
 import { BaseLayout } from "./base-layout"
 
 const storeNavItems = [
@@ -19,6 +19,11 @@ const storeNavItems = [
         name: "Orders",
         href: "/orders",
         icon: <Box className="h-4 w-4" />,
+      },
+      {
+        name: "Payments",
+        href: "/payments",
+        icon: <DollarSign className="h-4 w-4" />,
       },
 
     ],

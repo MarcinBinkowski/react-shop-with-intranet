@@ -68,3 +68,12 @@ export async function deletePayment(id: string) {
     throw error
   }
 }
+export async function getUserPayments(customerName: string) {
+  try {
+    const response = await fetch(`${API_URL}/user/${customerName}`)
+    return await response.json()
+  } catch (error) {
+    console.error('Failed to fetch user payments:', error)
+    return []
+  }
+}
