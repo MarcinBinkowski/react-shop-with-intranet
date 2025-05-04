@@ -5,11 +5,11 @@ const storeNavItems = [
   {
     title: "Main",
     items: [
-    //   {
-    //     name: "Products",
-    //     href: "/products",
-    //     icon: <Package className="h-4 w-4" />,
-    //   },
+      {
+        name: "Shop",
+        href: "/shop",
+        icon: <ShoppingCart className="h-4 w-4" />,
+      },
 
     ],
   }

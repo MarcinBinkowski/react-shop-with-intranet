@@ -12,6 +12,7 @@ import InvoicesPage from "./pages/intranet/invoices"
 import OrdersPage from "./pages/intranet/orders"
 import PaymentsPage from "./pages/intranet/payments"
 import NotificationsPage from "./pages/intranet/notifications"
+import ShopPage from "./pages/store/shop"
 
 
 const AppRoutes: React.FC = () => {
@@ -28,31 +29,12 @@ const AppRoutes: React.FC = () => {
           <Route path="orders" element={<OrdersPage />} />
           <Route path="payments" element={<PaymentsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
-
-
-
-        {/* <Route
-            path="customers"
-            element={
-              <div className="p-6">
-                <h1 className="text-2xl font-bold">Customers</h1>
-              </div>
-            }
-          />
-          <Route
-            path="team"
-            element={
-              <div className="p-6">
-                <h1 className="text-2xl font-bold">Team</h1>
-              </div>
-            }
-          /> */}
         </Route>
 
         <Route path="/" element={<StoreLayout />}>
           <Route index element={<Index />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="orders" element={<OrdersPage />} />
+          <Route path="shop" element={<ShopPage />} />
+          {/* <Route path="orders" element={<OrdersPage />} /> */}
         </Route>
         {/* 404 Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
