@@ -14,6 +14,7 @@ import PaymentsPage from "./pages/intranet/payments"
 import NotificationsPage from "./pages/intranet/notifications"
 import ShopPage from "./pages/store/shop"
 import CartPage from "./pages/store/cart"
+import StoreOrdersPage from "./pages/store/orders"
 
 
 const AppRoutes: React.FC = () => {
@@ -36,6 +37,7 @@ const AppRoutes: React.FC = () => {
           <Route index element={<ShopPage />} />
           <Route path="shop" element={<ShopPage />} />
           <Route path="cart" element={<CartPage />} />
+          <Route path="orders" element={<StoreOrdersPage />} />
         </Route>
         {/* 404 Route */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,157 +1,152 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCart } from '@/context/cart-context'
 import { useUser } from '@/context/user-context'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Minus, Plus, Trash2 } from "lucide-react"
-import { createOrder } from '@/api/orders'
+import { createOrder, getUserOrders, updateOrder } from '@/api/orders'
+import { formatDate } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
 import { Label } from "@/components/ui/label"
 
-export default function CartPage() {
-  const { items, removeItem, updateQuantity, total, clearCart } = useCart()
-  const { user } = useUser()
-  const navigate = useNavigate()
-  const [isOrdering, setIsOrdering] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+interface Order {
+  id: string
+  orderNumber: string
+  customerName: string
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  orderDate: string
+  deliveryDate: string
+  amount: number
+  shippingAddress: string
+  notes?: string
+}
 
-  const handleCreateOrder = async () => {
-    if (!user) {
-      setError('Please log in to place an order')
-      navigate('/login')
-      return
-    }
-
+function OrderCard({ order, onUpdate }: { 
+  order: Order
+  onUpdate: (order: Order) => void 
+}) {
+  const handlePayment = async () => {
     try {
-      setIsOrdering(true)
-      setError(null)
-      
-      const order = {
-        orderNumber: `ORD-${Date.now()}`,
-        customerName: user.name,
-        status: 'pending' as const,
-        orderDate: new Date().toISOString(),
-        deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        amount: total,
-        shippingAddress: user.address,
-        notes: ''
+      const paymentWindow = window.open(`http://google.com`, '_blank', 'noopener,noreferrer')
+      if (paymentWindow) {
+        paymentWindow.focus()
       }
-
-      await createOrder(order)
-      clearCart()
-      navigate('/')
+      const updatedOrder = {
+        ...order,
+        status: 'processing'
+      }
+      await onUpdate(updatedOrder)
     } catch (error) {
-      console.error('Failed to create order:', error)
-      setError('Failed to create order. Please try again.')
-    } finally {
-      setIsOrdering(false)
+      console.error('Failed to process payment:', error)
     }
   }
 
-  if (items.length === 0) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex justify-between">
+          <span>Order #{order.orderNumber}</span>
+          <span className={`text-sm px-2 py-1 rounded-full ${
+            order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+            order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+            order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+            order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+            'bg-red-100 text-red-800'
+          }`}>
+            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Order Date:</span> {formatDate(order.orderDate)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Expected Delivery:</span> {formatDate(order.deliveryDate)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold">Shipping Address:</span> {order.shippingAddress}
+        </p>
+        <p className="text-lg font-semibold">
+          Total: ${order.amount.toFixed(2)}
+        </p>
+      </CardContent>
+      {order.status === 'pending' && (
+        <CardFooter>
+          <Button 
+            className="w-full" 
+            onClick={handlePayment}
+          >
+            Pay Now
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
+  )
+}
+
+export default function StoreOrdersPage() {
+  const { user } = useUser()
+  const navigate = useNavigate()
+  const [orders, setOrders] = useState<Order[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchOrders()
+  }, [user, navigate])
+
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true)
+      const data = await getUserOrders(user.name)
+      setOrders(data)
+    } catch (error) {
+      console.error('Failed to fetch orders:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUpdateOrder = async (updatedOrder: Order) => {
+    try {
+      await updateOrder(updatedOrder)
+      setOrders(prev => prev.map(order => 
+        order.id === updatedOrder.id ? updatedOrder : order
+      ))
+    } catch (error) {
+      console.error('Failed to update order:', error)
+    }
+  }
+
+  if (isLoading) {
     return (
       <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-        <div className="text-center text-muted-foreground">
-          Your cart is empty
-        </div>
+        <h1 className="text-3xl font-bold mb-8">My Orders</h1>
+        <div className="text-center">Loading...</div>
       </div>
     )
   }
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+      <h1 className="text-3xl font-bold mb-8">My Orders</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-4">
-          {items.map(item => (
-            <Card key={item.id}>
-              <CardHeader className="flex flex-row items-center gap-4">
-                <div className="w-24 h-24 overflow-hidden rounded-lg bg-gray-100">
-                  {item.imageBase64 ? (
-                    <img
-                      src={item.imageBase64}
-                      alt={item.name}
-                      className="h-full w-full object-cover object-center"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <span className="text-gray-400">No image</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-sm text-muted-foreground">{item.category}</p>
-                  <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => item.quantity === 1 ? removeItem(item.id) : updateQuantity(item.id, item.quantity - 1)}
-                    disabled={item.quantity <= 1}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center">{item.quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItem(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-            </Card>
+      {orders.length === 0 ? (
+        <div className="text-center text-muted-foreground">
+          You haven't placed any orders yet
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {orders.map(order => (
+            <OrderCard 
+              key={order.id} 
+              order={order}
+              onUpdate={handleUpdateOrder}
+            />
           ))}
         </div>
-
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Shipping Address</Label>
-                <p className="text-sm border rounded-md p-3 bg-muted">
-                  {user?.address}
-                </p>
-              </div>
-
-              <div className="flex justify-between text-lg font-semibold">
-                <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-
-              {error && (
-                <p className="text-sm text-destructive">
-                  {error}
-                </p>
-              )}
-
-              <Button 
-                className="w-full" 
-                onClick={handleCreateOrder}
-                disabled={isOrdering}
-              >
-                {isOrdering ? "Processing..." : "Order Now"}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

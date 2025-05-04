@@ -7,6 +7,7 @@ const fetchOptions = {
 }
 const API_URL = '/api/orders'
 
+
 export async function getOrders() {
   try {
     const response = await fetch(API_URL)
@@ -55,5 +56,15 @@ export async function deleteOrder(id: string) {
   } catch (error) {
     console.error('Failed to delete order:', error)
     throw error
+  }
+}
+
+export async function getUserOrders(customerName: string) {
+  try {
+    const response = await fetch(`${API_URL}/search/${customerName}`)
+    return await response.json()
+  } catch (error) {
+    console.error('Failed to fetch user orders:', error)
+    return []
   }
 }
