@@ -14,9 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { createInvoice, deleteInvoice, getInvoices, updateInvoice } from '@/api/invoices'
 import { formatDate, formatDateForForm } from '@/lib/utils'
-import { Download } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
-import { InvoicePreviewModal } from '@/components/invoices/InvoicePreviewModal'
 import { InvoicePDF } from '@/components/invoices/InvoicePDF'
 
 export interface Invoice {
@@ -145,7 +143,6 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
   onUpdate: (invoice: Invoice) => void 
 }) {
   const [isEditing, setIsEditing] = useState(false)
-  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false)
 
   const handleUpdate = (updatedInvoice: Omit<Invoice, 'id'>) => {
     onUpdate({ ...updatedInvoice, id: invoice.id })
@@ -227,12 +224,6 @@ function InvoiceCard({ invoice, onDelete, onUpdate }: {
           />
         </DialogContent>
       </Dialog>
-
-      <InvoicePreviewModal
-        invoice={invoice}
-        isOpen={isPdfPreviewOpen}
-        onClose={() => setIsPdfPreviewOpen(false)}
-      />
     </>
   )
 }
